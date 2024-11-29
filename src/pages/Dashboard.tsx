@@ -1,21 +1,23 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import supabase from "@/utils/supabase";
 import { useEffect, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
+import { saveLocationToDatabase, getLatestLocationForEachUser } from "@/lib/actions";
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
   const [location, setLocation] = useState<any>(null);
+  const [userLocations, setUserLocations] = useState<any[]>([]);
   const user = useUser();
 
   useEffect(() => {
-    if (!user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+    const fetchUserLocations = async () => {
+      const locations = await getLatestLocationForEachUser();
+      setUserLocations(locations);
+    };
+
+    fetchUserLocations();
+  }, []);
 
   // Fetch current user's location
   useEffect(() => {
@@ -24,18 +26,10 @@ export const Dashboard = () => {
         const { latitude, longitude } = position.coords;
         setLocation({ lat: latitude, lng: longitude });
 
-        supabase
-          .from("locations")
-          .upsert({
-            user_id: user?.id,
-            latitude,
-            longitude,
-          })
-          .then((res) => {
-            if (res.error) {
-              console.error("Error updating location:", res.error.message);
-            }
-          });
+        // Call the action function to write data to DB
+        if (user) {
+          saveLocationToDatabase(user.id, user?.user_metadata.username, latitude, longitude);
+        }
       }, (error) => {
         console.error("Geolocation error:", error);
       }, { enableHighAccuracy: true, maximumAge: 10000 });
@@ -52,9 +46,18 @@ export const Dashboard = () => {
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker position={[location.lat, location.lng]}>
-          <Popup>Your current location</Popup>
-        </Marker>
+        {userLocations.map((userLocation) => (
+          <Marker
+            key={userLocation.user_id}
+            position={[userLocation.latitude, userLocation.longitude]}
+          >
+            <Tooltip permanent direction="top" offset={[-15, -10]}>
+              <div>
+                <p>{userLocation.username}</p>
+              </div>
+            </Tooltip>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
