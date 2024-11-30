@@ -2,7 +2,7 @@ import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import supabase from "@/utils/supabase";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { LoginForm } from "@/components/customs/login-form";
-import Dashboard from "@/pages/Dashboard";
+import DashboardPage from "@/pages/DashboardPage";
 import { useState, useEffect } from "react";
 import UpdateUserInfo from "./pages/UpdateProfile";
 
@@ -36,7 +36,7 @@ function App() {
           {/* Halaman Dashboard */}
           <Route
             path="/dashboard"
-            element={checkUser() ? <Dashboard /> : <Navigate to="/" />}
+            element={checkUser() ? <DashboardPage /> : <Navigate to="/" />}
           />
 
           {/* Halaman Update */}
