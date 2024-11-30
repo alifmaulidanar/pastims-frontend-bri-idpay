@@ -20,6 +20,8 @@
     "@supabase/supabase-js": "^2.46.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
     "lucide-react": "^0.462.0",

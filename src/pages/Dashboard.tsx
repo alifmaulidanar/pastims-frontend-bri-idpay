@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { MapContainer, TileLayer, Marker, Tooltip, Popup } from "react-leaflet";
 import { saveLocationToDatabase, getLatestLocationForEachUser } from "@/lib/actions";
+import { format, toZonedTime } from 'date-fns-tz';
 
 export const Dashboard = () => {
   const user = useUser();
@@ -76,14 +77,17 @@ export const Dashboard = () => {
           >
             <Tooltip permanent direction="top" offset={[-15, -10]}>
               <div>
-                <h3>{userLocation.username}</h3>
+                <h3>{userLocation.username || "Loading..."}</h3>
+                <h3>{user?.user_metadata.phone || "Loading..."}</h3>
               </div>
             </Tooltip>
             <Popup>
               <div>
-                <h3>{userLocation.username}</h3>
-                <p>Latitude: {userLocation.latitude}</p>
-                <p>Longitude: {userLocation.longitude}</p>
+                <h3>{userLocation.username || "Loading..."}</h3>
+                <p>Phone: {user?.user_metadata.phone || "Loading..."}</p>
+                <p>Latitude: {userLocation.latitude || "Loading..."}</p>
+                <p>Longitude: {userLocation.longitude || "Loading..."}</p>
+                <p>Timestamp: {format(toZonedTime(userLocation.timestamp, 'Asia/Jakarta'), 'PPpp') || "Loading..."}</p>
                 <p>Address: {userLocation.address || "Loading..."}</p>
               </div>
             </Popup>
