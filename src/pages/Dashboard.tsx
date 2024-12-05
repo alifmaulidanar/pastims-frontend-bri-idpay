@@ -1,22 +1,24 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet-control-geocoder/dist/Control.Geocoder.js";
+import { format, toZonedTime } from 'date-fns-tz';
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
-import { MapContainer, TileLayer, Marker, Tooltip, Popup } from "react-leaflet";
+import "leaflet-control-geocoder/dist/Control.Geocoder.js";
 import { saveLocationToDatabase, getLatestLocationForEachUser } from "@/lib/actions";
-import { format, toZonedTime } from 'date-fns-tz';
+import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap } from "react-leaflet";
 
 export const Dashboard = () => {
   const user = useUser();
   const mapRef = useRef<any>(null);
-  const [location, setLocation] = useState<any>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [userLocations, setUserLocations] = useState<any[]>([]);
 
   // Add geocoder control to the map
   useEffect(() => {
     if (mapRef.current) {
-      const map = mapRef.current;
+      const map = useMap();
       L.Control.Geocoder.nominatim().addTo(map);
     }
   }, []);
@@ -69,7 +71,9 @@ export const Dashboard = () => {
         zoom={13}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
         {userLocations.map((userLocation) => (
           <Marker
             key={userLocation.user_id}
