@@ -20,12 +20,13 @@ export function LoginForm() {
       setError(user.error.message);
     }
 
+    setError("");
     navigate("/dashboard");
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center px-4">
-      <Card className="mx-auto max-w-sm w-80">
+    <div className="flex items-center justify-center w-full h-screen px-4">
+      <Card className="max-w-sm mx-auto w-80">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>

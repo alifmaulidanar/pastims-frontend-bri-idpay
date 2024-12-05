@@ -1,6 +1,7 @@
+import { handleLogout } from "@/auth/userAuth";
+import { Button } from "@/components/ui/button";
 import { Home, LogOutIcon } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { handleLogout } from "@/auth/userAuth";
 
 const items = [
   {
@@ -31,15 +32,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Menambahkan tombol Logout di bagian bawah sidebar */}
         <div className="p-4 mt-auto">
-          <button
+          <Button
             onClick={handleLogout}
             className="w-full py-2 text-white bg-red-600 rounded hover:bg-red-800"
           >
             <LogOutIcon className="inline mr-2" />
             Logout
-          </button>
+          </Button>
         </div>
       </SidebarContent>
     </Sidebar>
