@@ -1,6 +1,5 @@
 import supabase from "@/utils/supabase";
 
-// Fungsi untuk memeriksa apakah 5 menit telah berlalu sejak operasi terakhir
 const canWriteData = () => {
   const lastWritten = localStorage.getItem('lastWritten');
   const now = new Date().getTime();
@@ -32,18 +31,44 @@ export const saveLocationToDatabase = async (userId: string, username: string, l
   }
 };
 
+// export const saveLocationToDatabase = async (userId: string, username: string, latitude: number, longitude: number) => {
+//   if (canWriteData()) {
+//     const response = await fetch('http://127.0.0.1:8787/save-location', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         user_id: userId,
+//         username,
+//         latitude,
+//         longitude,
+//       }),
+//     });
+
+//     const data = await response.json();
+
+//     if (response.ok) {
+//       console.log('Location saved:', data);
+//     } else {
+//       console.error('Error saving location:', data.message);
+//     }
+//   } else {
+//     console.log('Too soon to save location. Please wait 5 minutes.');
+//   }
+// };
+
 export const getLatestLocationForEachUser = async () => {
   try {
-    // Menggunakan RPC untuk memanggil fungsi yang telah dibuat
-    const { data, error } = await supabase
-      .rpc('get_latest_user_locations');
+    const response = await fetch('http://127.0.0.1:8787/latest-locations');
+    const data = await response.json();
 
-    if (error) {
-      console.error("Error fetching latest locations:", error.message);
+    if (response.ok) {
+      return data;
+    } else {
+      console.error("Error fetching latest locations:", data.message);
       return [];
     }
-
-    return data;
   } catch (error) {
     console.error("Unexpected error:", error);
     return [];
