@@ -1,10 +1,8 @@
-// import supabase from "@/utils/supabase";
-
 const canWriteData = () => {
   const lastWritten = localStorage.getItem('lastWritten');
   const now = new Date().getTime();
 
-  if (lastWritten && now - parseInt(lastWritten) < 300000) { // 300000 ms = 5 menit
+  if (lastWritten && now - parseInt(lastWritten) < 3000000) { // 300000 ms = 5 menit
     return false;
   }
 
@@ -12,26 +10,7 @@ const canWriteData = () => {
   return true;
 };
 
-// export const saveLocationToDatabase = async (userId: string, username: string, latitude: number, longitude: number) => {
-//   if (canWriteData()) {
-//     const { error } = await supabase
-//       .from("locations")
-//       .upsert({
-//         user_id: userId,
-//         username,
-//         latitude,
-//         longitude,
-//       });
-
-//     if (error) {
-//       console.error("Error updating location:", error.message);
-//     }
-//   } else {
-//     return []
-//   }
-// };
-
-export const saveLocationToDatabase = async (userId: string, username: string, latitude: number, longitude: number) => {
+export const saveLocationToDatabase = async (user_id: string, latitude: number, longitude: number) => {
   if (canWriteData()) {
     const response = await fetch('http://127.0.0.1:8787/save-location', {
       method: 'POST',
@@ -39,8 +18,7 @@ export const saveLocationToDatabase = async (userId: string, username: string, l
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user_id: userId,
-        username,
+        user_id,
         latitude,
         longitude,
       }),

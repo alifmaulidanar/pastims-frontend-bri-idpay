@@ -41,7 +41,8 @@ export const Dashboard = () => {
 
         // Call the action function to write data to DB
         if (user) {
-          saveLocationToDatabase(user.id, user?.user_metadata.username, latitude, longitude);
+          const user_id = user.id;
+          saveLocationToDatabase(user_id, latitude, longitude);
         }
       }, (error) => {
         console.error("Geolocation error:", error);
