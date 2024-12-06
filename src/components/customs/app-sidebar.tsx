@@ -1,6 +1,6 @@
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
-import { Home, LogOutIcon } from "lucide-react";
+import { Home, LogOutIcon, User } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 const items = [
@@ -8,6 +8,11 @@ const items = [
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: User,
   },
 ];
 
