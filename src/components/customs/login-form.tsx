@@ -22,6 +22,7 @@ export function LoginForm() {
 
     setError("");
     navigate("/dashboard");
+    window.location.reload();
   };
 
   return (
