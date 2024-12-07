@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function Users() {
@@ -11,25 +12,22 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
-  // Fetch users from the backend API
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8787/users');
-        const data = await response.json();
-
-        if (response.ok) {
-          setUsers(data);
-        } else {
-          console.error('Failed to fetch users:', data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
+    const getUsers = async () => {
+      const fetchedUsers = await fetchUsers();
+      setUsers(fetchedUsers);
     };
-
-    fetchUsers();
+    getUsers();
   }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const updatedUsers = await handleAddUser(users, formData);
+    setUsers(updatedUsers);
+    setOpenDialog(false);
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,103 +35,17 @@ export default function Users() {
     if (!selectedUser) return;
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get('email') as string;
-    const username = formData.get('username') as string;
-    const phone = formData.get('phone') as string;
-
-    const requestPayload = {
-      user_id: selectedUser.user_id,
-      email,
-      username,
-      phone,
-    };
-
-    try {
-      const method = selectedUser ? 'PUT' : 'POST';
-
-      const response = await fetch('http://127.0.0.1:8787/updateuser', {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestPayload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if (selectedUser) {
-          setUsers(users.map(user => (user.id === selectedUser.id ? data : user)));
-        } else {
-          setUsers([data, ...users]);
-        }
-        setOpenDialog(false);
-      } else {
-        console.error('Failed to update user:', data.message);
-      }
-    } catch (error) {
-      console.error('Error updating user:', error);
-    }
+    const updatedUsers = await handleUpdateUser(selectedUser, users, formData);
+    setUsers(updatedUsers);
+    setOpenDialog(false);
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDelete = async () => {
+    if (!selectedUser) return;
 
-    const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get('email') as string;
-    const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
-    const phone = formData.get('phone') as string;
-
-    const requestPayload = {
-      email,
-      username,
-      password,
-      phone,
-    };
-
-    try {
-      const response = await fetch('http://127.0.0.1:8787/adduser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestPayload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers([data, ...users]);
-        setOpenDialog(false);
-      } else {
-        console.error('Failed to add user:', data.message);
-      }
-    } catch (error) {
-      console.error('Error adding user:', error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch('http://127.0.0.1:8787/deleteuser', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_id: selectedUser?.user_id }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setUsers(users.filter(user => user.id !== id));
-        setOpenAlertDialog(false);
-      } else {
-        console.error('Failed to delete user:', data.message);
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
+    const deletedUsers = await handleDeleteUser(users, selectedUser);
+    setUsers(deletedUsers);
+    setOpenAlertDialog(false);
   };
 
   const handleAddOrUpdate = (user: User | null) => {
@@ -239,7 +151,7 @@ export default function Users() {
             <AlertDialogCancel onClick={() => setOpenAlertDialog(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete(selectedUser?.id || '')}>
+            <AlertDialogAction onClick={() => handleDelete()}>
               Delete
             </AlertDialogAction>
           </div>

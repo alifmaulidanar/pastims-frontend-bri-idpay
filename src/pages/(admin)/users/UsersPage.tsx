@@ -1,4 +1,4 @@
-import Users from "@/pages/users/Users";
+import Users from "@/pages/(admin)/users/Users";
 import Layout from "@/components/layouts/dashboard-layout";
 
 export default function UsersPage() {
