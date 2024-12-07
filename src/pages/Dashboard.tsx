@@ -83,13 +83,13 @@ export const Dashboard = () => {
             <Tooltip permanent direction="top" offset={[-15, -10]}>
               <div>
                 <h3>{userLocation.username || "Loading..."}</h3>
-                <h3>{user?.user_metadata.phone || "Loading..."}</h3>
+                <h3>{userLocation.phone || "Loading..."}</h3>
               </div>
             </Tooltip>
             <Popup>
               <div>
                 <h3>{userLocation.username || "Loading..."}</h3>
-                <p>Phone: {user?.user_metadata.phone || "Loading..."}</p>
+                <p>Phone: {userLocation.phone || "Loading..."}</p>
                 <p>Latitude: {userLocation.latitude || "Loading..."}</p>
                 <p>Longitude: {userLocation.longitude || "Loading..."}</p>
                 <p>Timestamp: {format(toZonedTime(userLocation.timestamp, 'Asia/Jakarta'), 'PPpp') || "Loading..."}</p>
