@@ -1,10 +1,11 @@
 import supabase from "@/utils/supabase";
+import { useRole } from "@/hooks/useRole";
 import { useState, useEffect } from "react";
 import DashboardPage from "@/pages/DashboardPage";
 import UsersPage from "@/pages/(admin)/users/UsersPage";
-// import UpdateUserInfo from "@/pages/(admin)/users/UpdateProfile";
 import { LoginForm } from "@/components/customs/login-form";
 import ProfilePage from "@/pages/(users)/profile/ProfilePage";
+// import UpdateUserInfo from "@/pages/(admin)/users/UpdateProfile";
 import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
@@ -12,6 +13,7 @@ function App() {
   const [, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // Flag to show loading state
   const userSession = localStorage.getItem(import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION);
+  const { role, loading: roleLoading } = useRole();
 
   // Function to check user session status
   const checkUser = () => {
@@ -28,7 +30,7 @@ function App() {
     setLoading(false);
   }, [userSession]);
 
-  if (loading) {
+  if (loading || roleLoading) {
     return <div>Loading...</div>;
   }
 
@@ -49,7 +51,7 @@ function App() {
           />
           <Route
             path="/users"
-            element={checkUser() ? <UsersPage /> : <Navigate to="/" />}
+            element={checkUser() && role === 'admin' ? <UsersPage /> : <Navigate to="/" />}
           />
           <Route
             path="/profile"
