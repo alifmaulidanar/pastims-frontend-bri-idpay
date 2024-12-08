@@ -1,4 +1,4 @@
-# Live Tracking Demo
+# Trackify
 
 ## Map Preview
 

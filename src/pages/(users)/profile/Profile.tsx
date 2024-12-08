@@ -11,6 +11,13 @@ const UserProfile = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
 

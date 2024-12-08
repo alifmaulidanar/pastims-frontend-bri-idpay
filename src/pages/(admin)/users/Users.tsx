@@ -13,6 +13,13 @@ export default function Users() {
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
   useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  useEffect(() => {
     const getUsers = async () => {
       const fetchedUsers = await fetchUsers();
       setUsers(fetchedUsers);
