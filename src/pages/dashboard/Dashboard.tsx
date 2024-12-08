@@ -15,6 +15,13 @@ export const Dashboard = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [userLocations, setUserLocations] = useState<any[]>([]);
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   // Add geocoder control to the map
   useEffect(() => {
     if (mapRef.current) {
