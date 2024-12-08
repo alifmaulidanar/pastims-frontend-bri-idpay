@@ -47,6 +47,7 @@ export const handleLogout = async () => {
       console.error("Error logging out:", res.message);
     }
 
+    localStorage.removeItem("user_role");
     localStorage.removeItem("lastWritten");
     localStorage.removeItem(supabaseLocalStorageSession);
     window.location.href = '/';

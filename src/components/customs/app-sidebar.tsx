@@ -1,4 +1,4 @@
-import { useRole } from "@/hooks/useRole";
+import { useEffect, useState } from "react";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
 import { Home, LogOutIcon, User, UserCircle } from "lucide-react";
@@ -23,7 +23,12 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { role } = useRole();
+  const [role, setRole] = useState<string | null>(localStorage.getItem('user_role'));
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('user_role');
+    if (storedRole) setRole(storedRole);
+  }, []);
 
   return (
     <Sidebar>
