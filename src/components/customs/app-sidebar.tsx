@@ -1,3 +1,4 @@
+import { useRole } from "@/hooks/useRole";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
 import { Home, LogOutIcon, User, UserCircle } from "lucide-react";
@@ -22,22 +23,29 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { role } = useRole();
+
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items
+                .filter((item) => {
+                  if (item.title === "Users" && role !== "admin") return false;
+                  return true;
+                })
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
