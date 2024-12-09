@@ -1,0 +1,107 @@
+.
+├── |   .env
+├── |   .gitignore
+├── |   components.json
+├── |   eslint.config.js
+├── |   index.html
+├── |   package-lock.json
+├── |   package.json
+├── |   postcss.config.js
+├── |   README.md
+├── |   tailwind.config.js
+├── |   tree-view.txt
+├── |   tree.txt
+├── |   tsconfig.app.json
+├── |   tsconfig.json
+├── |   tsconfig.node.json
+├── |   vite.config.ts
+├── |   
+├── +---.vscode
+├── +---dist
+├── |   |   index.html
+├── |   |   vite.svg
+├── |   |   
+├── |   \---assets
+├── |           browser-Bus3Ba2e.js
+├── |           index-hvKXFhEf.css
+├── |           index-JV8M1Hb8.js
+├── |           landing-KM9i5jVY.png
+├── |           
+├── +---public
+├── |       vite.svg
+├── |       
+└── \---src/
+    ├── |   App.tsx
+    ├── |   index.css
+    ├── |   main.tsx
+    ├── |   vite-env.d.ts
+    ├── |   
+    ├── +---assets
+    ├── |       landing.png
+    ├── |       
+    ├── +---auth
+    ├── |       userAuth.tsx
+    ├── |       
+    ├── +---components
+    ├── |   +---customs
+    ├── |   |       app-sidebar.tsx
+    ├── |   |       login-form.tsx
+    ├── |   |       
+    ├── |   +---layouts
+    ├── |   |       dashboard-layout.tsx
+    ├── |   |       landing-layout.tsx
+    ├── |   |       
+    ├── |   \---ui
+    ├── |           alert-dialog.tsx
+    ├── |           button.tsx
+    ├── |           card.tsx
+    ├── |           dialog.tsx
+    ├── |           input.tsx
+    ├── |           label.tsx
+    ├── |           select.tsx
+    ├── |           separator.tsx
+    ├── |           sheet.tsx
+    ├── |           sidebar.tsx
+    ├── |           skeleton.tsx
+    ├── |           table.tsx
+    ├── |           tooltip.tsx
+    ├── |           
+    ├── +---hooks
+    ├── |       use-mobile.tsx
+    ├── |       useRole.tsx
+    ├── |       
+    ├── +---lib
+    ├── |       actions.ts
+    ├── |       utils.ts
+    ├── |       
+    ├── +---pages
+    ├── |   |   Landing.tsx
+    ├── |   |   LandingPage.tsx
+    ├── |   |   
+    ├── |   +---(admin)
+    ├── |   |   \---users
+    ├── |   |       |   UpdateProfile.tsx
+    ├── |   |       |   Users.tsx
+    ├── |   |       |   UsersPage.tsx
+    ├── |   |       |   
+    ├── |   |       \---lib
+    ├── |   |               actions.ts
+    ├── |   |               
+    ├── |   +---(users)
+    ├── |   |   \---profile
+    ├── |   |       |   Profile.tsx
+    ├── |   |       |   ProfilePage.tsx
+    ├── |   |       |   
+    ├── |   |       \---lib
+    ├── |   |               actions.ts
+    ├── |   |               
+    ├── |   \---dashboard
+    ├── |           Dashboard.tsx
+    ├── |           DashboardPage.tsx
+    ├── |           
+    ├── +---types
+    ├── |       index.d.ts
+    ├── |       leaflet-control-geocoder.d.ts
+    ├── |       
+    └── \---utils/
+        └── supabase.ts
