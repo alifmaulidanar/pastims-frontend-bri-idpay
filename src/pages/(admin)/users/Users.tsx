@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -67,19 +68,20 @@ export default function Users() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-2xl font-semibold">User Dashboard</h1>
+      <h1 className="mb-4 text-2xl font-semibold">Daftar Pengguna</h1>
 
       <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
-        Add New User
+        <UserPlus className="inline" />
+        Tambahkan Pengguna
       </Button>
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableCell>Email</TableCell>
-            <TableCell>Username</TableCell>
-            <TableCell>Phone</TableCell>
-            <TableCell>Actions</TableCell>
+            <TableCell>Nama</TableCell>
+            <TableCell>No. HP</TableCell>
+            <TableCell>Aksi</TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -90,10 +92,12 @@ export default function Users() {
               <TableCell>{user.phone}</TableCell>
               <TableCell>
                 <Button onClick={() => handleAddOrUpdate(user)} variant="outline" className="mr-2">
+                  <Pencil className="inline" />
                   Edit
                 </Button>
                 <Button onClick={() => handleAlertDialog(user)} variant="destructive">
-                  Delete
+                  <Trash2 className="inline" />
+                  Hapus
                 </Button>
               </TableCell>
             </TableRow>
@@ -107,7 +111,7 @@ export default function Users() {
           <Button className="hidden" />
         </DialogTrigger>
         <DialogContent>
-          <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+          <DialogTitle>{selectedUser ? 'Edit Pengguna' : 'Tambahkan Pengguna'}</DialogTitle>
           <form className="space-y-4" onSubmit={selectedUser ? handleUpdate : handleAdd}>
             <input
               type="text"
@@ -119,7 +123,7 @@ export default function Users() {
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Kata Sandi"
               hidden={selectedUser ? true : false}
               defaultValue={selectedUser?.password || ''}
               className="w-full px-4 py-2 border rounded"
@@ -127,23 +131,25 @@ export default function Users() {
             <input
               type="text"
               name="username"
-              placeholder="Username"
+              placeholder="Nama"
               defaultValue={selectedUser?.username || ''}
               className="w-full px-4 py-2 border rounded"
             />
             <input
               type="text"
               name="phone"
-              placeholder="Phone"
+              placeholder="No. HP"
               defaultValue={selectedUser?.phone || ''}
               className="w-full px-4 py-2 border rounded"
             />
             <div className="flex justify-end space-x-2">
               <Button onClick={() => setOpenDialog(false)} variant="outline">
-                Cancel
+                <X className="inline" />
+                Batal
               </Button>
               <Button type="submit">
-                Save
+                <Save className="inline" />
+                Simpan
               </Button>
             </div>
           </form>
@@ -153,13 +159,15 @@ export default function Users() {
       {/* Alert Dialog for delete confirmation */}
       <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
         <AlertDialogContent>
-          <AlertDialogTitle>Are you sure you want to delete this user?</AlertDialogTitle>
+          <AlertDialogTitle>Apakah Anda yakin ingin menghapus pengguna ini?</AlertDialogTitle>
           <div className="flex justify-end space-x-2">
             <AlertDialogCancel onClick={() => setOpenAlertDialog(false)}>
-              Cancel
+              <X className="inline" />
+              Batal
             </AlertDialogCancel>
             <AlertDialogAction onClick={() => handleDelete()}>
-              Delete
+              <Trash2 className="inline" />
+              Hapus
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

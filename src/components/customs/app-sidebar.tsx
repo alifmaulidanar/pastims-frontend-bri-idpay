@@ -1,22 +1,27 @@
 import { useEffect, useState } from "react";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
-import { Home, LogOutIcon, User, UserCircle } from "lucide-react";
+import { Home, LogOutIcon, MapPinCheck, User, UserCircle } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 const items = [
   {
-    title: "Dashboard",
+    title: "Dasbor",
     url: "/dashboard",
     icon: Home,
   },
   {
-    title: "Users",
+    title: "Daftar Tempat",
+    url: "/places",
+    icon: MapPinCheck,
+  },
+  {
+    title: "Daftar Pengguna",
     url: "/users",
     icon: User,
   },
   {
-    title: "Profile",
+    title: "Profil",
     url: "/profile",
     icon: UserCircle,
   },
@@ -60,8 +65,8 @@ export function AppSidebar() {
             onClick={handleLogout}
             className="w-full py-2 text-white bg-red-600 rounded hover:bg-red-800"
           >
-            <LogOutIcon className="inline mr-2" />
-            Logout
+            <LogOutIcon className="inline" />
+            Keluar (Logout)
           </Button>
         </div>
       </SidebarContent>
