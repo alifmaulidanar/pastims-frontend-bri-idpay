@@ -2,18 +2,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { format, toZonedTime } from 'date-fns-tz';
+import { UserRadar as User } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-import { saveLocationToDatabase, getLatestLocationForEachUser } from "@/lib/actions";
-import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 
-export const Dashboard = () => {
+// Define custom icons
+import adminIconUrl from "../../assets/marker-icons/admin/pin-map.png";
+import motorIconUrl from "../../assets/marker-icons/motorcycle/motorcycle.png";
+
+const Dashboard = () => {
   const user = useUser();
   const mapRef = useRef<any>(null);
+  const [userLocations, setUserLocations] = useState<User[]>([]);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [userLocations, setUserLocations] = useState<any[]>([]);
+
+  // Create custom icons
+  const adminIcon = L.icon({
+    iconUrl: adminIconUrl,
+    iconSize: [44, 44],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+
+  const motorIcon = L.icon({
+    iconUrl: motorIconUrl,
+    iconSize: [44, 44],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -22,21 +40,11 @@ export const Dashboard = () => {
     };
   }, []);
 
-  // Add geocoder control to the map
   useEffect(() => {
     if (mapRef.current) {
       const map = useMap();
       L.Control.Geocoder.nominatim().addTo(map);
     }
-  }, []);
-
-  // Fetch all user locations
-  useEffect(() => {
-    const fetchUserLocations = async () => {
-      const locations = await getLatestLocationForEachUser();
-      setUserLocations(locations);
-    };
-    fetchUserLocations();
   }, []);
 
   // Fetch current user's location
@@ -45,29 +53,45 @@ export const Dashboard = () => {
       navigator.geolocation.watchPosition((position) => {
         const { latitude, longitude } = position.coords;
         setLocation({ lat: latitude, lng: longitude });
-
-        // Call the action function to write data to DB
-        if (user) {
-          const user_id = user.id;
-          saveLocationToDatabase(user_id, latitude, longitude);
-        }
       }, (error) => {
         console.error("Geolocation error:", error);
       }, { enableHighAccuracy: true, maximumAge: 10000 });
     }
   }, [user]);
 
-  // Fetch address for each user location
+  // Fetch locations of all users
   useEffect(() => {
-    if (userLocations.length > 0) {
-      userLocations.forEach(async (userLocation) => {
-        const { latitude, longitude } = userLocation;
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+    const fetchUserLocations = async () => {
+      try {
+        const response = await fetch("https://api.radar.io/v1/users", {
+          headers: {
+            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Failed to fetch user locations:", errorData.message);
+          return;
+        }
+
         const data = await response.json();
-        userLocation.address = data.display_name;
-      });
-    }
-  }, [userLocations]);
+        setUserLocations(data.users);
+
+        if (userLocations) {
+          userLocations.forEach(async (user: any) => {
+            const latitude = user.location.coordinates[1];
+            const longitude = user.location.coordinates[0];
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            return response.json();
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user locations:", error);
+      }
+    };
+    fetchUserLocations();
+  }, []);
 
   // Render the map
   if (!location) return <div>Loading...</div>;
@@ -79,32 +103,37 @@ export const Dashboard = () => {
         zoom={13}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {userLocations.map((userLocation) => (
-          <Marker
-            key={userLocation.user_id}
-            position={[userLocation.latitude, userLocation.longitude]}
-          >
-            <Tooltip permanent direction="top" offset={[-15, -10]}>
-              <div>
-                <h3>{userLocation.username || "Loading..."}</h3>
-                <h3>{userLocation.phone || "Loading..."}</h3>
-              </div>
-            </Tooltip>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+        {/* Current user's location */}
+        {location && (
+          <Marker position={[location.lat, location.lng]} icon={adminIcon}>
             <Popup>
               <div>
-                <h3>{userLocation.username || "Loading..."}</h3>
-                <p>Phone: {userLocation.phone || "Loading..."}</p>
-                <p>Latitude: {userLocation.latitude || "Loading..."}</p>
-                <p>Longitude: {userLocation.longitude || "Loading..."}</p>
-                <p>Timestamp: {format(toZonedTime(userLocation.timestamp, 'Asia/Jakarta'), 'PPpp') || "Loading..."}</p>
-                <p>Address: {userLocation.address || "Loading..."}</p>
+                <h3>Your Location</h3>
+                <p>Latitude: {location.lat}</p>
+                <p>Longitude: {location.lng}</p>
               </div>
             </Popup>
           </Marker>
-        ))}
+        )}
+
+        {/* Other users' locations */}
+        {userLocations.map((user) => {
+          const [longitude, latitude] = user.location.coordinates;
+          return (
+            <Marker key={user._id} position={[latitude, longitude]} icon={motorIcon}>
+              <Popup>
+                <div>
+                  <h3>{user.description || "Unknown User"}</h3>
+                  <p>Latitude: {user.location.coordinates[1]}</p>
+                  <p>Longitude: {user.location.coordinates[0]}</p>
+                  <p>Metadata: {JSON.stringify(user.metadata)}</p>
+                </div>
+              </Popup>
+            </Marker>
+          )
+        })}
       </MapContainer>
     </div>
   );
