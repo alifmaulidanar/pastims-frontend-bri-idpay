@@ -1,16 +1,18 @@
 import Radar from "radar-sdk-js";
 import supabase from "@/utils/supabase";
 import { useRole } from "@/hooks/useRole";
-import LandingPage from "./pages/LandingPage";
 import { useState, useEffect } from "react";
-import DashboardPage from "@/pages/dashboard/DashboardPage";
+import LandingPage from "./pages/LandingPage";
 import UsersPage from "@/pages/(admin)/users/UsersPage";
+import TripsPage from "./pages/(admin)/trips/TripsPage";
+import PlacesPage from "./pages/(admin)/places/PlacesPage";
+import DashboardPage from "@/pages/dashboard/DashboardPage";
 import { LoginForm } from "@/components/customs/login-form";
+import TicketsPage from "./pages/(admin)/tickets/TicketsPage";
 import ProfilePage from "@/pages/(users)/profile/ProfilePage";
 // import UpdateUserInfo from "@/pages/(admin)/users/UpdateProfile";
 import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import PlacesPage from "./pages/(admin)/places/PlacesPage";
 
 const radarPublishableKey = import.meta.env.VITE_RADAR_TEST_PUBLISHABLE_KEY;
 Radar.initialize(radarPublishableKey);
@@ -52,6 +54,14 @@ function App() {
           <Route
             path="/dashboard"
             element={checkUser() ? <DashboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/tickets"
+            element={checkUser() ? <TicketsPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/trips"
+            element={checkUser() ? <TripsPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/places"
