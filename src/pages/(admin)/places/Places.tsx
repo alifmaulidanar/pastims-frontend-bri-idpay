@@ -131,6 +131,34 @@ export default function Places() {
       }
 
       const data = await response.json();
+
+      // Save to backend
+      // try {
+      //   const saveToBackend = {
+      //     radar_id: data.geofence._id,
+      //     external_id: data.geofence.externalId,
+      //     description: data.geofence.description,
+      //     tag: data.geofence.tag,
+      //     type: data.geofence.type,
+      //     radius: data.geofence.geometryRadius,
+      //     coordinates: data.geofence.geometryCenter.coordinates,
+      //   }
+      //   const response = await fetch("http://127.0.0.1:8787/addgeofence", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(saveToBackend),
+      //   });
+
+      //   if (!response.ok) {
+      //     console.error("Failed to save geofence to the backend");
+      //     return;
+      //   }
+      // } catch (error) {
+      //   console.error("Failed to save geofence to the backend:", error);
+      // }
+
       if (selectedGeofence) {
         setGeofences((prev) => prev.map((geofence) => (geofence.externalId === selectedGeofence.externalId ? data.geofence : geofence)));
       } else {
@@ -262,7 +290,7 @@ export default function Places() {
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Daftar Tempat</h1>
+      <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
 
       <Button className="mb-4" onClick={handleAddPlace}>
         <MapPinPlus className="inline" />
@@ -273,13 +301,13 @@ export default function Places() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-left">ID</TableHead>
-              <TableHead className="text-left">External ID</TableHead>
+              {/* <TableHead className="text-left">ID</TableHead> */}
+              <TableHead className="text-left">ID Tempat</TableHead>
               <TableHead className="text-left">Nama Tempat</TableHead>
               <TableHead className="text-left">Tag</TableHead>
               {/* <TableHead className="text-left">Tipe</TableHead> */}
               <TableHead className="text-left">Radius (m)</TableHead>
-              <TableHead className="text-left">Koordinat (Latidue, Longitude)</TableHead>
+              <TableHead className="text-left">Koordinat (Latitude, Longitude)</TableHead>
               <TableHead className="text-left">Status</TableHead>
               <TableHead className="text-left">Aksi</TableHead>
             </TableRow>
@@ -287,7 +315,7 @@ export default function Places() {
           <TableBody>
             {geofences.map((geofence) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
-                <TableCell>{geofence._id || "-"}</TableCell>
+                {/* <TableCell>{geofence._id || "-"}</TableCell> */}
                 <TableCell>{geofence.externalId || "-"}</TableCell>
                 <TableCell>{geofence.description || "-"}</TableCell>
                 <TableCell>
@@ -338,7 +366,7 @@ export default function Places() {
       </div>
 
       {geofences.length === 0 && (
-        <div className="mt-4 text-center text-gray-500">Tidak ada data geofence untuk ditampilkan.</div>
+        <div className="mt-4 text-center text-gray-500">Tidak ada data tempat untuk ditampilkan.</div>
       )}
 
       {/* Add Place Dialog/Modal */}

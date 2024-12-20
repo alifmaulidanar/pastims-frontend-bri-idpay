@@ -2,7 +2,7 @@ import { User } from '@/types';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
@@ -67,7 +67,7 @@ export default function Users() {
   };
 
   return (
-    <div className="p-6">
+    <div className="w-[85%] max-w-screen-xxl p-6">
       <h1 className="mb-4 text-2xl font-semibold">Daftar Pengguna</h1>
 
       <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
@@ -78,26 +78,30 @@ export default function Users() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableCell>Email</TableCell>
-            <TableCell>Nama</TableCell>
-            <TableCell>No. HP</TableCell>
-            <TableCell>Aksi</TableCell>
+            <TableHead>ID Pengguna</TableHead>
+            <TableHead>Nama</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>No. HP</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Diperbarui pada</TableHead>
+            <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map(user => (
             <TableRow key={user.id}>
-              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.user_id}</TableCell>
               <TableCell>{user.username}</TableCell>
+              <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
+              <TableCell>{user.status === "active" ? "Aktif" : "Tidak Aktif"}</TableCell>
+              <TableCell>{new Date(user.updated_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell>
               <TableCell>
                 <Button onClick={() => handleAddOrUpdate(user)} variant="outline" className="mr-2">
                   <Pencil className="inline" />
-                  Edit
                 </Button>
                 <Button onClick={() => handleAlertDialog(user)} variant="destructive">
                   <Trash2 className="inline" />
-                  Hapus
                 </Button>
               </TableCell>
             </TableRow>

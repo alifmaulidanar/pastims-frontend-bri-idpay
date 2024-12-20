@@ -150,7 +150,7 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Dropdown container */}
+      {/* Tile layer themes dropdown */}
       < div className="z-50 flex justify-end w-[85%] p-4 bg-white rounded-md shadow-lg" >
         <Select onValueChange={handleTileLayerChange} defaultValue="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png">
           <SelectTrigger className="w-64">
