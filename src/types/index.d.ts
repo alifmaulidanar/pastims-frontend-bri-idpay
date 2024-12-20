@@ -5,8 +5,12 @@ export interface User {
   user_id: string;
   email: string;
   username: string;
-  password: string;
   phone: string;
+  role: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  password: string;
 }
 
 // Profile type definition
