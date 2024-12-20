@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
-import { Home, LogOutIcon, MapPinCheck, User, UserCircle } from "lucide-react";
+import { Home, ListTodo, LogOutIcon, MapPinCheck, Truck, User, UserCircle } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 const items = [
@@ -9,6 +9,16 @@ const items = [
     title: "Dasbor",
     url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Tiket",
+    url: "/tickets",
+    icon: ListTodo,
+  },
+  {
+    title: "Perjalanan",
+    url: "/trips",
+    icon: Truck,
   },
   {
     title: "Daftar Tempat",
