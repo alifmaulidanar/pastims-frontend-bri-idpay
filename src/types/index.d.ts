@@ -66,3 +66,14 @@ export interface GeofenceRadar {
   };
   enabled: boolean;
 }
+
+export interface Ticket {
+  ticket_id: string;
+  trip_id?: string;
+  user_id: string;
+  geofence_id: string;
+  description?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
