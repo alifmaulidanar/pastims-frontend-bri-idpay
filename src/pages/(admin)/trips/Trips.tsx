@@ -154,7 +154,7 @@ export default function Trips() {
                         ? "success"
                         : trip.status === "pending" || trip.status === "started" || trip.status === "approaching"
                           ? "warning"
-                          : "destructive"
+                          : trip.status === "expired" ? "secondary" : "destructive"
                     }
                   >
                     {trip.status === "started" && "Dimulai"}
@@ -162,6 +162,7 @@ export default function Trips() {
                     {trip.status === "approaching" && "Mendekati"}
                     {trip.status === "arrived" && "Tiba"}
                     {trip.status === "completed" && "Selesai"}
+                    {trip.status === "expired" && "Kadaluarsa"}
                     {trip.status === "canceled" && "Dibatalkan"}
                   </Badge>
                 </TableCell>

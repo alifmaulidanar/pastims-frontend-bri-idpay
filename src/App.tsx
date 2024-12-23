@@ -76,6 +76,12 @@ function App() {
             element={checkUser() ? <ProfilePage /> : <Navigate to="/login" />}
           />
 
+          {/* Halaman 404 */}
+          <Route
+            path="*"
+            element={<Navigate to="/login" />}
+          />
+
           {/* Halaman Update */}
           {/* <Route
             path="/update"

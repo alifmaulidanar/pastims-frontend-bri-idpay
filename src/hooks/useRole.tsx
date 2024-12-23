@@ -30,7 +30,7 @@ export const useRole = () => {
         const { data: userRole, error: roleError } = await supabase
           .from('roles')
           .select('role')
-          .eq('user_id', user?.id)
+          .or(`user_id.eq.${user?.id},admin_id.eq.${user?.id}`)
           .single();
 
         if (roleError || !userRole) {
@@ -38,7 +38,7 @@ export const useRole = () => {
           return;
         }
 
-        // Simpan role di localStorage
+        // Save role to localStorage
         localStorage.setItem('user_role', userRole.role);
         setRole(userRole.role);
       } catch (error) {
