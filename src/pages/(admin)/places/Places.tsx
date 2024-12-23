@@ -13,6 +13,7 @@ import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-lea
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Places() {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
@@ -133,31 +134,31 @@ export default function Places() {
       const data = await response.json();
 
       // Save to backend
-      // try {
-      //   const saveToBackend = {
-      //     radar_id: data.geofence._id,
-      //     external_id: data.geofence.externalId,
-      //     description: data.geofence.description,
-      //     tag: data.geofence.tag,
-      //     type: data.geofence.type,
-      //     radius: data.geofence.geometryRadius,
-      //     coordinates: data.geofence.geometryCenter.coordinates,
-      //   }
-      //   const response = await fetch("http://127.0.0.1:8787/addgeofence", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(saveToBackend),
-      //   });
+      try {
+        const saveToBackend = {
+          radar_id: data.geofence._id,
+          external_id: data.geofence.externalId,
+          description: data.geofence.description,
+          tag: data.geofence.tag,
+          type: data.geofence.type,
+          radius: data.geofence.geometryRadius,
+          coordinates: data.geofence.geometryCenter.coordinates,
+        }
+        const response = await fetch(`${BASE_URL}/addgeofence`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(saveToBackend),
+        });
 
-      //   if (!response.ok) {
-      //     console.error("Failed to save geofence to the backend");
-      //     return;
-      //   }
-      // } catch (error) {
-      //   console.error("Failed to save geofence to the backend:", error);
-      // }
+        if (!response.ok) {
+          console.error("Failed to save geofence to the backend");
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to save geofence to the backend:", error);
+      }
 
       if (selectedGeofence) {
         setGeofences((prev) => prev.map((geofence) => (geofence.externalId === selectedGeofence.externalId ? data.geofence : geofence)));

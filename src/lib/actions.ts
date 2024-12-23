@@ -1,3 +1,5 @@
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const canWriteData = () => {
   const lastWritten = localStorage.getItem('lastWritten');
   const now = new Date().getTime();
@@ -12,7 +14,7 @@ const canWriteData = () => {
 
 export const saveLocationToDatabase = async (user_id: string, latitude: number, longitude: number) => {
   if (canWriteData()) {
-    const response = await fetch('http://127.0.0.1:8787/save-location', {
+    const response = await fetch(`${BASE_URL}/save-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +40,7 @@ export const saveLocationToDatabase = async (user_id: string, latitude: number, 
 
 export const getLatestLocationForEachUser = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8787/latest-locations');
+    const response = await fetch(`${BASE_URL}/latest-locations`);
     const data = await response.json();
 
     if (response.ok) {
