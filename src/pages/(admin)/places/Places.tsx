@@ -25,12 +25,12 @@ export default function Places() {
   const [formValues, setFormValues] = useState({ latitude: "", longitude: "", radius: "", description: "", tag: "" });
 
   // Disable body scroll when dialog is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.body.style.overflow = "hidden";
+  //   return () => {
+  //     document.body.style.overflow = "auto";
+  //   };
+  // }, []);
 
   // Fetch geofences
   useEffect(() => {

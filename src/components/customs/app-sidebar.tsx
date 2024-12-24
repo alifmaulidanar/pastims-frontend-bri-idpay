@@ -30,11 +30,11 @@ const items = [
     url: "/users",
     icon: User,
   },
-  {
-    title: "Profil",
-    url: "/profile",
-    icon: UserCircle,
-  },
+  // {
+  //   title: "Profil",
+  //   url: "/profile",
+  //   icon: UserCircle,
+  // },
 ];
 
 export function AppSidebar() {

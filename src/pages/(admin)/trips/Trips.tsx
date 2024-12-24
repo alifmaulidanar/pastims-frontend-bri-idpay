@@ -12,12 +12,12 @@ export default function Trips() {
   const [users, setUsers] = useState<User[]>([]);
 
   // Disable body scroll when dialog is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.body.style.overflow = "hidden";
+  //   return () => {
+  //     document.body.style.overflow = "auto";
+  //   };
+  // }, []);
 
   // Fetch trips
   useEffect(() => {

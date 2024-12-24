@@ -13,12 +13,12 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.body.style.overflow = "hidden";
+  //   return () => {
+  //     document.body.style.overflow = "auto";
+  //   };
+  // }, []);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -171,7 +171,7 @@ export default function Users() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={() => handleDelete()}>
               <Trash2 className="inline" />
-              Hapus
+              Ya, hapus
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
