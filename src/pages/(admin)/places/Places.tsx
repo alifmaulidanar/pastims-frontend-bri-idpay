@@ -10,9 +10,9 @@ import { GeofenceRadar as Geofence } from "@/types";
 import { MapPinPlus, Pencil, Save, Trash2, X } from "lucide-react";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Places() {
@@ -144,7 +144,7 @@ export default function Places() {
           radius: data.geofence.geometryRadius,
           coordinates: data.geofence.geometryCenter.coordinates,
         }
-        const response = await fetch(`${BASE_URL}/addgeofence`, {
+        const response = await fetch(`${BASE_URL}/geofence`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -226,39 +226,6 @@ export default function Places() {
     setPreviewCoordinates([geofence.geometryCenter.coordinates[1], geofence.geometryCenter.coordinates[0]]);
     setPreviewRadius(geofence.geometryRadius);
     setOpenAddPlaceDialog(true);
-    // if (geofence) {
-    //   setPreviewCoordinates([geofence.geometryCenter.coordinates[1], geofence.geometryCenter.coordinates[0]]);
-    // }
-    // if (geofence) {
-    //   setPreviewRadius(geofence.geometryRadius);
-    // }
-    // setOpenAddPlaceDialog(true);
-    // try {
-    //   const tag = geofence?.tag;
-    //   const externalId = geofence?.externalId;
-
-    //   if (!tag || !externalId) {
-    //     console.error("Invalid geofence tag or external ID");
-    //     return;
-    //   }
-
-    //   const response = await fetch(`https://api.radar.io/v1/geofences/${tag}/${externalId}`, {
-    //     method: "PUT",
-    //     headers: {
-    //       Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-    //     },
-    //   });
-
-    //   if (!response.ok) {
-    //     console.error("Failed to fetch geofence");
-    //     return;
-    //   }
-
-    //   const data = await response.json();
-    //   console.log("Geofence data:", data);
-    // } catch (error) {
-    //   console.error("Failed to edit geofence:", error);
-    // }
   };
 
   // Handle delete place
@@ -282,6 +249,25 @@ export default function Places() {
         console.error("Failed to delete geofence");
         return;
       }
+
+      // Delete from backend
+      try {
+        const radar_id = selectedGeofence._id;
+        const response = await fetch(`${BASE_URL}/geofence/${radar_id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to save geofence to the backend");
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to save geofence to the backend:", error);
+      }
+
       setGeofences((prev) => prev.filter((geofence) => geofence.externalId !== externalId));
       setOpenAlertDialog(false);
     } catch (error) {
@@ -344,8 +330,11 @@ export default function Places() {
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Hapus Tempat</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?
+                          </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div>
+                        {/* <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div> */}
                         <AlertDialogFooter>
                           <Button variant="outline" onClick={() => setOpenAlertDialog(false)}>
                             <X className="inline" />
@@ -377,6 +366,9 @@ export default function Places() {
         </DialogTrigger>
         <DialogContent className="max-w-6xl">
           <DialogTitle>{selectedGeofence ? "Edit Tempat" : "Tambahkan Tempat"}</DialogTitle>
+          <DialogDescription>
+            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru"}
+          </DialogDescription>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <form className="space-y-4" onSubmit={handleSubmitAddPlace}>
               <Label>Deskripsi</Label>

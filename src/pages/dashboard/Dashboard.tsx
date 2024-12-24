@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
@@ -197,10 +198,13 @@ const Dashboard = () => {
               <Marker key={user._id} position={[latitude, longitude]} icon={motorIcon}>
                 <Popup>
                   <div>
-                    <h3>{user.description || "Unknown User"}</h3>
+                    <Badge variant="outline">{user.userId}</Badge>
+                    <p>Nama: {user.metadata.username || "Unknown User"}</p>
+                    <p>Email: {user.metadata.email}</p>
+                    <p>No. HP: {user.metadata.phone}</p>
                     <p>Latitude: {user.location.coordinates[1]}</p>
                     <p>Longitude: {user.location.coordinates[0]}</p>
-                    <p>Metadata: {JSON.stringify(user.metadata)}</p>
+                    {/* <p>Metadata: {JSON.stringify(user.metadata)}</p> */}
                   </div>
                 </Popup>
               </Marker>
@@ -214,10 +218,10 @@ const Dashboard = () => {
               <Marker key={geofence._id} position={[latitude, longitude]} icon={geofenceIcon}>
                 <Popup>
                   <div>
-                    <h3>{geofence.description || "Unknown geofence"}</h3>
+                    <Badge variant="outline">{geofence.externalId}</Badge>
+                    <p>{geofence.description || "Unknown geofence"} <Badge variant="secondary">{geofence.tag}</Badge></p>
                     <p>Latitude: {geofence.geometryCenter.coordinates[1]}</p>
                     <p>Longitude: {geofence.geometryCenter.coordinates[0]}</p>
-                    <p>Description: {JSON.stringify(geofence.description)}</p>
                   </div>
                 </Popup>
               </Marker>

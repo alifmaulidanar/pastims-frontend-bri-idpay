@@ -11,6 +11,16 @@ const items = [
     icon: Home,
   },
   {
+    title: "Daftar Pengguna",
+    url: "/users",
+    icon: User,
+  },
+  {
+    title: "Daftar Tempat",
+    url: "/places",
+    icon: MapPinCheck,
+  },
+  {
     title: "Tiket",
     url: "/tickets",
     icon: ListTodo,
@@ -19,16 +29,6 @@ const items = [
     title: "Perjalanan",
     url: "/trips",
     icon: Truck,
-  },
-  {
-    title: "Daftar Tempat",
-    url: "/places",
-    icon: MapPinCheck,
-  },
-  {
-    title: "Daftar Pengguna",
-    url: "/users",
-    icon: User,
   },
   // {
   //   title: "Profil",
