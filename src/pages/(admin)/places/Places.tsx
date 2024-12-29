@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { v4 as uuidv4 } from 'uuid';
 import { useEffect, useState } from "react";
@@ -10,9 +11,13 @@ import { GeofenceRadar as Geofence } from "@/types";
 import { MapPinPlus, Pencil, Save, Trash2, X } from "lucide-react";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+// Define custom icons
+import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Places() {
@@ -23,6 +28,14 @@ export default function Places() {
   const [previewCoordinates, setPreviewCoordinates] = useState<[number, number] | null>([-6.2088, 106.8456]);
   const [previewRadius, setPreviewRadius] = useState<number>(0);
   const [formValues, setFormValues] = useState({ latitude: "", longitude: "", radius: "", description: "", tag: "" });
+
+  // Create custom icons
+  const geofenceIcon = L.icon({
+    iconUrl: geofenceIconUrl,
+    iconSize: [36, 36],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
 
   // Disable body scroll when dialog is open
   // useEffect(() => {
@@ -181,7 +194,7 @@ export default function Places() {
 
     useEffect(() => {
       const provider = new OpenStreetMapProvider();
-      const searchControl = new SearchControl({
+      const searchControl = SearchControl({
         provider,
         style: "bar",
         autoComplete: true,
@@ -441,7 +454,7 @@ export default function Places() {
                 <MapWithSearchAndDraw />
                 {previewCoordinates && (
                   <>
-                    <Marker position={previewCoordinates}></Marker>
+                    <Marker position={previewCoordinates} icon={geofenceIcon}></Marker>
                     <Circle
                       center={previewCoordinates}
                       radius={previewRadius}
