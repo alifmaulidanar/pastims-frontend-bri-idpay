@@ -4,7 +4,7 @@ const supabaseLocalStorageSession = import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_
 
 export const handleLogin = async (email: string, password: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/login`, {
+    const response = await fetch(`${BASE_URL}/adm/login/admin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

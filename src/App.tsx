@@ -10,7 +10,6 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 import { LoginForm } from "@/components/customs/login-form";
 import TicketsPage from "./pages/(admin)/tickets/TicketsPage";
 import ProfilePage from "@/pages/(users)/profile/ProfilePage";
-// import UpdateUserInfo from "@/pages/(admin)/users/UpdateProfile";
 import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
@@ -20,7 +19,7 @@ Radar.initialize(radarPublishableKey);
 function App() {
   const [loading, setLoading] = useState(true);
   const [, setUser] = useState<User | null>(null);
-  const { role, loading: roleLoading } = useRole();
+  const { loading: roleLoading } = useRole();
   const userSession = localStorage.getItem(import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION);
 
   useEffect(() => {
@@ -69,7 +68,7 @@ function App() {
           />
           <Route
             path="/users"
-            element={checkUser() && role === 'admin' ? <UsersPage /> : <Navigate to="/login" />}
+            element={checkUser() ? <UsersPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/profile"
@@ -81,12 +80,6 @@ function App() {
             path="*"
             element={<Navigate to="/login" />}
           />
-
-          {/* Halaman Update */}
-          {/* <Route
-            path="/update"
-            element={<UpdateUserInfo />}
-          /> */}
         </Routes>
       </Router>
     </SessionContextProvider>
