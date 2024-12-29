@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
-import { Home, ListTodo, LogOutIcon, MapPinCheck, Truck, User, UserCircle } from "lucide-react";
+import { Home, ListTodo, LogOutIcon, MapPinCheck, Truck, User } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 const items = [
@@ -30,11 +30,6 @@ const items = [
     url: "/trips",
     icon: Truck,
   },
-  // {
-  //   title: "Profil",
-  //   url: "/profile",
-  //   icon: UserCircle,
-  // },
 ];
 
 export function AppSidebar() {
