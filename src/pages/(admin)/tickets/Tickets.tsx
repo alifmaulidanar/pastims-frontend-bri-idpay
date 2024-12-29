@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
-// import { v4 as uuidv4 } from 'uuid';
 import { Ticket, User } from "@/types";
 import { useEffect, useState } from "react";
-// import { Badge } from "@/components/ui/badge"
-import "leaflet-geosearch/dist/geosearch.css";
 import { fetchTickets } from "./lib/actions";
-import { Button } from "@/components/ui/button";
-import { Pencil, Save, TicketPlus, Trash2, X } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchUsers } from "../users/lib/actions";
 import { Badge } from "@/components/ui/badge";
+import "leaflet-geosearch/dist/geosearch.css";
+import { Button } from "@/components/ui/button";
+import { fetchUsers } from "../users/lib/actions";
+import { InfoIcon, Pencil, Save, TicketPlus, Trash2, X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Tickets() {
@@ -23,6 +21,7 @@ export default function Tickets() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openInfoDialog, setOpenInfoDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [formValues, setFormValues] = useState({ user_id: "", geofence_id: "", description: "" });
 
@@ -171,7 +170,6 @@ export default function Tickets() {
     }
   };
 
-
   const handleAddOrUpdate = (ticket: Ticket | null) => {
     setSelectedTicket(ticket);
     setFormValues({
@@ -180,6 +178,16 @@ export default function Tickets() {
       description: ticket?.description || "",
     });
     setOpenDialog(true);
+  };
+
+  const handleInfo = (ticket: Ticket | null) => {
+    setSelectedTicket(ticket);
+    setFormValues({
+      user_id: ticket?.user_id || "",
+      geofence_id: ticket?.geofence_id || "",
+      description: ticket?.description || "",
+    });
+    setOpenInfoDialog(true);
   };
 
   const handleAlertDialog = (ticket: Ticket | null) => {
@@ -232,21 +240,54 @@ export default function Tickets() {
                 </div>
               </TableCell>
               <TableCell>{ticket.description}</TableCell>
-              <TableCell>{ticket.status}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    ticket.status === "arrived" || ticket.status === "completed"
+                      ? "success"
+                      : ticket.status === "pending" || ticket.status === "started" || ticket.status === "approaching"
+                        ? "warning"
+                        : ticket.status === "expired"
+                          ? "secondary"
+                          : ticket.status === "assigned" ? "assigned" : "destructive"
+                  }
+                >
+                  {ticket.status === "assigned" && "Ditugaskan"}
+                  {ticket.status === "started" && "Dimulai"}
+                  {ticket.status === "pending" && "Menunggu"}
+                  {ticket.status === "approaching" && "Mendekati"}
+                  {ticket.status === "arrived" && "Tiba"}
+                  {ticket.status === "completed" && "Selesai"}
+                  {ticket.status === "expired" && "Kadaluarsa"}
+                  {ticket.status === "canceled" && "Dibatalkan"}
+                </Badge>
+              </TableCell>
               {/* <TableCell>{new Date(ticket.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell> */}
               <TableCell>{new Date(ticket.updated_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell>
               <TableCell className="flex">
-                <Button
-                  onClick={() => handleAddOrUpdate(ticket)}
-                  variant="outline" className="mr-2">
-                  <Pencil className="inline" />
-                </Button>
-                <Button
-                  onClick={() => handleAlertDialog(ticket)}
-                  variant="destructive"
-                >
-                  <X className="inline" />
-                </Button>
+                {(ticket.status !== "completed" && ticket.status !== "canceled") &&
+                  <>
+                    <Button
+                      onClick={() => handleAddOrUpdate(ticket)}
+                      variant="outline" className="mr-2">
+                      <Pencil className="inline" />
+                    </Button>
+                    <Button
+                      onClick={() => handleAlertDialog(ticket)}
+                      variant="destructive"
+                    >
+                      <X className="inline" />
+                    </Button>
+                  </>
+                }
+                {(ticket.status === "completed" || ticket.status === "canceled") &&
+                  <Button
+                    onClick={() => handleInfo(ticket)}
+                    variant="ghost"
+                  >
+                    <InfoIcon className="inline" />
+                  </Button>
+                }
               </TableCell>
             </TableRow>
           ))}
@@ -276,22 +317,6 @@ export default function Tickets() {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* <div>
-              <label className="block text-sm font-medium">Perjalanan (Opsional)</label>
-              <Select onValueChange={(value) => handleFormChange("trip_id", value)} value={formValues.trip_id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Perjalanan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {trips.map((trip) => (
-                    <SelectItem key={trip._id} value={trip.externalId}>
-                      {trip.externalId}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
 
             <div>
               <label className="block text-sm font-medium">Geofence</label>
@@ -331,6 +356,201 @@ export default function Tickets() {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog for showing ticket detail */}
+      <Dialog open={openInfoDialog} onOpenChange={setOpenInfoDialog}>
+        <DialogTrigger asChild>
+          <Button className="hidden" />
+        </DialogTrigger>
+        {/* <DialogContent className="max-w-6xl"> */}
+        <DialogContent className="max-w-[1600px]">
+          <DialogTitle>Detail Tiket</DialogTitle>
+          {/* <div className="grid grid-cols-3 gap-x-8"> */}
+          <div className="grid grid-cols-4 gap-x-6">
+            {/* Tiket */}
+            <div>
+              <h3 className="mb-4 font-medium">Tiket</h3>
+              <div className="grid grid-cols-1 gap-y-4">
+                <div>
+                  <label className="block text-sm">ID Tiket</label>
+                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                    {selectedTicket?.ticket_id || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Deskripsi</label>
+                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                    {selectedTicket?.description || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Dibuat pada</label>
+                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                    {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Diperbarui pada</label>
+                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                    {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Status Tiket</label>
+                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                    {selectedTicket?.status === "assigned" && "Ditugaskan"}
+                    {selectedTicket?.status === "started" && "Dimulai"}
+                    {selectedTicket?.status === "pending" && "Menunggu"}
+                    {selectedTicket?.status === "approaching" && "Mendekati"}
+                    {selectedTicket?.status === "arrived" && "Tiba"}
+                    {selectedTicket?.status === "completed" && "Selesai"}
+                    {selectedTicket?.status === "expired" && "Kadaluarsa"}
+                    {selectedTicket?.status === "canceled" && "Dibatalkan"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Geofence */}
+            <div>
+              <h3 className="mb-4 font-medium">Tempat</h3>
+              <div className="grid grid-cols-1 gap-y-4">
+                <div>
+                  <label className="block text-sm">ID Tempat</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {selectedTicket?.geofence_id || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Nama Tempat</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.description || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Tag</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.tag || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Radius</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryRadius || "-"} m
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Koordinat</label>
+                  <div className="grid px-4 py-2 bg-gray-100 border rounded">
+                    <span>{geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryCenter.coordinates[1] || "-"} (<span className="italic">Latitude</span>)</span>
+                    <span>{geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryCenter.coordinates[0] || "-"} (<span className="italic">Longitude</span>)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pengguna */}
+            <div>
+              <h3 className="mb-4 font-medium">Pengguna</h3>
+              <div className="grid grid-cols-1 gap-y-4">
+                <div>
+                  <label className="block text-sm">ID Pengguna</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {selectedTicket?.user_id || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Nama Pengguna</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.username || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Email</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.email || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">No. HP</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.phone || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Status Pengguna</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {users.find((user) => user.user_id === selectedTicket?.user_id) ? (users.find((user) => user.user_id === selectedTicket?.user_id)?.status === "active" ? "Aktif" : "Tidak Aktif") : "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Perjalanan */}
+            <div>
+              <h3 className="mb-4 font-medium">Perjalanan</h3>
+              <div className="grid grid-cols-1 gap-y-4">
+                <div>
+                  <label className="block text-sm">ID Perjalanan</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.externalId || "-"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Dimulai pada</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.startedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Diselesaikan pada</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.endedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Durasi</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {(() => {
+                      const trip = trips.find((trip) => trip.externalId === selectedTicket?.trip_id);
+                      if (!trip || !trip.startedAt || !trip.endedAt) return "-";
+
+                      const startedAt = new Date(trip.startedAt);
+                      const endedAt = new Date(trip.endedAt);
+                      const diffMs = endedAt.getTime() - startedAt.getTime();
+
+                      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                      const duration = [];
+                      if (hours > 0) duration.push(`${hours} jam`);
+                      if (minutes > 0) duration.push(`${minutes} menit`);
+                      if (seconds > 0) duration.push(`${seconds} detik`);
+
+                      return duration.length > 0 ? duration.join(" ") : "-";
+                    })()}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm">Status Perjalanan</label>
+                  <p className="px-4 py-2 bg-gray-100 border rounded">
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "assigned" && "Ditugaskan"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "started" && "Dimulai"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "pending" && "Menunggu"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "approaching" && "Mendekati"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "arrived" && "Tiba"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "completed" && "Selesai"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "expired" && "Kadaluarsa"}
+                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "canceled" && "Dibatalkan"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
       {/* Alert Dialog for delete confirmation */}
       <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
         <AlertDialogContent>
@@ -349,6 +569,6 @@ export default function Tickets() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </div >
   );
 }
