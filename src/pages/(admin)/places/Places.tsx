@@ -2,6 +2,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { v4 as uuidv4 } from 'uuid';
+import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
@@ -290,6 +291,11 @@ export default function Places() {
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Tempat</title>
+      </Helmet>
+
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
 
       <Button className="mb-4" onClick={handleAddPlace}>

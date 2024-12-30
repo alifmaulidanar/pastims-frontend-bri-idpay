@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
+import { Helmet } from "react-helmet-async";
+import { UserRadar as User } from "@/types";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { UserRadar as User } from "@/types";
 
 export default function Trips() {
   const [trips, setTrips] = useState<any[]>([]);
@@ -95,6 +96,11 @@ export default function Trips() {
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Perjalanan</title>
+      </Helmet>
+
       <h1 className="mb-6 text-2xl font-semibold">Daftar Perjalanan</h1>
 
       {/* <Button className="mb-4" onClick={handleAddPlace}>

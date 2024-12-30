@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Helmet } from "react-helmet-async";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -90,6 +91,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
+        console.log(data.geofences);
         setGeofences(data.geofences);
 
         if (geofences) {
@@ -151,8 +153,31 @@ const Dashboard = () => {
 
   return (
     <>
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Peta Lokasi</title>
+      </Helmet>
+
       {/* Tile layer themes dropdown */}
-      < div className="z-50 flex justify-end w-[85%] p-4 bg-white rounded-md shadow-lg" >
+      < div className="z-50 flex justify-between w-[85%] p-4 bg-white rounded-md shadow-lg" >
+        <h1 className="text-2xl font-semibold">Peta Lokasi</h1>
+
+        {/* buatlah sebuah legenda untuk map */}
+        <div className="flex space-x-4">
+          <div className="flex flex-col items-center justify-center">
+            <img src={adminIconUrl} alt="Admin" className="w-6 h-6" />
+            <p className="text-sm">Admin</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <img src={motorIconUrl} alt="Pengguna" className="w-6 h-6" />
+            <p className="text-sm">Pengguna</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <img src={geofenceIconUrl} alt="Tempat" className="w-6 h-6" />
+            <p className="text-sm">Tempat</p>
+          </div>
+        </div>
+
         <Select onValueChange={handleTileLayerChange} defaultValue="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png">
           <SelectTrigger className="w-64">
             <SelectValue placeholder="Pilih Tema Map" />
@@ -169,6 +194,8 @@ const Dashboard = () => {
           </SelectContent>
         </Select>
       </div >
+
+      {/* Maps */}
       <div className="absolute z-0 w-full h-full">
         <MapContainer
           center={[location.lat, location.lng]}

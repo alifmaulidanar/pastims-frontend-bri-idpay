@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
 import { Ticket, User } from "@/types";
+import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { fetchTickets } from "./lib/actions";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Tickets() {
@@ -201,6 +203,11 @@ export default function Tickets() {
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Tiket</title>
+      </Helmet>
+
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tiket</h1>
 
       <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>

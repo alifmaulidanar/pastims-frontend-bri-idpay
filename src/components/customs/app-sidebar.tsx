@@ -6,17 +6,17 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu
 
 const items = [
   {
-    title: "Dasbor",
-    url: "/dashboard",
+    title: "Peta Lokasi",
+    url: "/maps",
     icon: Home,
   },
   {
-    title: "Daftar Pengguna",
+    title: "Pengguna",
     url: "/users",
     icon: User,
   },
   {
-    title: "Daftar Tempat",
+    title: "Tempat",
     url: "/places",
     icon: MapPinCheck,
   },

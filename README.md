@@ -1,5 +1,3 @@
-# Trackify
+# Pasti Tracking
 
 ## Map Preview
-
-![alt text](src/assets/image.png)

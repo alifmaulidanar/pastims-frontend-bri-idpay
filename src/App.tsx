@@ -40,18 +40,18 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={checkUser() ? <Navigate to="/dashboard" /> : <LandingPage />}
+            element={checkUser() ? <Navigate to="/maps" /> : <LandingPage />}
           />
 
           {/* Halaman Login */}
           <Route
             path="/login"
-            element={checkUser() ? <Navigate to="/dashboard" /> : <LoginForm />}
+            element={checkUser() ? <Navigate to="/maps" /> : <LoginForm />}
           />
 
           {/* Halaman Dashboard */}
           <Route
-            path="/dashboard"
+            path="/maps"
             element={checkUser() ? <DashboardPage /> : <Navigate to="/login" />}
           />
           <Route

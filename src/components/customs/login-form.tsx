@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { handleLogin } from "@/auth/userAuth";
@@ -27,9 +28,22 @@ export function LoginForm() {
 
   return (
     <div className="flex items-center justify-center w-full h-screen px-4">
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Login</title>
+      </Helmet>
+
+      {/* Back Button */}
+      <Button
+        variant="default"
+        className="absolute top-4 left-4"
+        onClick={() => navigate("/")}
+      >
+        Kembali ke halaman utama
+      </Button>
       <Card className="max-w-sm mx-auto w-80">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Masuk</CardTitle>
           <CardDescription>
             Masukkan email dan kata sandi.
           </CardDescription>
@@ -49,7 +63,7 @@ export function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Kata Sandi</Label>
               </div>
               <Input
                 id="password"
@@ -61,7 +75,7 @@ export function LoginForm() {
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <Button type="submit" className="w-full">
-              Login
+              Masuk
             </Button>
           </form>
         </CardContent>

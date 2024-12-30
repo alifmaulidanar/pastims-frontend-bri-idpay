@@ -1,7 +1,9 @@
 import { useRef } from 'react';
 import { Link } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
+import { Badge } from '@/components/ui/badge';
 import { Button } from "@/components/ui/button"
-import landingImage from "@/assets/landing.png";
+import landingImage from "@/assets/landing-map-preview.png";
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Navigation, History, Users, ArrowRight, Building2 } from 'lucide-react'
 
@@ -11,21 +13,23 @@ export default function Landing() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Set Page Title */}
+      <Helmet>
+        <title>Pasti Tracking</title>
+      </Helmet>
+
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center max-w-screen-lg mx-auto h-14">
           <Link to="/" className="flex items-center space-x-2">
             <Navigation className="w-6 h-6 text-emerald-500" />
-            <span className="font-bold">Trackify</span>
+            <span className="font-bold">Pasti Tracking</span>
           </Link>
           <nav className="flex gap-4 ml-auto">
             <Link to="/login">
-              <Button variant="ghost" className="text-sm font-medium hover:text-emerald-500">
-                Login
+              <Button variant="ghost" className="text-sm font-medium hover:text-emerald-600">
+                Masuk
               </Button>
             </Link>
-            <Button variant="ghost" className="text-sm font-medium hover:text-emerald-500">
-              Register
-            </Button>
           </nav>
         </div>
       </header>
@@ -44,15 +48,15 @@ export default function Landing() {
           </div>
           <div className="space-y-4 text-center">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Track Your Team&apos;s Location <br /> in Real-Time
+              Lacak Lokasi Tim Anda <br /> secara <span className='italic'>Real-Time</span>
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-              Effortlessly monitor and manage your workforce with our advanced location tracking solution. Stay connected, ensure safety, and optimize performance.
+              Pantau dan kelola tenaga kerja Anda dengan mudah dengan solusi pelacakan lokasi yang canggih. Tetap terhubung, memastikan keamanan, dan mengoptimalkan kinerja.
             </p>
           </div>
           <div className="flex gap-4">
             <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" onClick={scrollToBottom}>
-              Get Started <ArrowRight className="w-4 h-4 ml-2" />
+              Mulai sekarang <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             {/* <Button size="lg" variant="outline">
               Learn More
@@ -77,46 +81,46 @@ export default function Landing() {
           <div className="grid items-center max-w-5xl gap-8 mx-auto lg:grid-cols-2">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Powerful Features for Your Business
+                Fitur-fitur yang Kuat untuk Bisnis Anda
               </h2>
               <p className="text-muted-foreground md:text-lg">
-                Our comprehensive solution provides everything you need to manage your mobile workforce effectively.
+                Solusi komprehensif kami menyediakan semua yang Anda butuhkan untuk mengelola tenaga kerja mobile secara efektif.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardContent className="p-6 space-y-2">
                   <MapPin className="w-10 h-10 text-emerald-500" />
-                  <h3 className="font-bold">Real-time Tracking</h3>
+                  <h3 className="font-bold">Pelacakan <span className='italic'>Real-Time</span></h3>
                   <p className="text-sm text-muted-foreground">
-                    Monitor your team&apos;s location in real-time with precise accuracy
+                    Pantau lokasi tim secara <span className='italic'>real-time</span> dengan akurasi tinggi
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
                   <History className="w-10 h-10 text-emerald-500" />
-                  <h3 className="font-bold">Location History</h3>
+                  <h3 className="font-bold">Riwayat Lokasi</h3>
                   <p className="text-sm text-muted-foreground">
-                    Access detailed history reports of movement and activities
+                    Laporan riwayat pergerakan dan aktivitas secara terperinci
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
                   <Users className="w-10 h-10 text-emerald-500" />
-                  <h3 className="font-bold">Team Management</h3>
+                  <h3 className="font-bold">Manajemen Tim</h3>
                   <p className="text-sm text-muted-foreground">
-                    Organize and manage your workforce efficiently
+                    Pengelolaan tenaga kerja secara efisien
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
                   <Building2 className="w-10 h-10 text-emerald-500" />
-                  <h3 className="font-bold">Company Dashboard</h3>
+                  <h3 className="font-bold">Dasbor Admin</h3>
                   <p className="text-sm text-muted-foreground">
-                    Comprehensive overview of your entire operation
+                    Tinjauan menyeluruh atas seluruh aktivitas pemantauan
                   </p>
                 </CardContent>
               </Card>
@@ -130,7 +134,7 @@ export default function Landing() {
           <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
             <Navigation className="w-6 h-6 text-emerald-500" />
             <p className="text-sm leading-loose text-center md:text-left">
-              Built with care for your business. © 2024 Trackify.
+              Pasti Tracking. © 2024 by <Badge variant="outline"><Link to="https://alifmaulidanar.com" target='_blank'>Alif Maulidanar</Link></Badge>
             </p>
           </div>
         </div>
