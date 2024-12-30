@@ -5,20 +5,30 @@ import { UserRadar as User } from "@/types";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Trips() {
   const [trips, setTrips] = useState<any[]>([]);
   const [geofences, setGeofences] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredTrips, setFilteredTrips] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [statusFilter, setStatusFilter] = useState("");
 
   // Disable body scroll when dialog is open
-  // useEffect(() => {
-  //   document.body.style.overflow = "hidden";
-  //   return () => {
-  //     document.body.style.overflow = "auto";
-  //   };
-  // }, []);
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+    document.body.style.overflowY = "auto";
+
+    return () => {
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
+    };
+  }, []);
 
   // Fetch trips
   useEffect(() => {
@@ -37,6 +47,7 @@ export default function Trips() {
 
         const data = await response.json();
         setTrips(data.trips || []);
+        filterAndSortTrips(data.trips, searchQuery, statusFilter, sortOrder);
       } catch (error) {
         console.error("Failed to fetch geofences:", error);
       }
@@ -92,7 +103,58 @@ export default function Trips() {
     fetchUsers();
   }, []);
 
-  // console.log({ trips, geofences, users });
+  useEffect(() => {
+    filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder);
+  }, [trips, searchQuery, statusFilter, sortOrder]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+  };
+
+  const handleSort = (key: string) => {
+    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(order);
+    filterAndSortTrips(trips, searchQuery, statusFilter, order, key);
+  };
+
+  const handleFilter = (status: string) => {
+    setStatusFilter(status);
+  };
+  console.log({ users })
+
+  const filterAndSortTrips = (data: any, query: any, status: any, order: any, sortKey = "destinationGeofenceExternalId") => {
+    let filtered = data;
+
+    // Filter by status
+    if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled" || status === "expired") {
+      filtered = filtered.filter((trip: any) => trip.status === status);
+    }
+
+    // Filter by search query
+    if (query) {
+      filtered = filtered.filter(
+        (trip: any) =>
+          trip.externalId.toLowerCase().includes(query) ||
+          trip.destinationGeofenceExternalId.toLowerCase().includes(query) ||
+          users.find((user) => user.userId === trip.userId)?.metadata.user_id.toLowerCase().includes(query) ||
+          trip.destinationGeofenceTag.toLowerCase().includes(query) ||
+          geofences.find((geofence) => geofence.externalId === trip.destinationGeofenceExternalId)?.description.toLowerCase().includes(query) ||
+          users.find((user) => user.userId === trip.userId)?.metadata.username.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort data
+    filtered = filtered.sort((a: any, b: any) => {
+      const compareA = String(a[sortKey]).toLowerCase();
+      const compareB = String(b[sortKey]).toLowerCase();
+      return order === "asc"
+        ? compareA.localeCompare(compareB)
+        : compareB.localeCompare(compareA);
+    });
+
+    setFilteredTrips(filtered);
+  };
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
@@ -107,6 +169,36 @@ export default function Trips() {
         <MapPinPlus className="inline" />
         Tambahkan Tempat
       </Button> */}
+
+      {/* Search, Sort, and Filter */}
+      <div className="flex items-center mb-4 space-x-4">
+        <Input
+          type="text"
+          placeholder="Cari perjalanan..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="w-1/3"
+        />
+        <Select
+          onValueChange={handleFilter}
+          value={statusFilter}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="assigned">Ditugaskan</SelectItem>
+            <SelectItem value="on_progress">Berjalan</SelectItem>
+            <SelectItem value="completed">Selesai</SelectItem>
+            <SelectItem value="canceled">Dibatalkan</SelectItem>
+            <SelectItem value="expired">Kadaluarsa</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={() => handleSort("destinationGeofenceExternalId")}>
+          Urutkan ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+      </div>
 
       <div className="overflow-x-auto">
         <Table>
@@ -129,7 +221,7 @@ export default function Trips() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {trips.map((trip) => (
+            {filteredTrips.map((trip) => (
               <TableRow key={trip._id} className="hover:bg-gray-50">
                 {/* <TableCell>{trip._id || "-"}</TableCell> */}
                 <TableCell>{trip.externalId || "-"}</TableCell>

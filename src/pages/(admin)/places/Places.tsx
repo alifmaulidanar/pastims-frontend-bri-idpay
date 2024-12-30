@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GeofenceRadar as Geofence } from "@/types";
 import { MapPinPlus, Pencil, Save, Trash2, X } from "lucide-react";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -23,6 +25,10 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Places() {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
+  const [filteredGeofences, setFilteredGeofences] = useState<Geofence[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [statusFilter, setStatusFilter] = useState("");
   const [openAddPlaceDialog, setOpenAddPlaceDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
@@ -39,12 +45,15 @@ export default function Places() {
   });
 
   // Disable body scroll when dialog is open
-  // useEffect(() => {
-  //   document.body.style.overflow = "hidden";
-  //   return () => {
-  //     document.body.style.overflow = "auto";
-  //   };
-  // }, []);
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+    document.body.style.overflowY = "auto";
+
+    return () => {
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
+    };
+  }, []);
 
   // Fetch geofences
   useEffect(() => {
@@ -69,6 +78,57 @@ export default function Places() {
     };
     fetchGeofences();
   }, []);
+
+  useEffect(() => {
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, sortOrder);
+  }, [geofences, searchQuery, statusFilter, sortOrder]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+  };
+
+  const handleSort = (key: string) => {
+    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(order);
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
+  };
+
+  const handleFilter = (status: string) => {
+    setStatusFilter(status);
+  };
+
+  const filterAndSortGeofences = (data: any, query: any, status: any, order: any, sortKey = "description") => {
+    let filtered = data;
+
+    // Filter by status
+    if (status === "Aktif" || status === "Tidak Aktif") {
+      filtered = filtered.filter(
+        (geofence: any) => geofence.enabled === (status === "Aktif")
+      );
+    }
+
+    // Filter by search query
+    if (query) {
+      filtered = filtered.filter(
+        (geofence: any) =>
+          (geofence.externalId ?? "").toLowerCase().includes(query) ||
+          (geofence.description ?? "").toLowerCase().includes(query) ||
+          (geofence.tag ?? "").toLowerCase().includes(query)
+      );
+    }
+
+    // Sort data
+    filtered = filtered.sort((a: any, b: any) => {
+      const compareA = String(a[sortKey]).toLowerCase();
+      const compareB = String(b[sortKey]).toLowerCase();
+      return order === "asc"
+        ? compareA.localeCompare(compareB)
+        : compareB.localeCompare(compareA);
+    });
+
+    setFilteredGeofences(filtered);
+  };
 
   // Fetch geofence details
   const handleAddPlace = () => {
@@ -298,10 +358,38 @@ export default function Places() {
 
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
 
+      {/* Add place button */}
       <Button className="mb-4" onClick={handleAddPlace}>
         <MapPinPlus className="inline" />
         Tambahkan Tempat
       </Button>
+
+      {/* Search, Sort, and Filter */}
+      <div className="flex items-center mb-4 space-x-4">
+        <Input
+          type="text"
+          placeholder="Cari tempat..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="w-1/3"
+        />
+        <Select
+          onValueChange={(value) => handleFilter(value)}
+          value={statusFilter}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Semua">Semua Status</SelectItem>
+            <SelectItem value="Aktif">Aktif</SelectItem>
+            <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={() => handleSort("description")}>
+          Urutkan Nama Tempat ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+      </div>
 
       <div className="overflow-x-auto">
         <Table>
@@ -319,7 +407,7 @@ export default function Places() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {geofences.map((geofence) => (
+            {filteredGeofences.map((geofence) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
                 {/* <TableCell>{geofence._id || "-"}</TableCell> */}
                 <TableCell>{geofence.externalId || "-"}</TableCell>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { fetchTickets } from "./lib/actions";
 import { Badge } from "@/components/ui/badge";
 import "leaflet-geosearch/dist/geosearch.css";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchUsers } from "../users/lib/actions";
 import { InfoIcon, Pencil, Save, TicketPlus, Trash2, X } from "lucide-react";
@@ -21,6 +22,10 @@ export default function Tickets() {
   const [geofences, setGeofences] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openInfoDialog, setOpenInfoDialog] = useState<boolean>(false);
@@ -28,12 +33,15 @@ export default function Tickets() {
   const [formValues, setFormValues] = useState({ user_id: "", geofence_id: "", description: "" });
 
   // Disable body scroll when dialog is open
-  // useEffect(() => {
-  //   document.body.style.overflow = "hidden";
-  //   return () => {
-  //     document.body.style.overflow = "auto";
-  //   };
-  // }, []);
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+    document.body.style.overflowY = "auto";
+
+    return () => {
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
+    };
+  }, []);
 
   // Fetch trips
   useEffect(() => {
@@ -64,6 +72,7 @@ export default function Tickets() {
     const getTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
+      filterAndSortTickets(fetchedTickets, searchQuery, statusFilter, sortOrder);
     };
     getTickets();
   }, []);
@@ -105,6 +114,62 @@ export default function Tickets() {
     getUsers();
   }, []);
 
+  useEffect(() => {
+    filterAndSortTickets(tickets, searchQuery, statusFilter, sortOrder);
+  }, [tickets, searchQuery, statusFilter, sortOrder]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+  };
+
+  const handleSort = (key: string) => {
+    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(order);
+    filterAndSortTickets(users, searchQuery, statusFilter, order, key);
+
+  };
+
+  const handleFilter = (status: string) => {
+    setStatusFilter(status);
+  };
+
+  const filterAndSortTickets = (data: any, query: any, status: any, order: any, sortKey = "description") => {
+    let filtered = data;
+
+    // Filter by status
+    if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled") {
+      filtered = filtered.filter(
+        (ticket: any) => ticket.status === status
+      );
+    }
+
+    // Filter by search query
+    if (query) {
+      filtered = filtered.filter(
+        (ticket: any) =>
+          ticket.ticket_id.toLowerCase().includes(query) ||
+          trips.find((trip) => trip.externalId === ticket.trip_id)?.externalId.toLowerCase().includes(query) ||
+          geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.externalId.toLowerCase().includes(query) ||
+          users.find((user) => user.user_id === ticket.user_id)?.user_id.toLowerCase().includes(query) ||
+          ticket.description.toLowerCase().includes(query) ||
+          geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description.toLowerCase().includes(query) ||
+          users.find((user) => user.user_id === ticket.user_id)?.username.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort data
+    filtered = filtered.sort((a: any, b: any) => {
+      const compareA = String(a[sortKey]).toLowerCase();
+      const compareB = String(b[sortKey]).toLowerCase();
+      return order === "asc"
+        ? compareA.localeCompare(compareB)
+        : compareB.localeCompare(compareA);
+    });
+
+    setFilteredTickets(filtered);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -131,7 +196,6 @@ export default function Tickets() {
       console.error("Error adding ticket:", error);
     }
   };
-
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,19 +274,49 @@ export default function Tickets() {
 
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tiket</h1>
 
+      {/* Add ticket button */}
       <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
         <TicketPlus className="inline" />
         Buat Tiket Baru
       </Button>
+
+      {/* Search, Sort, and Filter */}
+      <div className="flex items-center mb-4 space-x-4">
+        <Input
+          type="text"
+          placeholder="Cari tiket..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="w-1/3"
+        />
+        <Select
+          onValueChange={handleFilter}
+          value={statusFilter}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="assigned">Ditugaskan</SelectItem>
+            <SelectItem value="on_progress">Berjalan</SelectItem>
+            <SelectItem value="completed">Selesai</SelectItem>
+            <SelectItem value="canceled">Dibatalkan</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={() => handleSort("description")}>
+          Urutkan Deskripsi ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+      </div>
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID Tiket</TableHead>
             <TableHead>ID Perjalanan</TableHead>
+            <TableHead>Deskripsi</TableHead>
             <TableHead>Tempat</TableHead>
             <TableHead>Pengguna</TableHead>
-            <TableHead>Deskripsi</TableHead>
             <TableHead>Status</TableHead>
             {/* <TableHead>Dibuat pada</TableHead> */}
             <TableHead>Diperbarui pada</TableHead>
@@ -230,10 +324,11 @@ export default function Tickets() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map(ticket => (
-            <TableRow key={ticket.id}>
+          {filteredTickets.map(ticket => (
+            <TableRow key={ticket.ticket_id}>
               <TableCell>{ticket.ticket_id}</TableCell>
               <TableCell>{ticket.trip_id ? ticket.trip_id : "-"}</TableCell>
+              <TableCell>{ticket.description}</TableCell>
               <TableCell>
                 <div className="grid">
                   {ticket.geofence_id && geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description}
@@ -246,7 +341,6 @@ export default function Tickets() {
                   <Badge variant="secondary">{ticket.user_id}</Badge>
                 </div>
               </TableCell>
-              <TableCell>{ticket.description}</TableCell>
               <TableCell>
                 <Badge
                   variant={

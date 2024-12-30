@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from '@/types';
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
@@ -21,11 +22,15 @@ export default function Users() {
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
   // useEffect(() => {
-  //   document.body.style.overflow = "hidden";
-  //   return () => {
-  //     document.body.style.overflow = "auto";
-  //   };
-  // }, []);
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+    document.body.style.overflowY = "auto";
+
+    return () => {
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
+    };
+  }, []);
 
   //  Fetch users on mount
   useEffect(() => {
@@ -97,27 +102,29 @@ export default function Users() {
     filterAndSortUsers(users, searchQuery, status, sortOrder);
   };
 
-  const filterAndSortUsers = (data, query, status, order, sortKey = "username") => {
+  const filterAndSortUsers = (data: any, query: any, status: any, order: any, sortKey = "username") => {
     let filtered = data;
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
       filtered = filtered.filter(
-        (user) => user.status === (status === "Aktif" ? "active" : "inactive")
+        (user: any) => user.status === (status === "Aktif" ? "active" : "inactive")
       );
     }
 
     // Filter by search query
     if (query) {
       filtered = filtered.filter(
-        (user) =>
+        (user: any) =>
+          user.user_id.toLowerCase().includes(query) ||
           user.username.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query)
+          user.email.toLowerCase().includes(query) ||
+          user.phone.toLowerCase().includes(query)
       );
     }
 
     // Sort data
-    filtered = filtered.sort((a, b) => {
+    filtered = filtered.sort((a: any, b: any) => {
       if (order === "asc") {
         return a[sortKey].localeCompare(b[sortKey]);
       }
@@ -136,6 +143,7 @@ export default function Users() {
 
       <h1 className="mb-4 text-2xl font-semibold">Daftar Pengguna</h1>
 
+      {/* Add user button */}
       <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
         <UserPlus className="inline" />
         Tambahkan Pengguna
@@ -164,7 +172,7 @@ export default function Users() {
           </SelectContent>
         </Select>
         <Button onClick={() => handleSort("username")}>
-          Sortir Nama ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+          Urutkan Nama ({sortOrder === "asc" ? "A-Z" : "Z-A"})
         </Button>
       </div>
 
