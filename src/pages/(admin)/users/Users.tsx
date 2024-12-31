@@ -4,11 +4,11 @@ import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
+import { Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function Users() {
@@ -134,6 +134,57 @@ export default function Users() {
     setFilteredUsers(filtered);
   };
 
+  const downloadCSV = () => {
+    if (filteredUsers.length === 0) {
+      alert("Tidak ada data untuk diunduh.");
+      return;
+    }
+
+    // Column Header CSV
+    const headers = [
+      "ID Pengguna",
+      "Nama",
+      "Email",
+      "No. HP",
+      "Status",
+      "Diperbarui (WIB)"
+    ];
+
+    // Table Data
+    const rows = filteredUsers.map((user) => [
+      user.user_id,
+      user.username,
+      user.email,
+      user.phone,
+      user.status === "active" ? "Aktif" : "Tidak Aktif",
+      new Date(user.updated_at).toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).replace(".", ":")
+    ]);
+
+    // Combine headers and rows
+    const csvContent =
+      [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
+
+    // Create Blob object to store CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Trigger file download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "users-data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -173,6 +224,12 @@ export default function Users() {
         </Select>
         <Button onClick={() => handleSort("username")}>
           Urutkan Nama ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+
+        {/* Download CSV button */}
+        <Button onClick={downloadCSV} variant="secondary">
+          <Download className="inline" />
+          Unduh Data Pengguna
         </Button>
       </div>
 

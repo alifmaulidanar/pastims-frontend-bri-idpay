@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
+import { Download } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { UserRadar as User } from "@/types";
 import { useEffect, useState } from "react";
@@ -155,6 +156,86 @@ export default function Trips() {
     setFilteredTrips(filtered);
   };
 
+  const downloadCSV = () => {
+    if (filteredTrips.length === 0) {
+      alert("Tidak ada data untuk diunduh.");
+      return;
+    }
+
+    // Column Header CSV
+    const headers = [
+      "ID Perjalanan",
+      "ID Pengguna",
+      "ID Tempat",
+      "Nama Pengguna",
+      "Nama Tempat",
+      "Tag",
+      "Berangkat (WIB)",
+      "Tiba (WIB)",
+      "Status"
+    ];
+
+    // Table Data
+    const rows = filteredTrips.map((trip) => {
+      const user = users.find((u) => u.userId === trip.userId)?.metadata.username || "-";
+      const geofence = geofences.find((g) => g.externalId === trip.destinationGeofenceExternalId)?.description || "-";
+
+      return [
+        trip.externalId || "-",
+        trip.userId || "-",
+        trip.destinationGeofenceExternalId || "-",
+        user,
+        geofence,
+        trip.destinationGeofenceTag || "-",
+        new Date(trip.startedAt).toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).replace(".", ":"),
+        new Date(trip.endedAt).toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).replace(".", ":"),
+        trip.status === "started"
+          ? "Dimulai"
+          : trip.status === "pending"
+            ? "Menunggu"
+            : trip.status === "approaching"
+              ? "Mendekati"
+              : trip.status === "arrived"
+                ? "Tiba"
+                : trip.status === "completed"
+                  ? "Selesai"
+                  : trip.status === "expired"
+                    ? "Kadaluarsa"
+                    : "Dibatalkan",
+      ];
+    });
+
+    // Combine headers and rows
+    const csvContent =
+      [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
+
+    // Create Blob object to store CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Trigger file download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "trips-data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -163,11 +244,6 @@ export default function Trips() {
       </Helmet>
 
       <h1 className="mb-6 text-2xl font-semibold">Daftar Perjalanan</h1>
-
-      {/* <Button className="mb-4" onClick={handleAddPlace}>
-        <MapPinPlus className="inline" />
-        Tambahkan Tempat
-      </Button> */}
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">
@@ -196,6 +272,12 @@ export default function Trips() {
         </Select>
         <Button onClick={() => handleSort("destinationGeofenceExternalId")}>
           Urutkan ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+
+        {/* Download CSV button */}
+        <Button onClick={downloadCSV} variant="secondary">
+          <Download className="inline" />
+          Unduh Data Perjalanan
         </Button>
       </div>
 

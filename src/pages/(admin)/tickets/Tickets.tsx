@@ -10,12 +10,13 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchUsers } from "../users/lib/actions";
-import { InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
+const csvTicketsTemplate = new URL("@/assets/csv-templates/tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Tickets() {
@@ -304,6 +305,7 @@ export default function Tickets() {
       setOpenUploadDialog(false);
       setSelectedFile(null);
       setUploading(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error uploading tickets:", error);
       setUploading(false);
@@ -314,6 +316,67 @@ export default function Tickets() {
     onDrop,
     accept: { "text/csv": [".csv"] },
   });
+
+  // Handle download CSV
+  const downloadCSV = () => {
+    if (filteredTickets.length === 0) {
+      alert("Tidak ada data untuk diunduh.");
+      return;
+    }
+
+    // Column Header CSV
+    const headers = [
+      "ID Tiket",
+      "ID Perjalanan",
+      "Deskripsi",
+      "ID Tempat",
+      "Nama Tempat",
+      "ID Pengguna",
+      "Nama Pengguna",
+      "Status",
+      "Diperbarui (WIB)"
+    ];
+
+    // Table Data
+    const rows = filteredTickets.map((ticket) => {
+      const geofence = geofences.find((g) => g.externalId === ticket.geofence_id);
+      const user = users.find((u) => u.user_id === ticket.user_id);
+      return [
+        ticket.ticket_id,
+        ticket.trip_id || "-",
+        ticket.description,
+        ticket.geofence_id || "-",
+        geofence?.description || "-",
+        ticket.user_id || "-",
+        user?.username || "-",
+        ticket.status,
+        new Date(ticket.updated_at).toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).replace(".", ":"),
+      ];
+    });
+
+    // Combine headers and rows
+    const csvContent =
+      [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
+
+    //  Blob object to store CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Download CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "tickets-data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
@@ -326,13 +389,13 @@ export default function Tickets() {
 
       <div className="flex items-center mb-4 space-x-4">
         {/* Add ticket button */}
-        <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
+        <Button onClick={() => handleAddOrUpdate(null)}>
           <TicketPlus className="inline" />
           Buat Tiket Baru
         </Button>
 
         {/* Upload CSV button */}
-        <Button className="mb-4" variant="secondary" onClick={() => setOpenUploadDialog(true)}>
+        <Button variant="secondary" onClick={() => setOpenUploadDialog(true)}>
           <Upload className="inline" />
           Unggah CSV
         </Button>
@@ -351,6 +414,17 @@ export default function Tickets() {
           <DialogDescription>
             File yang diunggah harus tipe CSV dan mengikuti format sesuai template.
           </DialogDescription>
+
+          <div>
+            <a
+              href={csvTicketsTemplate}
+              download="tickets-template.csv"
+              className="text-blue-500 hover:underline"
+            >
+              Unduh Template Tiket CSV (.csv)
+            </a>
+          </div>
+
           <div
             {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
           >
@@ -399,7 +473,14 @@ export default function Tickets() {
         <Button onClick={() => handleSort("description")}>
           Urutkan Deskripsi ({sortOrder === "asc" ? "A-Z" : "Z-A"})
         </Button>
+
+        {/* Download CSV button */}
+        <Button onClick={downloadCSV} variant="secondary">
+          <Download className="inline" />
+          Unduh Data Tiket
+        </Button>
       </div>
+
 
       <Table>
         <TableHeader>
@@ -438,7 +519,7 @@ export default function Tickets() {
                   variant={
                     ticket.status === "arrived" || ticket.status === "completed"
                       ? "success"
-                      : ticket.status === "pending" || ticket.status === "started" || ticket.status === "approaching"
+                      : ticket.status === "pending" || ticket.status === "started" || ticket.status === "approaching" || ticket.status === "on_progress"
                         ? "warning"
                         : ticket.status === "expired"
                           ? "secondary"
@@ -447,6 +528,7 @@ export default function Tickets() {
                 >
                   {ticket.status === "assigned" && "Ditugaskan"}
                   {ticket.status === "started" && "Dimulai"}
+                  {ticket.status === "on_progress" && "Berjalan"}
                   {ticket.status === "pending" && "Menunggu"}
                   {ticket.status === "approaching" && "Mendekati"}
                   {ticket.status === "arrived" && "Tiba"}

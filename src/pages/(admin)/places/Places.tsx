@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { v4 as uuidv4 } from 'uuid';
+import { v7 as uuid } from 'uuid';
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
@@ -10,17 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GeofenceRadar as Geofence } from "@/types";
-import { MapPinPlus, Pencil, Save, Trash2, X } from "lucide-react";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import { Download, MapPinPlus, Pencil, Save, Trash2, Upload, X } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
+import { useDropzone } from "react-dropzone";
 
+const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Places() {
@@ -35,6 +37,9 @@ export default function Places() {
   const [previewCoordinates, setPreviewCoordinates] = useState<[number, number] | null>([-6.2088, 106.8456]);
   const [previewRadius, setPreviewRadius] = useState<number>(0);
   const [formValues, setFormValues] = useState({ latitude: "", longitude: "", radius: "", description: "", tag: "" });
+  const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Create custom icons
   const geofenceIcon = L.icon({
@@ -173,7 +178,7 @@ export default function Places() {
   const handleSubmitAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
     const tag = formValues.tag;
-    const externalId = selectedGeofence?.externalId || uuidv4();
+    const externalId = selectedGeofence?.externalId || uuid();
     const body = {
       description: formValues.description,
       type: "circle",
@@ -349,6 +354,97 @@ export default function Places() {
     }
   };
 
+  const onDrop = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setSelectedFile(acceptedFiles[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    setUploading(true);
+    try {
+      const response = await fetch(`${BASE_URL}/geofences/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Failed to upload tickets");
+        setUploading(false);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        console.error("Error uploading tickets:", data.error);
+        setUploading(false);
+        return;
+      }
+
+      setOpenUploadDialog(false);
+      setSelectedFile(null);
+      setUploading(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error uploading tickets:", error);
+      setUploading(false);
+    }
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { "text/csv": [".csv"] },
+  });
+
+  // Handle download CSV
+  const downloadCSV = () => {
+    if (filteredGeofences.length === 0) {
+      alert("Tidak ada data untuk diunduh.");
+      return;
+    }
+
+    // Column Header CSV
+    const headers = [
+      "ID Tempat",
+      "Nama Tempat",
+      "Tag",
+      "Radius (m)",
+      "Koordinat (Latitude, Longitude)",
+      "Status"
+    ];
+
+    // Table Data
+    const rows = filteredGeofences.map((geofence) => [
+      geofence.externalId || "-",
+      geofence.description || "-",
+      geofence.tag || "-",
+      geofence.geometryRadius || "-",
+      `${geofence.geometryCenter.coordinates[1]}, ${geofence.geometryCenter.coordinates[0]}`,
+      geofence.enabled ? "Aktif" : "Tidak Aktif"
+    ]);
+
+    // Combine headers and rows
+    const csvContent =
+      [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
+
+    // Create Blob object to store CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Trigger file download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "places-data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -358,11 +454,64 @@ export default function Places() {
 
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
 
-      {/* Add place button */}
-      <Button className="mb-4" onClick={handleAddPlace}>
-        <MapPinPlus className="inline" />
-        Tambahkan Tempat
-      </Button>
+      <div className="flex items-center mb-4 space-x-4">
+        {/* Add place button */}
+        <Button onClick={handleAddPlace}>
+          <MapPinPlus className="inline" />
+          Tambahkan Tempat
+        </Button>
+
+        {/* Upload CSV button */}
+        <Button variant="secondary" onClick={() => setOpenUploadDialog(true)}>
+          <Upload className="inline" />
+          Unggah CSV
+        </Button>
+      </div>
+
+      <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+        <DialogTrigger asChild>
+          <Button className="hidden" />
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Unggah File CSV
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            File yang diunggah harus tipe CSV dan mengikuti format sesuai template. Disarankan setelah mengunduh template, gunakan Notepad untuk mengedit isi CSV dan dapatkan koordinat latitude dan longitude dari Google Maps.
+          </DialogDescription>
+
+          <div>
+            <a
+              href={csvGeofencesTemplate}
+              download="geofences-template.csv"
+              className="text-blue-500 hover:underline"
+            >
+              Unduh Template Tempat CSV (.csv)
+            </a>
+          </div>
+
+          <div
+            {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
+          >
+            <input {...getInputProps()} />
+            {selectedFile ? (
+              <p>{`File: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`}</p>
+            ) : (
+              <p>Tarik dan lepaskan file CSV di sini atau klik untuk memilih file</p>
+            )}
+          </div>
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button variant="outline" onClick={() => { setSelectedFile(null); setOpenUploadDialog(false); }}>
+              Batal
+            </Button>
+            <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
+              {uploading ? "Mengunggah..." : "Unggah"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">
@@ -388,6 +537,12 @@ export default function Places() {
         </Select>
         <Button onClick={() => handleSort("description")}>
           Urutkan Nama Tempat ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+        </Button>
+
+        {/* Download CSV button */}
+        <Button onClick={downloadCSV} variant="secondary">
+          <Download className="inline" />
+          Unduh Data Tempat
         </Button>
       </div>
 
