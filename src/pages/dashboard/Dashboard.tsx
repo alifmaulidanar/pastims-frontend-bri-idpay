@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
 import { UserRadar as User, GeofenceRadar as Geofence } from "@/types";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Define custom icons
@@ -91,7 +91,6 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        console.log(data.geofences);
         setGeofences(data.geofences);
 
         if (geofences) {
@@ -126,7 +125,18 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        setUserLocations(data.users);
+        const uniqueUsers = data.users.reduce((acc: Record<string, User>, user: User) => {
+          const existingUser = user.userId ? acc[user.userId] : undefined;
+          if (!existingUser || new Date(user.updatedAt) > new Date(existingUser.updatedAt)) {
+            if (user.userId) {
+              acc[user.userId] = user;
+            }
+          }
+          return acc;
+        }, {});
+        setUserLocations(Object.values(uniqueUsers));
+
+        // setUserLocations(data.users);
 
         if (userLocations) {
           userLocations.forEach(async (user: any) => {
@@ -210,11 +220,14 @@ const Dashboard = () => {
             <Marker position={[location.lat, location.lng]} icon={adminIcon}>
               <Popup>
                 <div>
-                  <h3>Your Location</h3>
+                  <h3>Lokasi Anda:</h3>
                   <p>Latitude: {location.lat}</p>
                   <p>Longitude: {location.lng}</p>
                 </div>
               </Popup>
+              <Tooltip direction="top" offset={[0, -20]} permanent>
+                <span>Anda</span>
+              </Tooltip>
             </Marker>
           )}
 
@@ -231,9 +244,11 @@ const Dashboard = () => {
                     <p>No. HP: {user.metadata.phone}</p>
                     <p>Latitude: {user.location.coordinates[1]}</p>
                     <p>Longitude: {user.location.coordinates[0]}</p>
-                    {/* <p>Metadata: {JSON.stringify(user.metadata)}</p> */}
                   </div>
                 </Popup>
+                <Tooltip direction="top" offset={[0, -20]} permanent>
+                  <span>{user.metadata.username || "Unknown User"}</span>
+                </Tooltip>
               </Marker>
             )
           })}
@@ -251,6 +266,9 @@ const Dashboard = () => {
                     <p>Longitude: {geofence.geometryCenter.coordinates[0]}</p>
                   </div>
                 </Popup>
+                <Tooltip direction="top" offset={[0, -20]}>
+                  <span>{geofence.description || geofence.externalId}</span>
+                </Tooltip>
               </Marker>
             )
           })}
