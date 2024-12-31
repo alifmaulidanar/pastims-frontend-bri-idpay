@@ -4,13 +4,14 @@ import { Ticket, User } from "@/types";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { fetchTickets } from "./lib/actions";
+import { useDropzone } from "react-dropzone";
 import { Badge } from "@/components/ui/badge";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchUsers } from "../users/lib/actions";
-import { InfoIcon, Pencil, Save, TicketPlus, Trash2, X } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -31,6 +32,9 @@ export default function Tickets() {
   const [openInfoDialog, setOpenInfoDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [formValues, setFormValues] = useState({ user_id: "", geofence_id: "", description: "" });
+  const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Disable body scroll when dialog is open
   useEffect(() => {
@@ -265,6 +269,52 @@ export default function Tickets() {
     setFormValues((prev) => ({ ...prev, [field]: value }));
   };
 
+  const onDrop = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setSelectedFile(acceptedFiles[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    setUploading(true);
+    try {
+      const response = await fetch(`${BASE_URL}/tickets/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Failed to upload tickets");
+        setUploading(false);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        console.error("Error uploading tickets:", data.error);
+        setUploading(false);
+        return;
+      }
+
+      setOpenUploadDialog(false);
+      setSelectedFile(null);
+      setUploading(false);
+    } catch (error) {
+      console.error("Error uploading tickets:", error);
+      setUploading(false);
+    }
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { "text/csv": [".csv"] },
+  });
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -274,11 +324,53 @@ export default function Tickets() {
 
       <h1 className="mb-4 text-2xl font-semibold">Daftar Tiket</h1>
 
-      {/* Add ticket button */}
-      <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
-        <TicketPlus className="inline" />
-        Buat Tiket Baru
-      </Button>
+      <div className="flex items-center mb-4 space-x-4">
+        {/* Add ticket button */}
+        <Button className="mb-4" onClick={() => handleAddOrUpdate(null)}>
+          <TicketPlus className="inline" />
+          Buat Tiket Baru
+        </Button>
+
+        {/* Upload CSV button */}
+        <Button className="mb-4" variant="secondary" onClick={() => setOpenUploadDialog(true)}>
+          <Upload className="inline" />
+          Unggah CSV
+        </Button>
+      </div>
+
+      <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+        <DialogTrigger asChild>
+          <Button className="hidden" />
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Unggah File CSV
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            File yang diunggah harus tipe CSV dan mengikuti format sesuai template.
+          </DialogDescription>
+          <div
+            {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
+          >
+            <input {...getInputProps()} />
+            {selectedFile ? (
+              <p>{`File: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`}</p>
+            ) : (
+              <p>Tarik dan lepaskan file CSV di sini atau klik untuk memilih file</p>
+            )}
+          </div>
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button variant="outline" onClick={() => { setSelectedFile(null); setOpenUploadDialog(false); }}>
+              Batal
+            </Button>
+            <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
+              {uploading ? "Mengunggah..." : "Unggah"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">
@@ -319,7 +411,7 @@ export default function Tickets() {
             <TableHead>Pengguna</TableHead>
             <TableHead>Status</TableHead>
             {/* <TableHead>Dibuat pada</TableHead> */}
-            <TableHead>Diperbarui pada</TableHead>
+            <TableHead>Diperbarui (WIB)</TableHead>
             <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
@@ -364,7 +456,16 @@ export default function Tickets() {
                 </Badge>
               </TableCell>
               {/* <TableCell>{new Date(ticket.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell> */}
-              <TableCell>{new Date(ticket.updated_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell>
+              <TableCell>
+                {new Date(ticket.updated_at).toLocaleString('id-ID', {
+                  timeZone: 'Asia/Jakarta',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }).replace('.', ':')}
+              </TableCell>
               <TableCell className="flex">
                 {(ticket.status !== "completed" && ticket.status !== "canceled") &&
                   <>
@@ -484,15 +585,29 @@ export default function Tickets() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm">Dibuat pada</label>
+                  <label className="block text-sm">Dibuat pada (WIB)</label>
                   <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                    {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', {
+                      timeZone: 'Asia/Jakarta',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }).replace('.', ':')}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm">Diperbarui pada</label>
+                  <label className="block text-sm">Diperbarui pada (WIB)</label>
                   <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                    {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', {
+                      timeZone: 'Asia/Jakarta',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }).replace('.', ':')}
                   </p>
                 </div>
                 <div>
@@ -513,7 +628,7 @@ export default function Tickets() {
 
             {/* Geofence */}
             <div>
-              <h3 className="mb-4 font-medium">Tempat</h3>
+              <h3 className="mb-4 font-medium">Tempat Tujuan</h3>
               <div className="grid grid-cols-1 gap-y-4">
                 <div>
                   <label className="block text-sm">ID Tempat</label>
@@ -597,15 +712,29 @@ export default function Tickets() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm">Dimulai pada</label>
+                  <label className="block text-sm">Dimulai pada (WIB)</label>
                   <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.startedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.startedAt).toLocaleString('id-ID', {
+                      timeZone: 'Asia/Jakarta',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }).replace('.', ':')}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm">Diselesaikan pada</label>
+                  <label className="block text-sm">Diselesaikan pada (WIB)</label>
                   <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.endedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.endedAt).toLocaleString('id-ID', {
+                      timeZone: 'Asia/Jakarta',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }).replace('.', ':')}
                   </p>
                 </div>
                 <div>

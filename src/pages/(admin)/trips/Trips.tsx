@@ -121,7 +121,6 @@ export default function Trips() {
   const handleFilter = (status: string) => {
     setStatusFilter(status);
   };
-  console.log({ users })
 
   const filterAndSortTrips = (data: any, query: any, status: any, order: any, sortKey = "destinationGeofenceExternalId") => {
     let filtered = data;
@@ -211,8 +210,8 @@ export default function Trips() {
               <TableHead className="text-left">Nama Pengguna</TableHead>
               <TableHead className="text-left">Nama Tempat</TableHead>
               <TableHead className="text-left">Tag</TableHead>
-              <TableHead className="text-left">Berangkat</TableHead>
-              <TableHead className="text-left">Tiba</TableHead>
+              <TableHead className="text-left">Berangkat (WIB)</TableHead>
+              <TableHead className="text-left">Tiba (WIB)</TableHead>
               {/* <TableHead className="text-left">Tipe</TableHead> */}
               {/* <TableHead className="text-left">Mode</TableHead> */}
               {/* <TableHead className="text-left">Koordinat (Latitude, Longitude)</TableHead> */}
@@ -237,10 +236,24 @@ export default function Trips() {
                   <Badge variant="secondary">{trip.destinationGeofenceTag || "-"}</Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(trip.startedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  {new Date(trip.startedAt).toLocaleString('id-ID', {
+                    timeZone: 'Asia/Jakarta',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }).replace('.', ':')}
                 </TableCell>
                 <TableCell>
-                  {new Date(trip.endedAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
+                  {new Date(trip.endedAt).toLocaleString('id-ID', {
+                    timeZone: 'Asia/Jakarta',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }).replace('.', ':')}
                 </TableCell>
                 {/* <TableCell>{trip.type}</TableCell> */}
                 {/* <TableCell>{trip.mode}</TableCell> */}

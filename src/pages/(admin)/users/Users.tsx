@@ -184,7 +184,7 @@ export default function Users() {
             <TableHead>Email</TableHead>
             <TableHead>No. HP</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Diperbarui pada</TableHead>
+            <TableHead>Diperbarui (WIB)</TableHead>
             <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
@@ -196,7 +196,16 @@ export default function Users() {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
               <TableCell>{user.status === "active" ? "Aktif" : "Tidak Aktif"}</TableCell>
-              <TableCell>{new Date(user.updated_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB</TableCell>
+              <TableCell>
+                {new Date(user.updated_at).toLocaleString('id-ID', {
+                  timeZone: 'Asia/Jakarta',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }).replace('.', ':')}
+              </TableCell>
               <TableCell>
                 <Button onClick={() => handleAddOrUpdate(user)} variant="outline" className="mr-2">
                   <Pencil className="inline" />
