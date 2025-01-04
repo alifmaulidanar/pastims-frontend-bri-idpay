@@ -1,0 +1,49 @@
+diff --git a/node_modules/react-leaflet/lib/MapContainer.d.ts b/node_modules/react-leaflet/lib/MapContainer.d.ts
+index 9cc061e..f79c630 100644
+--- a/node_modules/react-leaflet/lib/MapContainer.d.ts
++++ b/node_modules/react-leaflet/lib/MapContainer.d.ts
+@@ -1,6 +1,8 @@
+ import { type FitBoundsOptions, type LatLngBoundsExpression, Map as LeafletMap, type MapOptions } from 'leaflet';
+ import React, { type CSSProperties, type ReactNode } from 'react';
+ export interface MapContainerProps extends MapOptions {
++    center: [number, number];
++    zoom: number;
+     bounds?: LatLngBoundsExpression;
+     boundsOptions?: FitBoundsOptions;
+     children?: ReactNode;
+diff --git a/node_modules/react-leaflet/lib/Marker.d.ts b/node_modules/react-leaflet/lib/Marker.d.ts
+index 3b3bf2c..82beaa6 100644
+--- a/node_modules/react-leaflet/lib/Marker.d.ts
++++ b/node_modules/react-leaflet/lib/Marker.d.ts
+@@ -4,5 +4,6 @@ import type { ReactNode } from 'react';
+ export interface MarkerProps extends MarkerOptions, EventedProps {
+     children?: ReactNode;
+     position: LatLngExpression;
++    icon?: any;
+ }
+ export declare const Marker: import("react").ForwardRefExoticComponent<MarkerProps & import("react").RefAttributes<LeafletMarker<any>>>;
+diff --git a/node_modules/react-leaflet/lib/TileLayer.d.ts b/node_modules/react-leaflet/lib/TileLayer.d.ts
+index 9bd5d47..5999435 100644
+--- a/node_modules/react-leaflet/lib/TileLayer.d.ts
++++ b/node_modules/react-leaflet/lib/TileLayer.d.ts
+@@ -3,5 +3,6 @@ import { type LayerProps } from '@react-leaflet/core';
+ import { TileLayer as LeafletTileLayer, type TileLayerOptions } from 'leaflet';
+ export interface TileLayerProps extends TileLayerOptions, LayerProps {
+     url: string;
++    attribution?: string;
+ }
+ export declare const TileLayer: import("react").ForwardRefExoticComponent<TileLayerProps & import("react").RefAttributes<LeafletTileLayer>>;
+diff --git a/node_modules/react-leaflet/lib/Tooltip.d.ts b/node_modules/react-leaflet/lib/Tooltip.d.ts
+index 1e56926..4db9c7d 100644
+--- a/node_modules/react-leaflet/lib/Tooltip.d.ts
++++ b/node_modules/react-leaflet/lib/Tooltip.d.ts
+@@ -4,5 +4,9 @@ import { type ReactNode } from 'react';
+ export interface TooltipProps extends TooltipOptions, EventedProps {
+     children?: ReactNode;
+     position?: LatLngExpression;
++    permanent?: boolean;
++    sticky?: boolean;
++    direction?: 'auto' | 'right' | 'left' | 'top' | 'bottom';
++    offset?: [number, number];
+ }
+ export declare const Tooltip: import("react").ForwardRefExoticComponent<TooltipProps & import("react").RefAttributes<LeafletTooltip>>;
