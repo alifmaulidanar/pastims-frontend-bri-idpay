@@ -399,6 +399,17 @@ export default function Tickets() {
           <Upload className="inline" />
           Unggah CSV
         </Button>
+
+        {/* Download CSV Template */}
+        <div>
+          <a
+            href={csvTicketsTemplate}
+            download="tickets-template.csv"
+            className="text-blue-500 hover:underline"
+          >
+            Unduh Template Tiket CSV (.csv)
+          </a>
+        </div>
       </div>
 
       <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
@@ -414,16 +425,6 @@ export default function Tickets() {
           <DialogDescription>
             File yang diunggah harus tipe CSV dan mengikuti format sesuai template.
           </DialogDescription>
-
-          <div>
-            <a
-              href={csvTicketsTemplate}
-              download="tickets-template.csv"
-              className="text-blue-500 hover:underline"
-            >
-              Unduh Template Tiket CSV (.csv)
-            </a>
-          </div>
 
           <div
             {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
