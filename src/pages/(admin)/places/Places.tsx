@@ -31,6 +31,7 @@ export default function Places() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [openAddPlaceDialog, setOpenAddPlaceDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
@@ -466,6 +467,17 @@ export default function Places() {
           <Upload className="inline" />
           Unggah CSV
         </Button>
+
+        {/* Download CSV Template */}
+        <div>
+          <a
+            href={csvGeofencesTemplate}
+            download="geofences-template.csv"
+            className="text-blue-500 hover:underline"
+          >
+            Unduh Template Tempat CSV (.csv)
+          </a>
+        </div>
       </div>
 
       <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
@@ -481,16 +493,6 @@ export default function Places() {
           <DialogDescription>
             File yang diunggah harus tipe CSV dan mengikuti format sesuai template. Disarankan setelah mengunduh template, gunakan Notepad untuk mengedit isi CSV dan dapatkan koordinat latitude dan longitude dari Google Maps.
           </DialogDescription>
-
-          <div>
-            <a
-              href={csvGeofencesTemplate}
-              download="geofences-template.csv"
-              className="text-blue-500 hover:underline"
-            >
-              Unduh Template Tempat CSV (.csv)
-            </a>
-          </div>
 
           <div
             {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
@@ -515,6 +517,7 @@ export default function Places() {
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">
+        {/* Search Bar */}
         <Input
           type="text"
           placeholder="Cari tempat..."
@@ -522,6 +525,8 @@ export default function Places() {
           onChange={handleSearch}
           className="w-1/3"
         />
+
+        {/* Filter by Status */}
         <Select
           onValueChange={(value) => handleFilter(value)}
           value={statusFilter}
@@ -535,6 +540,26 @@ export default function Places() {
             <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Filter by Tag */}
+        <Select
+          onValueChange={(value) => handleFilter(value)}
+          value={tagFilter}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Semua">Semua Status</SelectItem>
+            {geofences.map((geofence) => (
+              <SelectItem key={geofence.tag} value={geofence.tag ?? ""}>
+                {geofence.tag}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Sort by Description */}
         <Button onClick={() => handleSort("description")}>
           Urutkan Nama Tempat ({sortOrder === "asc" ? "A-Z" : "Z-A"})
         </Button>
