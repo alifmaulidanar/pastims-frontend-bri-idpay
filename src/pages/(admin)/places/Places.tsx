@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GeofenceRadar as Geofence } from "@/types";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import { Download, MapPinPlus, Pencil, Save, Trash2, Upload, X } from "lucide-react";
+import { Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,7 +32,7 @@ export default function Places() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
-  const [tagFilter, setTagFilter] = useState("");
+  const [tagFilter] = useState("");
   const [openAddPlaceDialog, setOpenAddPlaceDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
@@ -446,6 +447,20 @@ export default function Places() {
     document.body.removeChild(link);
   };
 
+  const handleSearchCoordinates = () => {
+    const lat = parseFloat(formValues.latitude);
+    const lng = parseFloat(formValues.longitude);
+    if (
+      !isNaN(lat) && lat >= -90 && lat <= 90 &&
+      !isNaN(lng) && lng >= -180 && lng <= 180
+    ) {
+      setPreviewCoordinates([lat, lng]);
+    } else {
+      alert("Koordinat tidak valid. Pastikan latitude di antara -90 hingga 90, dan longitude di antara -180 hingga 180.");
+    }
+  };
+
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -654,58 +669,74 @@ export default function Places() {
         <DialogContent className="max-w-6xl">
           <DialogTitle>{selectedGeofence ? "Edit Tempat" : "Tambahkan Tempat"}</DialogTitle>
           <DialogDescription>
-            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru"}
+            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru dengan cara mengisi koordinat lokasi, lalu klik tombol \"Cari\" atau masukkan nama tempat di kolom pencarian."}
           </DialogDescription>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <form className="space-y-4" onSubmit={handleSubmitAddPlace}>
-              <Label>Deskripsi</Label>
-              <input
-                type="text"
-                name="description"
-                placeholder="Deskripsi"
-                value={formValues.description}
-                onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Tag</Label>
-              <input
-                type="text"
-                name="tag"
-                placeholder="Tag (kelompok)"
-                value={formValues.tag}
-                onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Radius (m)</Label>
-              <input
-                type="number"
-                name="radius"
-                placeholder="Radius (meter)"
-                value={formValues.radius}
-                onChange={handleFormChange}
-                // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Koordinat</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="items-center">
+                <Label>Deskripsi</Label>
                 <input
-                  type="number"
-                  name="latitude"
-                  placeholder="Latitude"
-                  value={formValues.latitude}
-                  onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
-                  className="w-full px-4 py-2 border rounded"
-                />
-                <input
-                  type="number"
-                  name="longitude"
-                  placeholder="Longitude"
-                  value={formValues.longitude}
-                  onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
+                  type="text"
+                  name="description"
+                  placeholder="Deskripsi"
+                  value={formValues.description}
+                  onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
                   className="w-full px-4 py-2 border rounded"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className="items-center">
+                <Label>Tag</Label>
+                <input
+                  type="text"
+                  name="tag"
+                  placeholder="Tag (kelompok)"
+                  value={formValues.tag}
+                  onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+              <div className="items-center">
+                <Label>Radius (m)</Label>
+                <input
+                  type="number"
+                  name="radius"
+                  placeholder="Radius (meter)"
+                  value={formValues.radius}
+                  onChange={handleFormChange}
+                  // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+              <div className="items-center">
+                <Label>Koordinat</Label>
+                <div className="grid items-stretch grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 col-span-5 gap-4">
+                    <input
+                      type="number"
+                      name="latitude"
+                      placeholder="Latitude"
+                      value={formValues.latitude}
+                      onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                    <input
+                      type="number"
+                      name="longitude"
+                      placeholder="Longitude"
+                      value={formValues.longitude}
+                      onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <Button onClick={handleSearchCoordinates} variant="default" className="w-full h-full">
+                      <SearchIcon className="inline" />
+                      Cari
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4 space-x-2">
                 <Button variant="outline" onClick={() => setOpenAddPlaceDialog(false)}>
                   <X className="inline" />
                   Batal
