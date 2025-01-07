@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<string>("username");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -93,6 +94,7 @@ export default function Users() {
 
   const handleSort = (key: string) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortKey(key);
     setSortOrder(order);
     filterAndSortUsers(users, searchQuery, statusFilter, order, key);
   };
@@ -102,20 +104,26 @@ export default function Users() {
     filterAndSortUsers(users, searchQuery, status, sortOrder);
   };
 
-  const filterAndSortUsers = (data: any, query: any, status: any, order: any, sortKey = "username") => {
+  const filterAndSortUsers = (
+    data: User[],
+    query: string,
+    status: string,
+    order: string,
+    sortKey: string = "username"
+  ) => {
     let filtered = data;
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
       filtered = filtered.filter(
-        (user: any) => user.status === (status === "Aktif" ? "active" : "inactive")
+        (user) => user.status === (status === "Aktif" ? "active" : "inactive")
       );
     }
 
     // Filter by search query
     if (query) {
       filtered = filtered.filter(
-        (user: any) =>
+        (user) =>
           user.user_id.toLowerCase().includes(query) ||
           user.username.toLowerCase().includes(query) ||
           user.email.toLowerCase().includes(query) ||
@@ -125,12 +133,13 @@ export default function Users() {
 
     // Sort data
     filtered = filtered.sort((a: any, b: any) => {
+      const aValue = a[sortKey]?.toString().toLowerCase() || "";
+      const bValue = b[sortKey]?.toString().toLowerCase() || "";
       if (order === "asc") {
-        return a[sortKey].localeCompare(b[sortKey]);
+        return aValue.localeCompare(bValue);
       }
-      return b[sortKey].localeCompare(a[sortKey]);
+      return bValue.localeCompare(aValue);
     });
-
     setFilteredUsers(filtered);
   };
 
@@ -184,6 +193,12 @@ export default function Users() {
     document.body.removeChild(link);
   };
 
+  const getSortIcon = (key: string) => {
+    if (sortKey === key) {
+      return sortOrder === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+    }
+    return null;
+  };
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
@@ -222,9 +237,9 @@ export default function Users() {
             <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={() => handleSort("username")}>
+        {/* <Button onClick={() => handleSort("username")}>
           Urutkan Nama ({sortOrder === "asc" ? "A-Z" : "Z-A"})
-        </Button>
+        </Button> */}
 
         {/* Download CSV button */}
         <Button onClick={downloadCSV} variant="secondary">
@@ -233,16 +248,51 @@ export default function Users() {
         </Button>
       </div>
 
+      <div className='mb-2'>
+        <p className="text-sm text-gray-500">
+          Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
+        </p>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID Pengguna</TableHead>
-            <TableHead>Nama</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>No. HP</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Diperbarui (WIB)</TableHead>
-            <TableHead>Aksi</TableHead>
+            <TableHead onClick={() => handleSort("user_id")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("user_id")}
+                ID Pengguna
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("username")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("username")}
+                Nama
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("email")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("email")}
+                Email
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("phone")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("phone")}
+                No. HP
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("status")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("status")}
+                Status
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("updated_at")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("updated_at")}
+                Diperbarui (WIB)
+              </div>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
