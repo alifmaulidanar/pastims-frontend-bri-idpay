@@ -187,7 +187,7 @@ export default function Users() {
     // Trigger file download
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "users-data.csv");
+    link.setAttribute("download", "data-pengguna.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -293,6 +293,7 @@ export default function Users() {
                 Diperbarui (WIB)
               </div>
             </TableHead>
+            <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

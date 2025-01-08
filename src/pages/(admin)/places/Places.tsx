@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GeofenceRadar as Geofence } from "@/types";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import { Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,9 +30,10 @@ export default function Places() {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
   const [filteredGeofences, setFilteredGeofences] = useState<Geofence[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<string>("username");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
-  const [tagFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [openAddPlaceDialog, setOpenAddPlaceDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
@@ -87,8 +88,8 @@ export default function Places() {
   }, []);
 
   useEffect(() => {
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, sortOrder);
-  }, [geofences, searchQuery, statusFilter, sortOrder]);
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder);
+  }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -97,21 +98,43 @@ export default function Places() {
 
   const handleSort = (key: string) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortKey(key);
     setSortOrder(order);
     filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
   };
 
-  const handleFilter = (status: string) => {
-    setStatusFilter(status);
+  const getSortIcon = (key: string) => {
+    if (sortKey === key) {
+      return sortOrder === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+    }
+    return null;
   };
 
-  const filterAndSortGeofences = (data: any, query: any, status: any, order: any, sortKey = "description") => {
+  const handleFilterStatus = (status: string) => {
+    setStatusFilter(status);
+    filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder);
+  };
+
+  const handleFilterTag = (tag: string) => {
+    setTagFilter(tag);
+    filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder);
+  };
+
+
+  const filterAndSortGeofences = (data: any, query: any, status: any, tag: any, order: any, sortKey = "description") => {
     let filtered = data;
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
       filtered = filtered.filter(
         (geofence: any) => geofence.enabled === (status === "Aktif")
+      );
+    }
+
+    // Filter by tag
+    if (tag && tag !== "Semua") {
+      filtered = filtered.filter(
+        (geofence: any) => geofence.tag === tag
       );
     }
 
@@ -441,7 +464,7 @@ export default function Places() {
     // Trigger file download
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "places-data.csv");
+    link.setAttribute("download", "data-tempat.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -543,7 +566,7 @@ export default function Places() {
 
         {/* Filter by Status */}
         <Select
-          onValueChange={(value) => handleFilter(value)}
+          onValueChange={(value) => handleFilterStatus(value)}
           value={statusFilter}
         >
           <SelectTrigger className="w-48">
@@ -558,26 +581,21 @@ export default function Places() {
 
         {/* Filter by Tag */}
         <Select
-          onValueChange={(value) => handleFilter(value)}
+          onValueChange={(value) => handleFilterTag(value)}
           value={tagFilter}
         >
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="Semua Status" />
+            <SelectValue placeholder="Semua Tag" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Semua">Semua Status</SelectItem>
-            {geofences.map((geofence) => (
-              <SelectItem key={geofence.tag} value={geofence.tag ?? ""}>
-                {geofence.tag}
+            <SelectItem value="Semua">Semua Tag</SelectItem>
+            {[...new Set(geofences.map((geofence) => geofence.tag))].map((tag) => (
+              <SelectItem key={tag} value={tag ?? ""}>
+                {tag}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-
-        {/* Sort by Description */}
-        <Button onClick={() => handleSort("description")}>
-          Urutkan Nama Tempat ({sortOrder === "asc" ? "A-Z" : "Z-A"})
-        </Button>
 
         {/* Download CSV button */}
         <Button onClick={downloadCSV} variant="secondary">
@@ -586,18 +604,60 @@ export default function Places() {
         </Button>
       </div>
 
+      <div className='mb-2'>
+        <p className="text-sm text-gray-500">
+          Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
+        </p>
+      </div>
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead onClick={() => handleSort("externalId")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("externalId")}
+                  ID Tempat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("description")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("description")}
+                  Nama Tempat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("tag")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("tag")}
+                  Tag
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("geometryRadius")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("geometryRadius")}
+                  Radius (m)
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("geometryCenter.coordinates")}
+                  Koordinat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("enabled")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("enabled")}
+                  Status
+                </div>
+              </TableHead>
               {/* <TableHead className="text-left">ID</TableHead> */}
-              <TableHead className="text-left">ID Tempat</TableHead>
-              <TableHead className="text-left">Nama Tempat</TableHead>
-              <TableHead className="text-left">Tag</TableHead>
+              {/* <TableHead className="text-left">ID Tempat</TableHead>
+              <TableHead className="text-left">Nama Tempat</TableHead> */}
+              {/* <TableHead className="text-left">Tag</TableHead> */}
               {/* <TableHead className="text-left">Tipe</TableHead> */}
-              <TableHead className="text-left">Radius (m)</TableHead>
+              {/* <TableHead className="text-left">Radius (m)</TableHead>
               <TableHead className="text-left">Koordinat (Latitude, Longitude)</TableHead>
-              <TableHead className="text-left">Status</TableHead>
+              <TableHead className="text-left">Status</TableHead> */}
               <TableHead className="text-left">Aksi</TableHead>
             </TableRow>
           </TableHeader>

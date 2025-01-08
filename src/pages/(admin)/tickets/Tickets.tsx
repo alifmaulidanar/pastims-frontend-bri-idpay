@@ -10,7 +10,7 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchUsers } from "../users/lib/actions";
-import { Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -26,6 +26,7 @@ export default function Tickets() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<string>("username");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -86,7 +87,7 @@ export default function Tickets() {
   useEffect(() => {
     const fetchGeofences = async () => {
       try {
-        const response = await fetch("https://api.radar.io/v1/geofences", {
+        const response = await fetch(`${BASE_URL}/geofences`, {
           headers: {
             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
           },
@@ -98,7 +99,7 @@ export default function Tickets() {
         }
 
         const data = await response.json();
-        setGeofences(data.geofences || []);
+        setGeofences(data);
       } catch (error) {
         console.error("Failed to fetch geofences:", error);
       }
@@ -130,17 +131,30 @@ export default function Tickets() {
 
   const handleSort = (key: string) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortKey(key);
     setSortOrder(order);
-    filterAndSortTickets(users, searchQuery, statusFilter, order, key);
+    filterAndSortTickets(tickets, searchQuery, statusFilter, order, key);
+  };
 
+  const getSortIcon = (key: string) => {
+    if (sortKey === key) {
+      return sortOrder === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+    }
+    return null;
   };
 
   const handleFilter = (status: string) => {
     setStatusFilter(status);
   };
 
-  const filterAndSortTickets = (data: any, query: any, status: any, order: any, sortKey = "description") => {
+  const filterAndSortTickets = (data: Ticket[], query: any, status: any, order: any, sortKey = "description") => {
     let filtered = data;
+    const statusMapping: Record<string, string> = {
+      assigned: "Ditugaskan",
+      on_progress: "Berjalan",
+      completed: "Selesai",
+      canceled: "Dibatalkan",
+    };
 
     // Filter by status
     if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled") {
@@ -155,21 +169,37 @@ export default function Tickets() {
         (ticket: any) =>
           ticket.ticket_id.toLowerCase().includes(query) ||
           trips.find((trip) => trip.externalId === ticket.trip_id)?.externalId.toLowerCase().includes(query) ||
-          geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.externalId.toLowerCase().includes(query) ||
+          geofences.find((geofence) => geofence.external_id === ticket.geofence_id)?.external_id.toLowerCase().includes(query) ||
           users.find((user) => user.user_id === ticket.user_id)?.user_id.toLowerCase().includes(query) ||
           ticket.description.toLowerCase().includes(query) ||
-          geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description.toLowerCase().includes(query) ||
+          geofences.find((geofence) => geofence.external_id === ticket.geofence_id)?.description.toLowerCase().includes(query) ||
           users.find((user) => user.user_id === ticket.user_id)?.username.toLowerCase().includes(query)
       );
     }
 
     // Sort data
     filtered = filtered.sort((a: any, b: any) => {
-      const compareA = String(a[sortKey]).toLowerCase();
-      const compareB = String(b[sortKey]).toLowerCase();
-      return order === "asc"
-        ? compareA.localeCompare(compareB)
-        : compareB.localeCompare(compareA);
+      let aValue: string | number = a[sortKey] ?? "";
+      let bValue: string | number = b[sortKey] ?? "";
+
+      if (sortKey === "geofence_id") {
+        aValue = geofences.find((g) => g.external_id === a.geofence_id)?.description || "";
+        bValue = geofences.find((g) => g.external_id === b.geofence_id)?.description || "";
+      }
+
+      if (sortKey === "username") {
+        aValue = users.find((u) => u.user_id === a.user_id)?.username || "";
+        bValue = users.find((u) => u.user_id === b.user_id)?.username || "";
+      }
+
+      if (sortKey === "status") {
+        aValue = statusMapping[a.status] || a.status;
+        bValue = statusMapping[b.status] || b.status;
+      }
+
+      aValue = String(aValue).toLowerCase();
+      bValue = String(bValue).toLowerCase();
+      return order === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     });
 
     setFilteredTickets(filtered);
@@ -177,8 +207,6 @@ export default function Tickets() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log({ formValues });
     try {
       const response = await fetch(`${BASE_URL}/ticket`, {
         method: "POST",
@@ -206,15 +234,10 @@ export default function Tickets() {
     e.preventDefault();
     if (!selectedTicket) return;
 
-    console.log({ selectedTicket });
-    console.log({ formValues });
-
     const ticketData = {
       ticket_id: selectedTicket.ticket_id,
       ...formValues,
     };
-
-    console.log({ ticketData });
 
     try {
       const response = await fetch(`${BASE_URL}/ticket`, {
@@ -378,6 +401,31 @@ export default function Tickets() {
     document.body.removeChild(link);
   };
 
+  const handleDelete = async () => {
+    if (!selectedTicket) return;
+
+    try {
+      const response = await fetch(`${BASE_URL}/ticket/status/not-running`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+        },
+        body: JSON.stringify({ ticket_id: selectedTicket.ticket_id, status: "canceled" }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to update ticket status");
+        return;
+      }
+
+      setOpenAlertDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+    }
+  };
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -471,9 +519,6 @@ export default function Tickets() {
             <SelectItem value="canceled">Dibatalkan</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={() => handleSort("description")}>
-          Urutkan Deskripsi ({sortOrder === "asc" ? "A-Z" : "Z-A"})
-        </Button>
 
         {/* Download CSV button */}
         <Button onClick={downloadCSV} variant="secondary">
@@ -482,18 +527,57 @@ export default function Tickets() {
         </Button>
       </div>
 
+      <div className='mb-2'>
+        <p className="text-sm text-gray-500">
+          Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
+        </p>
+      </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID Tiket</TableHead>
-            <TableHead>ID Perjalanan</TableHead>
-            <TableHead>Deskripsi</TableHead>
-            <TableHead>Tempat</TableHead>
-            <TableHead>Pengguna</TableHead>
-            <TableHead>Status</TableHead>
-            {/* <TableHead>Dibuat pada</TableHead> */}
-            <TableHead>Diperbarui (WIB)</TableHead>
+            <TableHead onClick={() => handleSort("ticket_id")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("ticket_id")}
+                ID Tiket
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("trip_id")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("trip_id")}
+                ID Perjalanan
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("description")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("description")}
+                Deskripsi
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("geofence_id")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("geofence_id")}
+                Tempat
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("username")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("username")}
+                Pengguna
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("status")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("status")}
+                Status
+              </div>
+            </TableHead>
+            <TableHead onClick={() => handleSort("updated_at")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("updated_at")}
+                Diperbarui (WIB)
+              </div>
+            </TableHead>
             <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
@@ -505,7 +589,7 @@ export default function Tickets() {
               <TableCell>{ticket.description}</TableCell>
               <TableCell>
                 <div className="grid">
-                  {ticket.geofence_id && geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description}
+                  {ticket.geofence_id && geofences.find((geofence) => geofence.external_id === ticket.geofence_id)?.description}
                   <Badge variant="secondary">{ticket.geofence_id}</Badge>
                 </div>
               </TableCell>
@@ -611,7 +695,7 @@ export default function Tickets() {
                 </SelectTrigger>
                 <SelectContent>
                   {geofences.map((geofence) => (
-                    <SelectItem key={geofence._id} value={geofence.externalId}>
+                    <SelectItem key={geofence._id} value={geofence.external_id}>
                       {geofence.description}
                     </SelectItem>
                   ))}
@@ -722,26 +806,26 @@ export default function Tickets() {
                 <div>
                   <label className="block text-sm">Nama Tempat</label>
                   <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.description || "-"}
+                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description || "-"}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm">Tag</label>
                   <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.tag || "-"}
+                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.tag || "-"}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm">Radius</label>
                   <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryRadius || "-"} m
+                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.radius || "-"} m
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm">Koordinat</label>
                   <div className="grid px-4 py-2 bg-gray-100 border rounded">
-                    <span>{geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryCenter.coordinates[1] || "-"} (<span className="italic">Latitude</span>)</span>
-                    <span>{geofences.find((geofence) => geofence.externalId === selectedTicket?.geofence_id)?.geometryCenter.coordinates[0] || "-"} (<span className="italic">Longitude</span>)</span>
+                    <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[1] || "-"} (<span className="italic">Latitude</span>)</span>
+                    <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[0] || "-"} (<span className="italic">Longitude</span>)</span>
                   </div>
                 </div>
               </div>
@@ -863,7 +947,6 @@ export default function Tickets() {
         </DialogContent>
       </Dialog>
 
-
       {/* Alert Dialog for delete confirmation */}
       <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
         <AlertDialogContent>
@@ -874,7 +957,7 @@ export default function Tickets() {
               Tidak jadi
             </AlertDialogCancel>
             <AlertDialogAction
-            // onClick={() => handleDelete()}
+              onClick={() => handleDelete()}
             >
               <Trash2 className="inline" />
               Ya, batalkan tiket
