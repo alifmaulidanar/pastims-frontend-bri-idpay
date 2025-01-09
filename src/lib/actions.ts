@@ -1,3 +1,5 @@
+import supabase from "@/utils/supabase";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const canWriteData = () => {
@@ -54,3 +56,31 @@ export const getLatestLocationForEachUser = async () => {
     return [];
   }
 };
+
+export async function getLastGeofenceIndex() {
+  try {
+    // Query ke Supabase untuk mendapatkan baris terakhir berdasarkan external_id
+    const { data, error } = await supabase
+      .from('geofences') // Tabel geofences
+      .select('external_id')
+      .order('external_id', { ascending: false }) // Urutkan descending
+      .limit(1); // Ambil 1 baris terakhir
+
+    if (error) {
+      console.error('Error fetching last geofence:', error);
+      return null;
+    }
+
+    if (data && data.length > 0) {
+      // Extract angka dari external_id, misalnya "LK123" -> 123
+      const lastId = data[0].external_id;
+      const match = lastId.match(/\d+$/); // Cari angka di akhir
+      return match ? parseInt(match[0], 10) : null; // Parse angka terakhir
+    }
+
+    return null; // Tidak ada data
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    return null;
+  }
+}
