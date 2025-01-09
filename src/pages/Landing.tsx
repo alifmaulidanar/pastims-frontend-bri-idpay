@@ -15,14 +15,14 @@ export default function Landing() {
     <div className="flex flex-col min-h-screen">
       {/* Set Page Title */}
       <Helmet>
-        <title>Pasti Tracking</title>
+        <title>PastiMS</title>
       </Helmet>
 
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center max-w-screen-lg mx-auto h-14">
           <Link to="/" className="flex items-center space-x-2">
             <Navigation className="w-6 h-6 text-emerald-500" />
-            <span className="font-bold">Pasti Tracking</span>
+            <span className="font-bold">PastiMS</span>
           </Link>
           <nav className="flex gap-4 ml-auto">
             <Link to="/login">
@@ -134,7 +134,7 @@ export default function Landing() {
           <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
             <Navigation className="w-6 h-6 text-emerald-500" />
             <p className="text-sm leading-loose text-center md:text-left">
-              Pasti Tracking. © 2024 by <Badge variant="outline"><Link to="https://alifmaulidanar.com" target='_blank'>Alif Maulidanar</Link></Badge>
+              PastiMS. © 2024 by <Badge variant="outline"><Link to="https://alifmaulidanar.com" target='_blank'>Alif Maulidanar</Link></Badge>
             </p>
           </div>
         </div>
