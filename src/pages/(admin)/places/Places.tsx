@@ -2,14 +2,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { v7 as uuid } from 'uuid';
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
+import { useDropzone } from "react-dropzone";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getLastGeofenceIndex } from "@/lib/actions";
 import { GeofenceRadar as Geofence } from "@/types";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
@@ -21,7 +22,6 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
-import { useDropzone } from "react-dropzone";
 
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -204,7 +204,18 @@ export default function Places() {
   const handleSubmitAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
     const tag = formValues.tag;
-    const externalId = selectedGeofence?.externalId || uuid();
+
+    // Get latest geofence index
+    const latestGeofenceIndex = await getLastGeofenceIndex();
+    if (!latestGeofenceIndex) {
+      console.error('Failed to get latest geofence index');
+      return;
+    }
+
+    // Generate new index and external ID
+    const newIndex = latestGeofenceIndex + 1;
+    const externalId = `LK${newIndex}`;
+
     const body = {
       description: formValues.description,
       type: "circle",
@@ -483,7 +494,6 @@ export default function Places() {
       alert("Koordinat tidak valid. Pastikan latitude di antara -90 hingga 90, dan longitude di antara -180 hingga 180.");
     }
   };
-
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
