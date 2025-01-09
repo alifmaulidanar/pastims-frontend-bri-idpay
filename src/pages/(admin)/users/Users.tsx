@@ -21,6 +21,8 @@ export default function Users() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
+  // const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default 10 rows
+  // const [currentPage, setCurrentPage] = useState<number>(1);
 
   // useEffect(() => {
   useEffect(() => {
@@ -47,6 +49,16 @@ export default function Users() {
   useEffect(() => {
     filterAndSortUsers(users, searchQuery, statusFilter, sortOrder);
   }, [users, searchQuery, statusFilter, sortOrder]);
+
+  // Paginate users
+  // const paginatedUsers = filteredUsers.slice(
+  //   (currentPage - 1) * rowsPerPage,
+  //   currentPage * rowsPerPage
+  // );
+
+  // const handlePageChange = (page: number) => {
+  //   setCurrentPage(page);
+  // };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,6 +260,56 @@ export default function Users() {
         </Button>
       </div>
 
+      {/* <div className='mb-2'>
+        <Select
+          onValueChange={(value) => {
+            setRowsPerPage(value === "Semua" ? filteredUsers.length : parseInt(value));
+            setCurrentPage(1); // Reset to the first page
+          }}
+          value={rowsPerPage.toString()}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Jumlah Baris" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+            <SelectItem value="100">100</SelectItem>
+            <SelectItem value="Semua">Semua</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-gray-500">
+            Menampilkan {paginatedUsers.length} dari {filteredUsers.length} pengguna
+          </p>
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              variant="outline"
+            >
+              Sebelumnya
+            </Button>
+            <p className="text-sm text-gray-500">
+              Halaman {currentPage} dari {Math.ceil(filteredUsers.length / rowsPerPage)}
+            </p>
+            <Button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === Math.ceil(filteredUsers.length / rowsPerPage)}
+              variant="outline"
+            >
+              Berikutnya
+            </Button>
+          </div>
+        </div>
+      </div> */}
+
+      <div className='mb-2'>
+        <p className="text-sm font-bold text-gray-500">
+          Menampilkan pengguna: {filteredUsers.length}
+        </p>
+      </div>
       <div className='mb-2'>
         <p className="text-sm text-gray-500">
           Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
@@ -257,6 +319,7 @@ export default function Users() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>No.</TableHead>
             <TableHead onClick={() => handleSort("user_id")}>
               <div className='flex items-center gap-x-2'>
                 {getSortIcon("user_id")}
@@ -297,8 +360,12 @@ export default function Users() {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {/* {paginatedUsers.map((user, index) => (
+            <TableRow key={user.id}>
+              <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell> */}
           {filteredUsers.map(user => (
             <TableRow key={user.id}>
+              <TableCell>{filteredUsers.indexOf(user) + 1}</TableCell>
               <TableCell>{user.user_id}</TableCell>
               <TableCell>{user.username}</TableCell>
               <TableCell>{user.email}</TableCell>

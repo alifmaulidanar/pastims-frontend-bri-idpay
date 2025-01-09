@@ -68,6 +68,7 @@ export default function Places() {
     const fetchGeofences = async () => {
       try {
         const response = await fetch("https://api.radar.io/v1/geofences", {
+          // const response = await fetch("https://api.radar.io/v1/geofences?limit=10", {
           headers: {
             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
           },
@@ -605,6 +606,11 @@ export default function Places() {
       </div>
 
       <div className='mb-2'>
+        <p className="text-sm font-bold text-gray-500">
+          Menampilkan tempat: {filteredGeofences.length}
+        </p>
+      </div>
+      <div className='mb-2'>
         <p className="text-sm text-gray-500">
           Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
         </p>
@@ -614,6 +620,7 @@ export default function Places() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>No.</TableHead>
               <TableHead onClick={() => handleSort("externalId")}>
                 <div className='flex items-center gap-x-2'>
                   {getSortIcon("externalId")}
@@ -664,6 +671,7 @@ export default function Places() {
           <TableBody>
             {filteredGeofences.map((geofence) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
+                <TableCell>{geofences.indexOf(geofence) + 1}</TableCell>
                 {/* <TableCell>{geofence._id || "-"}</TableCell> */}
                 <TableCell>{geofence.externalId || "-"}</TableCell>
                 <TableCell>{geofence.description || "-"}</TableCell>

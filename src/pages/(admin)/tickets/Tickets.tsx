@@ -528,6 +528,11 @@ export default function Tickets() {
       </div>
 
       <div className='mb-2'>
+        <p className="text-sm font-bold text-gray-500">
+          Menampilkan tiket: {filteredTickets.length}
+        </p>
+      </div>
+      <div className='mb-2'>
         <p className="text-sm text-gray-500">
           Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
         </p>
