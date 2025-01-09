@@ -3,13 +3,13 @@ import "leaflet/dist/leaflet.css";
 import { Ticket, User } from "@/types";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
-import { fetchTickets } from "./lib/actions";
 import { useDropzone } from "react-dropzone";
 import { Badge } from "@/components/ui/badge";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchUsers } from "../users/lib/actions";
+import { fetchTicketPhotos, fetchTickets } from "./lib/actions";
 import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,6 +37,8 @@ export default function Tickets() {
   const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [ticketPhotos, setTicketPhotos] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Disable body scroll when dialog is open
   useEffect(() => {
@@ -274,7 +276,9 @@ export default function Tickets() {
     setOpenDialog(true);
   };
 
-  const handleInfo = (ticket: Ticket | null) => {
+  const handleInfo = async (ticket: Ticket | null) => {
+    const getTicketPhotos = await fetchTicketPhotos(ticket?.ticket_id || "");
+    setTicketPhotos(getTicketPhotos.photos);
     setSelectedTicket(ticket);
     setFormValues({
       user_id: ticket?.user_id || "",
@@ -541,6 +545,7 @@ export default function Tickets() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>No.</TableHead>
             <TableHead onClick={() => handleSort("ticket_id")}>
               <div className='flex items-center gap-x-2'>
                 {getSortIcon("ticket_id")}
@@ -589,6 +594,7 @@ export default function Tickets() {
         <TableBody>
           {filteredTickets.map(ticket => (
             <TableRow key={ticket.ticket_id}>
+              <TableCell>{filteredTickets.indexOf(ticket) + 1}</TableCell>
               <TableCell>{ticket.ticket_id}</TableCell>
               <TableCell>{ticket.trip_id ? ticket.trip_id : "-"}</TableCell>
               <TableCell>{ticket.description}</TableCell>
@@ -948,7 +954,33 @@ export default function Tickets() {
                 </div>
               </div>
             </div>
+
+            {/* Foto Tiket */}
+            <div className="col-span-4">
+              <h3 className="mb-2 font-medium">Foto Tiket</h3>
+              <div className="flex gap-4">
+                {ticketPhotos.length > 0 ? (
+                  ticketPhotos.map((photo, index) => (
+                    <div key={index} className="relative overflow-hidden border rounded-lg">
+                      <img
+                        src={photo.url}
+                        alt={`Foto ${index + 1}`}
+                        className="object-cover h-32"
+                        onClick={() => setSelectedImage(photo.url)}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">Tidak ada foto yang tersedia.</p>
+                )}
+              </div>
+            </div>
           </div>
+          {selectedImage && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setSelectedImage(null)}>
+              <img src={selectedImage} alt="Detail gambar" className="object-contain w-full h-full" />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

@@ -331,6 +331,7 @@ export default function Trips() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>No.</TableHead>
               <TableHead onClick={() => handleSort("externalId")}>
                 <div className="flex items-center gap-x-2">
                   {getSortIcon("externalId")}
@@ -404,7 +405,7 @@ export default function Trips() {
           <TableBody>
             {filteredTrips.map((trip) => (
               <TableRow key={trip._id} className="hover:bg-gray-50">
-                {/* <TableCell>{trip._id || "-"}</TableCell> */}
+                <TableCell>{filteredTrips.indexOf(trip) + 1}</TableCell>
                 <TableCell>{trip.externalId || "-"}</TableCell>
                 <TableCell>{trip.userId || "-"}</TableCell>
                 <TableCell>{trip.destinationGeofenceExternalId || "-"}</TableCell>
