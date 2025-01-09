@@ -77,3 +77,7 @@ export interface Ticket {
   created_at: string;
   updated_at: string;
 }
+
+export interface TicketPhoto {
+  photos: string[];
+}
