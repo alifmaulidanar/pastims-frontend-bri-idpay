@@ -1,17 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { v7 as uuid } from 'uuid';
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
+import { useDropzone } from "react-dropzone";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getLastGeofenceIndex } from "@/lib/actions";
 import { GeofenceRadar as Geofence } from "@/types";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import { Download, MapPinPlus, Pencil, Save, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +22,6 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
-import { useDropzone } from "react-dropzone";
 
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -29,8 +30,10 @@ export default function Places() {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
   const [filteredGeofences, setFilteredGeofences] = useState<Geofence[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<string>("username");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [openAddPlaceDialog, setOpenAddPlaceDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
@@ -65,6 +68,7 @@ export default function Places() {
     const fetchGeofences = async () => {
       try {
         const response = await fetch("https://api.radar.io/v1/geofences", {
+          // const response = await fetch("https://api.radar.io/v1/geofences?limit=10", {
           headers: {
             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
           },
@@ -85,8 +89,8 @@ export default function Places() {
   }, []);
 
   useEffect(() => {
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, sortOrder);
-  }, [geofences, searchQuery, statusFilter, sortOrder]);
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder);
+  }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -95,21 +99,43 @@ export default function Places() {
 
   const handleSort = (key: string) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortKey(key);
     setSortOrder(order);
     filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
   };
 
-  const handleFilter = (status: string) => {
-    setStatusFilter(status);
+  const getSortIcon = (key: string) => {
+    if (sortKey === key) {
+      return sortOrder === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+    }
+    return null;
   };
 
-  const filterAndSortGeofences = (data: any, query: any, status: any, order: any, sortKey = "description") => {
+  const handleFilterStatus = (status: string) => {
+    setStatusFilter(status);
+    filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder);
+  };
+
+  const handleFilterTag = (tag: string) => {
+    setTagFilter(tag);
+    filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder);
+  };
+
+
+  const filterAndSortGeofences = (data: any, query: any, status: any, tag: any, order: any, sortKey = "description") => {
     let filtered = data;
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
       filtered = filtered.filter(
         (geofence: any) => geofence.enabled === (status === "Aktif")
+      );
+    }
+
+    // Filter by tag
+    if (tag && tag !== "Semua") {
+      filtered = filtered.filter(
+        (geofence: any) => geofence.tag === tag
       );
     }
 
@@ -178,7 +204,18 @@ export default function Places() {
   const handleSubmitAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
     const tag = formValues.tag;
-    const externalId = selectedGeofence?.externalId || uuid();
+
+    // Get latest geofence index
+    const latestGeofenceIndex = await getLastGeofenceIndex();
+    if (!latestGeofenceIndex) {
+      console.error('Failed to get latest geofence index');
+      return;
+    }
+
+    // Generate new index and external ID
+    const newIndex = latestGeofenceIndex + 1;
+    const externalId = `LK${newIndex}`;
+
     const body = {
       description: formValues.description,
       type: "circle",
@@ -439,10 +476,23 @@ export default function Places() {
     // Trigger file download
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "places-data.csv");
+    link.setAttribute("download", "data-tempat.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleSearchCoordinates = () => {
+    const lat = parseFloat(formValues.latitude);
+    const lng = parseFloat(formValues.longitude);
+    if (
+      !isNaN(lat) && lat >= -90 && lat <= 90 &&
+      !isNaN(lng) && lng >= -180 && lng <= 180
+    ) {
+      setPreviewCoordinates([lat, lng]);
+    } else {
+      alert("Koordinat tidak valid. Pastikan latitude di antara -90 hingga 90, dan longitude di antara -180 hingga 180.");
+    }
   };
 
   return (
@@ -466,6 +516,17 @@ export default function Places() {
           <Upload className="inline" />
           Unggah CSV
         </Button>
+
+        {/* Download CSV Template */}
+        <div>
+          <a
+            href={csvGeofencesTemplate}
+            download="geofences-template.csv"
+            className="text-blue-500 hover:underline"
+          >
+            Unduh Template Tempat CSV (.csv)
+          </a>
+        </div>
       </div>
 
       <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
@@ -481,16 +542,6 @@ export default function Places() {
           <DialogDescription>
             File yang diunggah harus tipe CSV dan mengikuti format sesuai template. Disarankan setelah mengunduh template, gunakan Notepad untuk mengedit isi CSV dan dapatkan koordinat latitude dan longitude dari Google Maps.
           </DialogDescription>
-
-          <div>
-            <a
-              href={csvGeofencesTemplate}
-              download="geofences-template.csv"
-              className="text-blue-500 hover:underline"
-            >
-              Unduh Template Tempat CSV (.csv)
-            </a>
-          </div>
 
           <div
             {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
@@ -515,6 +566,7 @@ export default function Places() {
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">
+        {/* Search Bar */}
         <Input
           type="text"
           placeholder="Cari tempat..."
@@ -522,8 +574,10 @@ export default function Places() {
           onChange={handleSearch}
           className="w-1/3"
         />
+
+        {/* Filter by Status */}
         <Select
-          onValueChange={(value) => handleFilter(value)}
+          onValueChange={(value) => handleFilterStatus(value)}
           value={statusFilter}
         >
           <SelectTrigger className="w-48">
@@ -535,9 +589,24 @@ export default function Places() {
             <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={() => handleSort("description")}>
-          Urutkan Nama Tempat ({sortOrder === "asc" ? "A-Z" : "Z-A"})
-        </Button>
+
+        {/* Filter by Tag */}
+        <Select
+          onValueChange={(value) => handleFilterTag(value)}
+          value={tagFilter}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Semua Tag" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Semua">Semua Tag</SelectItem>
+            {[...new Set(geofences.map((geofence) => geofence.tag))].map((tag) => (
+              <SelectItem key={tag} value={tag ?? ""}>
+                {tag}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {/* Download CSV button */}
         <Button onClick={downloadCSV} variant="secondary">
@@ -546,24 +615,73 @@ export default function Places() {
         </Button>
       </div>
 
+      <div className='mb-2'>
+        <p className="text-sm font-bold text-gray-500">
+          Menampilkan tempat: {filteredGeofences.length}
+        </p>
+      </div>
+      <div className='mb-2'>
+        <p className="text-sm text-gray-500">
+          Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
+        </p>
+      </div>
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>No.</TableHead>
+              <TableHead onClick={() => handleSort("externalId")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("externalId")}
+                  ID Tempat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("description")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("description")}
+                  Nama Tempat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("tag")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("tag")}
+                  Tag
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("geometryRadius")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("geometryRadius")}
+                  Radius (m)
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("geometryCenter.coordinates")}
+                  Koordinat
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort("enabled")}>
+                <div className='flex items-center gap-x-2'>
+                  {getSortIcon("enabled")}
+                  Status
+                </div>
+              </TableHead>
               {/* <TableHead className="text-left">ID</TableHead> */}
-              <TableHead className="text-left">ID Tempat</TableHead>
-              <TableHead className="text-left">Nama Tempat</TableHead>
-              <TableHead className="text-left">Tag</TableHead>
+              {/* <TableHead className="text-left">ID Tempat</TableHead>
+              <TableHead className="text-left">Nama Tempat</TableHead> */}
+              {/* <TableHead className="text-left">Tag</TableHead> */}
               {/* <TableHead className="text-left">Tipe</TableHead> */}
-              <TableHead className="text-left">Radius (m)</TableHead>
+              {/* <TableHead className="text-left">Radius (m)</TableHead>
               <TableHead className="text-left">Koordinat (Latitude, Longitude)</TableHead>
-              <TableHead className="text-left">Status</TableHead>
+              <TableHead className="text-left">Status</TableHead> */}
               <TableHead className="text-left">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredGeofences.map((geofence) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
+                <TableCell>{geofences.indexOf(geofence) + 1}</TableCell>
                 {/* <TableCell>{geofence._id || "-"}</TableCell> */}
                 <TableCell>{geofence.externalId || "-"}</TableCell>
                 <TableCell>{geofence.description || "-"}</TableCell>
@@ -629,58 +747,74 @@ export default function Places() {
         <DialogContent className="max-w-6xl">
           <DialogTitle>{selectedGeofence ? "Edit Tempat" : "Tambahkan Tempat"}</DialogTitle>
           <DialogDescription>
-            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru"}
+            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru dengan cara mengisi koordinat lokasi, lalu klik tombol \"Cari\" atau masukkan nama tempat di kolom pencarian."}
           </DialogDescription>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <form className="space-y-4" onSubmit={handleSubmitAddPlace}>
-              <Label>Deskripsi</Label>
-              <input
-                type="text"
-                name="description"
-                placeholder="Deskripsi"
-                value={formValues.description}
-                onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Tag</Label>
-              <input
-                type="text"
-                name="tag"
-                placeholder="Tag (kelompok)"
-                value={formValues.tag}
-                onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Radius (m)</Label>
-              <input
-                type="number"
-                name="radius"
-                placeholder="Radius (meter)"
-                value={formValues.radius}
-                onChange={handleFormChange}
-                // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
-                className="w-full px-4 py-2 border rounded"
-              />
-              <Label>Koordinat</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="items-center">
+                <Label>Deskripsi</Label>
                 <input
-                  type="number"
-                  name="latitude"
-                  placeholder="Latitude"
-                  value={formValues.latitude}
-                  onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
-                  className="w-full px-4 py-2 border rounded"
-                />
-                <input
-                  type="number"
-                  name="longitude"
-                  placeholder="Longitude"
-                  value={formValues.longitude}
-                  onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
+                  type="text"
+                  name="description"
+                  placeholder="Deskripsi"
+                  value={formValues.description}
+                  onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
                   className="w-full px-4 py-2 border rounded"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className="items-center">
+                <Label>Tag</Label>
+                <input
+                  type="text"
+                  name="tag"
+                  placeholder="Tag (kelompok)"
+                  value={formValues.tag}
+                  onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+              <div className="items-center">
+                <Label>Radius (m)</Label>
+                <input
+                  type="number"
+                  name="radius"
+                  placeholder="Radius (meter)"
+                  value={formValues.radius}
+                  onChange={handleFormChange}
+                  // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+              <div className="items-center">
+                <Label>Koordinat</Label>
+                <div className="grid items-stretch grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 col-span-5 gap-4">
+                    <input
+                      type="number"
+                      name="latitude"
+                      placeholder="Latitude"
+                      value={formValues.latitude}
+                      onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                    <input
+                      type="number"
+                      name="longitude"
+                      placeholder="Longitude"
+                      value={formValues.longitude}
+                      onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <Button onClick={handleSearchCoordinates} variant="default" className="w-full h-full">
+                      <SearchIcon className="inline" />
+                      Cari
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4 space-x-2">
                 <Button variant="outline" onClick={() => setOpenAddPlaceDialog(false)}>
                   <X className="inline" />
                   Batal

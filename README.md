@@ -1,3 +1,1 @@
-# Pasti Tracking
-
-## Map Preview
+# PastiMS
