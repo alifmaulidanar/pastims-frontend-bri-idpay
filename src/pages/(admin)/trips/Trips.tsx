@@ -268,7 +268,9 @@ export default function Trips() {
     // Trigger file download
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "trips-data.csv");
+    const date = new Date();
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear()}-${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}`;
+    link.setAttribute("download", `data-perjalanan-${formattedDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -281,7 +283,7 @@ export default function Trips() {
         <title>Perjalanan</title>
       </Helmet>
 
-      <h1 className="mb-6 text-2xl font-semibold">Daftar Perjalanan</h1>
+      <h1 className="mb-4 text-2xl font-semibold">Daftar Perjalanan</h1>
 
       {/* Search, Sort, and Filter */}
       <div className="flex items-center mb-4 space-x-4">

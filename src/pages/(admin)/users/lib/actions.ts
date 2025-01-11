@@ -27,12 +27,14 @@ export const handleAddUser = async (
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
   const phone = formData.get('phone') as string;
+  const role = formData.get('role') as string;
 
   const requestPayload = {
     email,
     username,
     password,
     phone,
+    role,
   };
 
   try {

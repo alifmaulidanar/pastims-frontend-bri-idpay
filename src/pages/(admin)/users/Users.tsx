@@ -10,6 +10,7 @@ import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from '.
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -21,6 +22,7 @@ export default function Users() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<string>(selectedUser?.role || 'user');
   // const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default 10 rows
   // const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -64,6 +66,7 @@ export default function Users() {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
+    formData.set('role', selectedRole);
     const updatedUsers = await handleAddUser(users, formData);
     setUsers(updatedUsers);
     setOpenDialog(false);
@@ -199,7 +202,9 @@ export default function Users() {
     // Trigger file download
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "data-pengguna.csv");
+    const date = new Date();
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear()}-${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}`;
+    link.setAttribute("download", `data-pengguna-${formattedDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -344,6 +349,12 @@ export default function Users() {
                 No. HP
               </div>
             </TableHead>
+            <TableHead onClick={() => handleSort("role")}>
+              <div className='flex items-center gap-x-2'>
+                {getSortIcon("role")}
+                Role
+              </div>
+            </TableHead>
             <TableHead onClick={() => handleSort("status")}>
               <div className='flex items-center gap-x-2'>
                 {getSortIcon("status")}
@@ -370,6 +381,10 @@ export default function Users() {
               <TableCell>{user.username}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
+              <TableCell>
+                {/* jika role === user maka badge shadcn ui default, jika role === client maka badge shadcnui warning */}
+                <Badge variant={user.role === "user" ? "assigned" : "warning"}>{user.role}</Badge>
+              </TableCell>
               <TableCell>{user.status === "active" ? "Aktif" : "Tidak Aktif"}</TableCell>
               <TableCell>
                 {new Date(user.updated_at).toLocaleString('id-ID', {
@@ -402,6 +417,25 @@ export default function Users() {
         <DialogContent>
           <DialogTitle>{selectedUser ? 'Edit Pengguna' : 'Tambahkan Pengguna'}</DialogTitle>
           <form className="space-y-4" onSubmit={selectedUser ? handleUpdate : handleAdd}>
+            <div className='grid items-center grid-cols-4 gap-x-4'>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Pilih Role
+              </label>
+              <div className='col-span-3'>
+                <Select
+                  value={selectedUser?.role || selectedRole}
+                  onValueChange={(value) => setSelectedRole(value)}
+                >
+                  <SelectTrigger id="role" name='role' className="w-full">
+                    <SelectValue placeholder="Pilih Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="client">Client</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <input
               type="text"
               name="email"

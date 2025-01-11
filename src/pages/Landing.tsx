@@ -22,7 +22,7 @@ export default function Landing() {
         <div className="container flex items-center max-w-screen-lg mx-auto h-14">
           <Link to="/" className="flex items-center space-x-2">
             <Navigation className="w-6 h-6 text-emerald-500" />
-            <span className="font-bold">PastiMS</span>
+            <span className="font-bold">PastiMS Admin</span>
           </Link>
           <nav className="flex gap-4 ml-auto">
             <Link to="/login">

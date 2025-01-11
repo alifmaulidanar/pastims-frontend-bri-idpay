@@ -366,14 +366,14 @@ export default function Tickets() {
 
     // Table Data
     const rows = filteredTickets.map((ticket) => {
-      const geofence = geofences.find((g) => g.externalId === ticket.geofence_id);
+      const geofence = geofences.find((g) => g.external_id === ticket.geofence_id)?.description;
       const user = users.find((u) => u.user_id === ticket.user_id);
       return [
         ticket.ticket_id,
         ticket.trip_id || "-",
         ticket.description,
         ticket.geofence_id || "-",
-        geofence?.description || "-",
+        geofence || "-",
         ticket.user_id || "-",
         user?.username || "-",
         ticket.status,
@@ -399,7 +399,9 @@ export default function Tickets() {
     // Download CSV
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "tickets-data.csv");
+    const date = new Date();
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear()}-${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}`;
+    link.setAttribute("download", `data-tiket-${formattedDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
