@@ -59,26 +59,26 @@ export const getLatestLocationForEachUser = async () => {
 
 export async function getLastGeofenceIndex() {
   try {
-    // Query ke Supabase untuk mendapatkan baris terakhir berdasarkan external_id
     const { data, error } = await supabase
-      .from('geofences') // Tabel geofences
-      .select('external_id')
-      .order('external_id', { ascending: false }) // Urutkan descending
-      .limit(1); // Ambil 1 baris terakhir
+      .from('geofences')
+      .select('external_id');
 
     if (error) {
-      console.error('Error fetching last geofence:', error);
+      console.error('Error fetching geofences:', error);
       return null;
     }
 
-    if (data && data.length > 0) {
-      // Extract angka dari external_id, misalnya "LK123" -> 123
-      const lastId = data[0].external_id;
-      const match = lastId.match(/\d+$/); // Cari angka di akhir
-      return match ? parseInt(match[0], 10) : null; // Parse angka terakhir
+    if (!data || data.length === 0) {
+      return 0;
     }
 
-    return null; // Tidak ada data
+    const maxIndex = data
+      .map((item) => {
+        const match = item.external_id.match(/\d+$/);
+        return match ? parseInt(match[0], 10) : 0;
+      })
+      .reduce((max, num) => Math.max(max, num), 0);
+    return maxIndex;
   } catch (err) {
     console.error('Unexpected error:', err);
     return null;
