@@ -29,6 +29,7 @@ export interface Profile {
 export interface UserRadar {
   _id: string;
   userId?: string;
+  user_id?: string;
   deviceId?: string;
   ip: string;
   description?: string;

@@ -1,7 +1,7 @@
 {
   "name": "pastims-fe",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "exceljs": "^4.4.0",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-geosearch": "^4.0.0",

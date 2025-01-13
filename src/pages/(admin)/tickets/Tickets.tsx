@@ -345,7 +345,7 @@ export default function Tickets() {
   });
 
   // Handle download CSV
-  const downloadCSV = () => {
+  const downloadCSV = async () => {
     if (filteredTickets.length === 0) {
       alert("Tidak ada data untuk diunduh.");
       return;
@@ -361,32 +361,44 @@ export default function Tickets() {
       "ID Pengguna",
       "Nama Pengguna",
       "Status",
-      "Diperbarui (WIB)"
+      "Diperbarui (WIB)",
+      "Foto Tiket",
     ];
 
     // Table Data
-    const rows = filteredTickets.map((ticket) => {
-      const geofence = geofences.find((g) => g.external_id === ticket.geofence_id)?.description;
-      const user = users.find((u) => u.user_id === ticket.user_id);
-      return [
-        ticket.ticket_id,
-        ticket.trip_id || "-",
-        ticket.description,
-        ticket.geofence_id || "-",
-        geofence || "-",
-        ticket.user_id || "-",
-        user?.username || "-",
-        ticket.status,
-        new Date(ticket.updated_at).toLocaleString("id-ID", {
-          timeZone: "Asia/Jakarta",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).replace(".", ":"),
-      ];
-    });
+    const rows = await Promise.all(
+      filteredTickets.map(async (ticket) => {
+        const geofence = geofences.find((g) => g.external_id === ticket.geofence_id)?.description;
+        const user = users.find((u) => u.user_id === ticket.user_id);
+        const { photos = [] } = await fetchTicketPhotos(ticket.ticket_id);
+        const photoUrls = Array.isArray(photos)
+          ? (photos as unknown as { url: string }[])
+            .filter((photo) => photo && typeof photo.url === "string")
+            .map((photo) => photo.url)
+            .join("\n")
+          : "";
+
+        return [
+          ticket.ticket_id,
+          ticket.trip_id || "-",
+          ticket.description,
+          ticket.geofence_id || "-",
+          geofence || "-",
+          ticket.user_id || "-",
+          user?.username || "-",
+          ticket.status,
+          new Date(ticket.updated_at).toLocaleString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          }).replace(".", ":"),
+          photoUrls || "-",
+        ];
+      })
+    );
 
     // Combine headers and rows
     const csvContent =
