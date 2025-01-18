@@ -70,6 +70,7 @@ export default function Users() {
     const updatedUsers = await handleAddUser(users, formData);
     setUsers(updatedUsers);
     setOpenDialog(false);
+    window.location.reload();
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -81,6 +82,7 @@ export default function Users() {
     const updatedUsers = await handleUpdateUser(selectedUser, users, formData);
     setUsers(updatedUsers);
     setOpenDialog(false);
+    window.location.reload();
   };
 
   const handleDelete = async () => {
@@ -89,6 +91,7 @@ export default function Users() {
     const deletedUsers = await handleDeleteUser(users, selectedUser);
     setUsers(deletedUsers);
     setOpenAlertDialog(false);
+    window.location.reload();
   };
 
   const handleAddOrUpdate = (user: User | null) => {

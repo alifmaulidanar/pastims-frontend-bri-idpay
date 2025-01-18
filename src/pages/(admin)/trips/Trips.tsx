@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { UserRadar as User } from "@/types";
 import { useEffect, useState } from "react";
@@ -8,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -22,6 +23,7 @@ export default function Trips() {
   const [sortKey, setSortKey] = useState<string>("destinationGeofenceExternalId");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
+  const [devMode, setDevMode] = useState(false);
 
   // Disable body scroll when dialog is open
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function Trips() {
 
         const data = await response.json();
         setTrips(data.trips || []);
-        filterAndSortTrips(data.trips, searchQuery, statusFilter, sortOrder);
+        filterAndSortTrips(data.trips, searchQuery, statusFilter, sortOrder, devMode);
       } catch (error) {
         console.error("Failed to fetch geofences:", error);
       }
@@ -108,8 +110,8 @@ export default function Trips() {
   }, []);
 
   useEffect(() => {
-    filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder);
-  }, [trips, searchQuery, statusFilter, sortOrder]);
+    filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder, devMode);
+  }, [trips, searchQuery, statusFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -120,7 +122,7 @@ export default function Trips() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortTrips(trips, searchQuery, statusFilter, order, key);
+    filterAndSortTrips(trips, searchQuery, statusFilter, order, devMode, key);
   };
 
   const getSortIcon = (key: string) => {
@@ -134,7 +136,7 @@ export default function Trips() {
     setStatusFilter(status);
   };
 
-  const filterAndSortTrips = (data: any, query: any, status: any, order: any, sortKey = "destinationGeofenceExternalId") => {
+  const filterAndSortTrips = (data: any, query: any, status: any, order: any, devMode: boolean, sortKey = "destinationGeofenceExternalId") => {
     let filtered = data;
     const statusMapping: Record<string, string> = {
       started: "Dimulai",
@@ -146,6 +148,11 @@ export default function Trips() {
       canceled: "Dibatalkan",
     };
 
+    if (!devMode) {
+      filtered = filtered.filter((trip: any) => {
+        return trip?.destinationGeofenceTag !== "testing";
+      });
+    }
 
     // Filter by status
     if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled" || status === "expired") {
@@ -316,6 +323,18 @@ export default function Trips() {
           <Download className="inline" />
           Unduh Data Perjalanan
         </Button>
+
+        {/* Development Mode Toggle */}
+        <div className="flex items-center mb-6 space-x-4">
+          <Switch
+            id="dev-mode-toggle"
+            checked={devMode}
+            onCheckedChange={(checked) => setDevMode(checked)}
+          />
+          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+            Development Mode
+          </label>
+        </div>
       </div>
 
       <div className='mb-2'>

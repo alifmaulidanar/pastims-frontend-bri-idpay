@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { fetchUsers } from "../users/lib/actions";
 import { fetchTicketPhotos, fetchTickets } from "./lib/actions";
-import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -39,6 +40,7 @@ export default function Tickets() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [ticketPhotos, setTicketPhotos] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [devMode, setDevMode] = useState(false);
 
   // Disable body scroll when dialog is open
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function Tickets() {
     const getTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
-      filterAndSortTickets(fetchedTickets, searchQuery, statusFilter, sortOrder);
+      filterAndSortTickets(fetchedTickets, searchQuery, statusFilter, sortOrder, devMode);
     };
     getTickets();
   }, []);
@@ -123,8 +125,8 @@ export default function Tickets() {
   }, []);
 
   useEffect(() => {
-    filterAndSortTickets(tickets, searchQuery, statusFilter, sortOrder);
-  }, [tickets, searchQuery, statusFilter, sortOrder]);
+    filterAndSortTickets(tickets, searchQuery, statusFilter, sortOrder, devMode);
+  }, [tickets, searchQuery, statusFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -149,7 +151,14 @@ export default function Tickets() {
     setStatusFilter(status);
   };
 
-  const filterAndSortTickets = (data: Ticket[], query: any, status: any, order: any, sortKey = "description") => {
+  const filterAndSortTickets = (
+    data: Ticket[],
+    query: any,
+    status: any,
+    order: any,
+    devMode: boolean,
+    sortKey = "description"
+  ) => {
     let filtered = data;
     const statusMapping: Record<string, string> = {
       assigned: "Ditugaskan",
@@ -157,6 +166,13 @@ export default function Tickets() {
       completed: "Selesai",
       canceled: "Dibatalkan",
     };
+
+    if (!devMode) {
+      filtered = filtered.filter((ticket) => {
+        const user = users.find((user) => user.user_id === ticket.user_id);
+        return user?.username !== "[DevUser]";
+      });
+    }
 
     // Filter by status
     if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled") {
@@ -227,6 +243,7 @@ export default function Tickets() {
       const newTicket = await response.json();
       setTickets((prevTickets) => [...prevTickets, newTicket]);
       setOpenDialog(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error adding ticket:", error);
     }
@@ -261,6 +278,7 @@ export default function Tickets() {
         prevTickets.map((ticket) => (ticket.ticket_id === updatedTicket.ticket_id ? updatedTicket : ticket))
       );
       setOpenDialog(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error updating ticket:", error);
     }
@@ -543,6 +561,18 @@ export default function Tickets() {
           <Download className="inline" />
           Unduh Data Tiket
         </Button>
+
+        {/* Development Mode Toggle */}
+        <div className="flex items-center mb-6 space-x-4">
+          <Switch
+            id="dev-mode-toggle"
+            checked={devMode}
+            onCheckedChange={(checked) => setDevMode(checked)}
+          />
+          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+            Development Mode
+          </label>
+        </div>
       </div>
 
       <div className='mb-2'>

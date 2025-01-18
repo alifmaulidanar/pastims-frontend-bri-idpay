@@ -10,13 +10,14 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getLastGeofenceIndex } from "@/lib/actions";
+import { Switch } from "@/components/ui/switch";
 import { GeofenceRadar as Geofence } from "@/types";
+import { getLastGeofenceIndex } from "@/lib/actions";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -43,6 +44,26 @@ export default function Places() {
   const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [devMode, setDevMode] = useState(false);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const itemsPerPage = 20;
+
+  // const paginatedGeofences = geofences.slice(
+  //   (currentPage - 1) * itemsPerPage,
+  //   currentPage * itemsPerPage
+  // );
+
+  // const handleNextPage = () => {
+  //   if (currentPage < Math.ceil(geofences.length / itemsPerPage)) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
+
+  // const handlePrevPage = () => {
+  //   if (currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  // };
 
   // Create custom icons
   const geofenceIcon = L.icon({
@@ -62,6 +83,53 @@ export default function Places() {
       document.body.style.overflowY = "";
     };
   }, []);
+
+  // const fetchGeofencesWithPagination = async () => {
+  //   let hasMore = true;
+  //   let geofencesList: Geofence[] = [];
+  //   let updatedBefore = null;
+
+  //   try {
+  //     while (hasMore) {
+  //       const params = new URLSearchParams({
+  //         limit: "100",
+  //       });
+  //       if (updatedBefore) {
+  //         params.append("updatedBefore", updatedBefore);
+  //       }
+
+  //       const response = await fetch(
+  //         `https://api.radar.io/v1/geofences?${params.toString()}`,
+  //         {
+  //           headers: {
+  //             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) {
+  //         console.error("Failed to fetch geofences");
+  //         return;
+  //       }
+
+  //       const data = await response.json();
+  //       geofencesList = [...geofencesList, ...data.geofences];
+  //       hasMore = data.meta.hasMore;
+
+  //       if (hasMore && data.geofences.length > 0) {
+  //         updatedBefore = data.geofences[data.geofences.length - 1].updatedAt;
+  //       }
+  //     }
+
+  //     setGeofences(geofencesList);
+  //   } catch (error) {
+  //     console.error("Error fetching geofences with pagination:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchGeofencesWithPagination();
+  // }, []);
 
   // Fetch geofences
   useEffect(() => {
@@ -89,8 +157,8 @@ export default function Places() {
   }, []);
 
   useEffect(() => {
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder);
-  }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder]);
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode);
+  }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -101,7 +169,7 @@ export default function Places() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
+    filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key, devMode);
   };
 
   const getSortIcon = (key: string) => {
@@ -113,17 +181,22 @@ export default function Places() {
 
   const handleFilterStatus = (status: string) => {
     setStatusFilter(status);
-    filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder);
+    filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder, devMode);
   };
 
   const handleFilterTag = (tag: string) => {
     setTagFilter(tag);
-    filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder);
+    filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder, devMode);
   };
 
-
-  const filterAndSortGeofences = (data: any, query: any, status: any, tag: any, order: any, sortKey = "description") => {
+  const filterAndSortGeofences = (data: any, query: any, status: any, tag: any, order: any, devMode: boolean, sortKey = "description") => {
     let filtered = data;
+
+    if (!devMode) {
+      filtered = filtered.filter((geofence: any) => {
+        return geofence?.tag !== "testing";
+      });
+    }
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
@@ -282,6 +355,7 @@ export default function Places() {
         setGeofences([...geofences, data.geofence]);
       }
       setOpenAddPlaceDialog(false);
+      window.location.reload();
     } catch (error) {
       console.error("Failed to add geofence:", error);
     }
@@ -308,15 +382,13 @@ export default function Places() {
         keepResult: true,
       });
 
-      map.addControl(searchControl);
-
       // Handle search results
+      map.addControl(searchControl);
       map.on("geosearch/showlocation", (event: any) => {
         const { lat, lng } = event.location;
         updateFormCoordinates(lat, lng);
         map.setView([lat, lng], 17);
       });
-
       return () => map.removeControl(searchControl);
     }, [map]);
 
@@ -386,6 +458,7 @@ export default function Places() {
 
       setGeofences((prev) => prev.filter((geofence) => geofence.externalId !== externalId));
       setOpenAlertDialog(false);
+      window.location.reload();
     } catch (error) {
       console.error("Failed to delete geofence:", error);
     }
@@ -602,11 +675,13 @@ export default function Places() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Semua">Semua Tag</SelectItem>
-            {[...new Set(geofences.map((geofence) => geofence.tag))].map((tag) => (
-              <SelectItem key={tag} value={tag ?? ""}>
-                {tag}
-              </SelectItem>
-            ))}
+            {[...new Set(geofences.map((geofence) => geofence.tag))]
+              .filter((tag) => devMode || tag !== "testing")
+              .map((tag) => (
+                <SelectItem key={tag} value={tag ?? ""}>
+                  {tag}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
 
@@ -615,6 +690,18 @@ export default function Places() {
           <Download className="inline" />
           Unduh Data Tempat
         </Button>
+
+        {/* Development Mode Toggle */}
+        <div className="flex items-center mb-6 space-x-4">
+          <Switch
+            id="dev-mode-toggle"
+            checked={devMode}
+            onCheckedChange={(checked) => setDevMode(checked)}
+          />
+          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+            Development Mode
+          </label>
+        </div>
       </div>
 
       <div className='mb-2'>
@@ -627,6 +714,26 @@ export default function Places() {
           Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
         </p>
       </div>
+      {/* <div className="flex items-center justify-between mt-4">
+        <Button
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          variant="outline"
+        >
+          Sebelumnya
+        </Button>
+        <p>
+          Halaman {currentPage} dari{" "}
+          {Math.ceil(geofences.length / itemsPerPage)}
+        </p>
+        <Button
+          onClick={handleNextPage}
+          disabled={currentPage === Math.ceil(geofences.length / itemsPerPage)}
+          variant="outline"
+        >
+          Selanjutnya
+        </Button>
+      </div> */}
 
       <div className="overflow-x-auto">
         <Table>
@@ -681,6 +788,7 @@ export default function Places() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {/* {paginatedGeofences.map((geofence) => ( */}
             {filteredGeofences.map((geofence) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
                 <TableCell>{geofences.indexOf(geofence) + 1}</TableCell>
