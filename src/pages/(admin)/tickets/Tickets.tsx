@@ -137,7 +137,7 @@ export default function Tickets() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortTickets(tickets, searchQuery, statusFilter, order, key);
+    filterAndSortTickets(tickets, searchQuery, statusFilter, order, devMode, key);
   };
 
   const getSortIcon = (key: string) => {
