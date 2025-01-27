@@ -4,7 +4,7 @@ const supabaseLocalStorageSession = import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_
 
 export const handleLogin = async (email: string, password: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/adm/login/admin`, {
+    const response = await fetch(`${BASE_URL}/auth/adm/login/admin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +39,11 @@ export const handleLogout = async () => {
   if (!isConfirmed) return;
 
   try {
-    const response = await fetch(`${BASE_URL}/logout`, {
+    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const response = await fetch(`${BASE_URL}/auth/logout`, {
+      headers: {
+        Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
+      },
       method: 'POST',
     });
 

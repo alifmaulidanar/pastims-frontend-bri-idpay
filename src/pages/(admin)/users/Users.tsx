@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from '@/types';
+import { fetchUsers } from '@/lib/users';
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { fetchUsers, handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
+import { handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
+import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -23,6 +25,7 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<string>(selectedUser?.role || 'user');
+  const [devMode, setDevMode] = useState(false);
   // const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default 10 rows
   // const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -42,15 +45,15 @@ export default function Users() {
     const getUsers = async () => {
       const fetchedUsers = await fetchUsers();
       setUsers(fetchedUsers);
-      filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder);
+      filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder, devMode);
     };
     getUsers();
   }, []);
 
   // Sync filteredUsers when users change
   useEffect(() => {
-    filterAndSortUsers(users, searchQuery, statusFilter, sortOrder);
-  }, [users, searchQuery, statusFilter, sortOrder]);
+    filterAndSortUsers(users, searchQuery, statusFilter, sortOrder, devMode);
+  }, [users, searchQuery, statusFilter, sortOrder, devMode]);
 
   // Paginate users
   // const paginatedUsers = filteredUsers.slice(
@@ -107,19 +110,19 @@ export default function Users() {
   const handleSearch = (e: { target: { value: string; }; }) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterAndSortUsers(users, query, statusFilter, sortOrder);
+    filterAndSortUsers(users, query, statusFilter, sortOrder, devMode);
   };
 
   const handleSort = (key: string) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortUsers(users, searchQuery, statusFilter, order, key);
+    filterAndSortUsers(users, searchQuery, statusFilter, order, devMode, key);
   };
 
   const handleFilter = (status: string) => {
     setStatusFilter(status);
-    filterAndSortUsers(users, searchQuery, status, sortOrder);
+    filterAndSortUsers(users, searchQuery, status, sortOrder, devMode);
   };
 
   const filterAndSortUsers = (
@@ -127,9 +130,20 @@ export default function Users() {
     query: string,
     status: string,
     order: string,
+    devMode: boolean,
     sortKey: string = "username"
   ) => {
     let filtered = data;
+
+    // 🟨DEV MODE🟨
+    if (!devMode) {
+      filtered = filtered.filter((user: any) => {
+        // return !/^\[.*\]$/.test(user.username);
+        return !/^\[.*\]$/.test(user.username) &&
+          !user.email.endsWith('@example.com') &&
+          user.phone !== '~';
+      });
+    }
 
     // Filter by status
     if (status === "Aktif" || status === "Tidak Aktif") {
@@ -266,6 +280,18 @@ export default function Users() {
           <Download className="inline" />
           Unduh Data Pengguna
         </Button>
+
+        {/* Development Mode Toggle */}
+        <div className="flex items-center mb-6 space-x-4">
+          <Switch
+            id="dev-mode-toggle"
+            checked={devMode}
+            onCheckedChange={(checked) => setDevMode(checked)}
+          />
+          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+            Development Mode
+          </label>
+        </div>
       </div>
 
       {/* <div className='mb-2'>

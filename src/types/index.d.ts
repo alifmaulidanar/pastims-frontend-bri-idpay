@@ -45,6 +45,21 @@ export interface UserRadar {
   geofences?: any;
 }
 
+// Geofence type definition
+export interface Geofence {
+  id: string;
+  radar_id: string;
+  external_id: string;
+  description: string;
+  tag: string;
+  type: string;
+  radius: string;
+  coordinates: [number, number];
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Radar Geofence type definition
 export interface GeofenceRadar {
   _id: string;
@@ -69,6 +84,7 @@ export interface GeofenceRadar {
 }
 
 export interface Ticket {
+  id: string;
   ticket_id: string;
   trip_id?: string;
   user_id: string;

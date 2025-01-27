@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
 import { Ticket, User } from "@/types";
+import { fetchUsers } from "@/lib/users";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -9,20 +10,21 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { fetchUsers } from "../users/lib/actions";
+import { fetchGeofences } from "@/lib/geofences";
+import { useQuery } from "@tanstack/react-query";
 import { fetchTicketPhotos, fetchTickets } from "./lib/actions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { fetchTrips } from "@/lib/trips";
 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Tickets() {
   const [trips, setTrips] = useState<any[]>([]);
-  const [geofences, setGeofences] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
@@ -55,26 +57,7 @@ export default function Tickets() {
 
   // Fetch trips
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const response = await fetch("https://api.radar.io/v1/trips", {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch geofences");
-          return;
-        }
-
-        const data = await response.json();
-        setTrips(data.trips || []);
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      }
-    };
-    fetchTrips();
+    fetchTrips(setTrips);
   }, []);
 
   // Fetch tickets
@@ -88,28 +71,11 @@ export default function Tickets() {
   }, []);
 
   // Fetch geofences
-  useEffect(() => {
-    const fetchGeofences = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/geofences`, {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch geofences");
-          return;
-        }
-
-        const data = await response.json();
-        setGeofences(data);
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      }
-    };
-    fetchGeofences();
-  }, []);
+  const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
+    queryKey: ['geofences'],
+    queryFn: fetchGeofences,
+    refetchInterval: 300000 // Refetch per 5 minutes
+  });
 
   // Fetch users
   useEffect(() => {
@@ -462,6 +428,9 @@ export default function Tickets() {
     }
   };
 
+  if (isLoadingGeofences) return <div>Loading...</div>;
+  if (geofenceError) return <div>Error loading data</div>;
+
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
@@ -750,7 +719,7 @@ export default function Tickets() {
                 </SelectTrigger>
                 <SelectContent>
                   {geofences.map((geofence) => (
-                    <SelectItem key={geofence._id} value={geofence.external_id}>
+                    <SelectItem key={geofence.id} value={geofence.external_id}>
                       {geofence.description}
                     </SelectItem>
                   ))}

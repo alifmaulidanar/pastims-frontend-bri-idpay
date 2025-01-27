@@ -1,4 +1,4 @@
-import Radar from "radar-sdk-js";
+// import Radar from "radar-sdk-js";
 import supabase from "@/utils/supabase";
 import { useRole } from "@/hooks/useRole";
 import { useState, useEffect } from "react";
@@ -13,8 +13,8 @@ import ProfilePage from "@/pages/(users)/profile/ProfilePage";
 import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
-const radarPublishableKey = import.meta.env.VITE_RADAR_TEST_PUBLISHABLE_KEY;
-Radar.initialize(radarPublishableKey);
+// const radarPublishableKey = import.meta.env.VITE_RADAR_TEST_PUBLISHABLE_KEY;
+// Radar.initialize(radarPublishableKey);
 
 function App() {
   const [loading, setLoading] = useState(true);

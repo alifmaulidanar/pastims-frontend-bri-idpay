@@ -11,6 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { fetchTrips } from "@/lib/trips";
+import { fetchRadarUsers as fetchUsers } from "@/lib/users";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -38,34 +40,14 @@ export default function Trips() {
 
   // Fetch trips
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const response = await fetch("https://api.radar.io/v1/trips", {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch geofences");
-          return;
-        }
-
-        const data = await response.json();
-        setTrips(data.trips || []);
-        filterAndSortTrips(data.trips, searchQuery, statusFilter, sortOrder, devMode);
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      }
-    };
-    fetchTrips();
+    fetchTrips(setTrips);
   }, []);
 
   // Fetch geofences
   useEffect(() => {
     const fetchGeofences = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/geofences`, {
+        const response = await fetch(`${BASE_URL}/geofence/radar/geofences`, {
           headers: {
             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
           },
@@ -87,26 +69,7 @@ export default function Trips() {
 
   // Fetch users
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("https://api.radar.io/v1/users", {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch users");
-          return;
-        }
-
-        const data = await response.json();
-        setUsers(data.users || []);
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
-      }
-    };
-    fetchUsers();
+    fetchUsers(setUsers);
   }, []);
 
   useEffect(() => {

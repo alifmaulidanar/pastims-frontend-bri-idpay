@@ -23,6 +23,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
+import { fetchGeofences } from "@/lib/geofences";
 
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -133,26 +134,6 @@ export default function Places() {
 
   // Fetch geofences
   useEffect(() => {
-    const fetchGeofences = async () => {
-      try {
-        const response = await fetch("https://api.radar.io/v1/geofences", {
-          // const response = await fetch("https://api.radar.io/v1/geofences?limit=10", {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch geofences");
-          return;
-        }
-
-        const data = await response.json();
-        setGeofences(data.geofences || []);
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      }
-    };
     fetchGeofences();
   }, []);
 
@@ -189,9 +170,18 @@ export default function Places() {
     filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder, devMode);
   };
 
-  const filterAndSortGeofences = (data: any, query: any, status: any, tag: any, order: any, devMode: boolean, sortKey = "description") => {
+  const filterAndSortGeofences = (
+    data: any,
+    query: any,
+    status: any,
+    tag: any,
+    order: any,
+    devMode: boolean,
+    sortKey = "description"
+  ) => {
     let filtered = data;
 
+    // 🟨DEV MODE🟨
     if (!devMode) {
       filtered = filtered.filter((geofence: any) => {
         return geofence?.tag !== "testing";

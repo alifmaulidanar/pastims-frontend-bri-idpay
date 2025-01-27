@@ -1,23 +1,6 @@
 import { User } from '@/types';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Fetch users from the backend API
-export const fetchUsers = async (): Promise<User[]> => {
-  try {
-    const response = await fetch(`${BASE_URL}/users`);
-    const data = await response.json();
-
-    if (response.ok) {
-      return data;
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return [];
-  }
-};
-
 // Handle adding a new user
 export const handleAddUser = async (
   users: User[],
