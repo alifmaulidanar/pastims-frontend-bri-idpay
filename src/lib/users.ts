@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserRadar, User } from "@/types";
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL_V2;
 
 // Fetch users from the backend API
 export const fetchUsers = async (): Promise<User[]> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/user/users`, {
+    const response = await fetch(`${BASE_URL}/user/admin/users`, {
+      // const response = await fetch(`${BASE_URL}/user/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
@@ -25,10 +25,11 @@ export const fetchUsers = async (): Promise<User[]> => {
 };
 
 // Get Radar Users
-export const fetchRadarUsers = async (setUsers: any) => {
+export const fetchRadarUsers = async (): Promise<UserRadar[] | undefined> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/user/radar/users`, {
+    const response = await fetch(`${BASE_URL}/user/admin/radar/users`, {
+      // const response = await fetch(`${BASE_URL}/user/radar/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
@@ -40,7 +41,7 @@ export const fetchRadarUsers = async (setUsers: any) => {
       return;
     }
     const data = await response.json();
-    setUsers(data.users);
+    return data.users;
   } catch (error) {
     console.error("Error fetching users:", error);
   }

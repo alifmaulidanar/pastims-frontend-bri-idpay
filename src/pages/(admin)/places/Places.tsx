@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { GeofenceRadar as Geofence } from "@/types";
 import { getLastGeofenceIndex } from "@/lib/actions";
+import { fetchGeofencesRadar } from "@/lib/geofences";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,7 +24,6 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
-import { fetchGeofences } from "@/lib/geofences";
 
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -134,11 +134,20 @@ export default function Places() {
 
   // Fetch geofences
   useEffect(() => {
-    fetchGeofences();
+    const getGeofences = async () => {
+      const fetchedGeofences = await fetchGeofencesRadar();
+      if (fetchedGeofences) {
+        setGeofences(fetchedGeofences);
+      }
+      filterAndSortGeofences(fetchedGeofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode);
+    }
+    getGeofences();
   }, []);
 
   useEffect(() => {
+    // filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder);
     filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode);
+    // }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder]);
   }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +159,7 @@ export default function Places() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
+    // filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
     filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key, devMode);
   };
 
@@ -162,11 +172,13 @@ export default function Places() {
 
   const handleFilterStatus = (status: string) => {
     setStatusFilter(status);
+    // filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder);
     filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder, devMode);
   };
 
   const handleFilterTag = (tag: string) => {
     setTagFilter(tag);
+    // filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder);
     filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder, devMode);
   };
 

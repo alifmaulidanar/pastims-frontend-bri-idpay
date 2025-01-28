@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { fetchGeofences } from "@/lib/geofences";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTicketPhotos, fetchTickets } from "./lib/actions";
+import { fetchTicketPhotos, fetchTickets } from "@/lib/tickets";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
@@ -970,7 +970,7 @@ export default function Tickets() {
 
             {/* Foto Tiket */}
             <div className="col-span-4">
-              <h3 className="mb-2 font-medium">Foto Tiket</h3>
+              <h3 className="mt-4 mb-2 font-medium">Foto Tiket</h3>
               <div className="flex gap-4">
                 {ticketPhotos.length > 0 ? (
                   ticketPhotos.map((photo, index) => (

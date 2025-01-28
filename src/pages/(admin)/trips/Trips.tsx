@@ -1,25 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
+import { fetchTrips } from "@/lib/trips";
 import { Helmet } from "react-helmet-async";
-import { UserRadar as User } from "@/types";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
+import { fetchRadarUsers } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { fetchGeofences } from "@/lib/geofences";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchTrips } from "@/lib/trips";
-import { fetchRadarUsers as fetchUsers } from "@/lib/users";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Trips() {
   const [trips, setTrips] = useState<any[]>([]);
-  const [geofences, setGeofences] = useState<any[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("destinationGeofenceExternalId");
@@ -44,33 +41,18 @@ export default function Trips() {
   }, []);
 
   // Fetch geofences
-  useEffect(() => {
-    const fetchGeofences = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/geofence/radar/geofences`, {
-          headers: {
-            Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch geofences");
-          return;
-        }
-
-        const data = await response.json();
-        setGeofences(data);
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      }
-    };
-    fetchGeofences();
-  }, []);
+  const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
+    queryKey: ['geofences'],
+    queryFn: fetchGeofences,
+    refetchInterval: 300000 // Refetch per 5 minutes
+  });
 
   // Fetch users
-  useEffect(() => {
-    fetchUsers(setUsers);
-  }, []);
+  const { data: users = [], isLoading: isLoadingUsers, error: userError } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchRadarUsers,
+    refetchInterval: 300000, // Refetch every 5 minutes
+  });
 
   useEffect(() => {
     filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder, devMode);
@@ -245,6 +227,9 @@ export default function Trips() {
     link.click();
     document.body.removeChild(link);
   };
+
+  if (isLoadingGeofences || isLoadingUsers) return <div>Loading...</div>;
+  if (geofenceError || userError) return <div>Error loading data</div>;
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">

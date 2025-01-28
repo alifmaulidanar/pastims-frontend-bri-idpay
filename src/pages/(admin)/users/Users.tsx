@@ -4,15 +4,15 @@ import { fetchUsers } from '@/lib/users';
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
 import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -45,6 +45,7 @@ export default function Users() {
     const getUsers = async () => {
       const fetchedUsers = await fetchUsers();
       setUsers(fetchedUsers);
+      // filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder);
       filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder, devMode);
     };
     getUsers();
@@ -52,7 +53,9 @@ export default function Users() {
 
   // Sync filteredUsers when users change
   useEffect(() => {
+    // filterAndSortUsers(users, searchQuery, statusFilter, sortOrder);
     filterAndSortUsers(users, searchQuery, statusFilter, sortOrder, devMode);
+    // }, [users, searchQuery, statusFilter, sortOrder]);
   }, [users, searchQuery, statusFilter, sortOrder, devMode]);
 
   // Paginate users
@@ -110,6 +113,7 @@ export default function Users() {
   const handleSearch = (e: { target: { value: string; }; }) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
+    // filterAndSortUsers(users, query, statusFilter, sortOrder);
     filterAndSortUsers(users, query, statusFilter, sortOrder, devMode);
   };
 
@@ -117,11 +121,13 @@ export default function Users() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
+    // filterAndSortUsers(users, searchQuery, statusFilter, order, key);
     filterAndSortUsers(users, searchQuery, statusFilter, order, devMode, key);
   };
 
   const handleFilter = (status: string) => {
     setStatusFilter(status);
+    // filterAndSortUsers(users, searchQuery, status, sortOrder);
     filterAndSortUsers(users, searchQuery, status, sortOrder, devMode);
   };
 

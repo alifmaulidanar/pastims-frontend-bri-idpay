@@ -1,5 +1,5 @@
 import supabase from '@/utils/supabase';
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL_V2;
 const supabaseLocalStorageSession = import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION;
 
 export const handleLogin = async (email: string, password: string) => {

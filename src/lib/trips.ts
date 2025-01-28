@@ -2,7 +2,8 @@
 export const fetchTrips = async (setTrips: any) => {
   try {
     const token = localStorage.getItem(import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION);
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/trip/radar/trips`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/trip/admin/radar/trips`, {
+      // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/trip/radar/trips`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },

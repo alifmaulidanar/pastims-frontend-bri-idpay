@@ -3,7 +3,7 @@ import { GeofenceRadar, Geofence } from "@/types";
 export const fetchGeofencesRadar = async (): Promise<GeofenceRadar[] | undefined> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/geofence/radar/geofences`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/geofence/admin/radar/geofences`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
@@ -21,10 +21,12 @@ export const fetchGeofencesRadar = async (): Promise<GeofenceRadar[] | undefined
   }
 };
 
+// Fetch geofences
 export const fetchGeofences = async (): Promise<Geofence[] | undefined> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/geofence/geofences`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/geofence/admin/geofences`, {
+      // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/geofence/geofences`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },

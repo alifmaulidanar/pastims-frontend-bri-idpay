@@ -2,15 +2,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { UserRadar } from "@/types";
+import { fetchMaps } from "@/lib/maps";
 import { useMap } from "react-leaflet";
 import { Helmet } from "react-helmet-async";
-import { fetchTickets } from "@/lib/tickets";
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserLocations } from "@/lib/users";
-import { fetchGeofencesRadar } from "@/lib/geofences";
 import { useUser } from "@supabase/auth-helpers-react";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Define custom icons
@@ -34,25 +33,30 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Fetch users
-  const { data: userLocations, isLoading: isLoadingUsers, error: userError } = useQuery({
-    queryKey: ['userLocations'],
-    queryFn: fetchUserLocations,
-    refetchInterval: 300000 // Refetch per 5 minutes
+  // Fetch all map data (users, geofences, tickets)
+  const { data: mapsData, isLoading, error } = useQuery({
+    queryKey: ['maps'],
+    queryFn: fetchMaps,
+    refetchInterval: 300000, // Refetch every 5 minutes
   });
 
-  // Fetch geofences
-  const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
-    queryKey: ['geofences'],
-    queryFn: fetchGeofencesRadar,
-    refetchInterval: 300000 // Refetch per 5 minutes
-  });
+  // Extract data from mapsData
+  const geofences = mapsData?.geofences ?? [];
+  const tickets = mapsData?.tickets ?? [];
+  const uniqueUsers = useMemo(() => {
+    if (!mapsData?.users) return [];
+    return mapsData.users.reduce((acc: Record<string, UserRadar>, user: UserRadar) => {
+      const existingUser = user.userId ? acc[user.userId] : undefined;
+      if (!existingUser || new Date(user.updatedAt) > new Date(existingUser.updatedAt)) {
+        if (user.userId) {
+          acc[user.userId] = user;
+        }
+      }
+      return acc;
+    }, {});
+  }, [mapsData?.users]);
 
-  const { data: tickets = [], isLoading: isLoadingTickets, error: ticketError } = useQuery({
-    queryKey: ['tickets'],
-    queryFn: fetchTickets,
-    refetchInterval: 300000 // Refetch per 5 minutes
-  });
+  const userLocations = useMemo(() => Object.values(uniqueUsers), [uniqueUsers]);
 
   // Add geocoder control to the map
   useEffect(() => {
@@ -80,9 +84,8 @@ const Dashboard = () => {
   };
 
   // Render the map
-  if (isLoadingUsers || isLoadingGeofences || isLoadingTickets) return <div>Loading...</div>;
-  if (userError || geofenceError) return <div>Error loading data</div>;
-  if (ticketError) return <div>Error loading tickets</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading data</div>;
   if (!location) return <div>Loading...</div>;
 
   return (
