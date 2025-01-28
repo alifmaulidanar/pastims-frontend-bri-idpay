@@ -37,7 +37,7 @@ const Dashboard = () => {
   const { data: mapsData, isLoading, error } = useQuery({
     queryKey: ['maps'],
     queryFn: fetchMaps,
-    refetchInterval: 300000, // Refetch every 5 minutes
+    refetchInterval: 600000, // Refetch every 10 minutes
   });
 
   // Extract data from mapsData

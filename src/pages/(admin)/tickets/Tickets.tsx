@@ -74,7 +74,6 @@ export default function Tickets() {
   const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
     queryKey: ['geofences'],
     queryFn: fetchGeofences,
-    refetchInterval: 300000 // Refetch per 5 minutes
   });
 
   // Fetch users

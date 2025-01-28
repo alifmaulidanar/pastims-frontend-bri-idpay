@@ -1,7 +1,7 @@
 import L from "leaflet";
-import { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import { Badge } from "../ui/badge";
+import { useEffect, useState } from "react";
 import clientIconUrl from "../../assets/marker-icons/admin/pin-map.png";
 import { UserRadar as User, GeofenceRadar as Geofence, Ticket } from "@/types";
 import motorIconUrl from "../../assets/marker-icons/motorcycle/motorcycle.png";
@@ -39,11 +39,28 @@ const geofenceIcon = L.icon({
 });
 
 const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMapLoad }: MapViewProps) => {
+  const [userAddresses, setUserAddresses] = useState<Record<string, string>>({});
+  const [geofenceAddress, setGeofenceAddress] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (onMapLoad) {
       onMapLoad();
     }
   }, [onMapLoad]);
+
+  const fetchAddressFromLatLng = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+      const data = await response.json();
+      return data.display_name || "-";
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      return "Error fetching address";
+    }
+  };
+
 
   return (
     <MapContainer
@@ -76,9 +93,16 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
       {/* Other users' locations */}
       {(userLocations ?? []).map((user) => {
         const [longitude, latitude] = user.location.coordinates;
+        const handleUserClick = async () => {
+          if (!userAddresses[user._id]) {
+            const address = await fetchAddressFromLatLng(latitude, longitude);
+            setUserAddresses((prev) => ({ ...prev, [user._id]: address }));
+          }
+        };
+
         return (
           <Marker key={user._id} position={[latitude, longitude]} icon={motorIcon}>
-            <Popup>
+            <Popup eventHandlers={{ add: handleUserClick }}>
               <div>
                 <Badge variant="outline">{user.userId}</Badge>
                 <table className="user-info-table">
@@ -107,6 +131,11 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                       <td><strong>Longitude</strong></td>
                       <td>:</td>
                       <td>{user.location.coordinates[0]}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Alamat</strong></td>
+                      <td>:</td>
+                      <td>{userAddresses[user._id] || "Memuat..."}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -180,17 +209,45 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
       {/* Geofences locations */}
       {geofences.map((geofence) => {
         const [longitude, latitude] = geofence.geometryCenter.coordinates;
+        const handleGeofenceClick = async () => {
+          if (!geofenceAddress[geofence._id]) {
+            const address = await fetchAddressFromLatLng(latitude, longitude);
+            setGeofenceAddress((prev) => ({ ...prev, [geofence._id]: address }));
+          }
+        };
+
         return (
           <Marker key={geofence._id} position={[latitude, longitude]} icon={geofenceIcon}>
-            <Popup>
+            <Popup eventHandlers={{ add: handleGeofenceClick }}>
               <div>
                 <div className="flex gap-x-2">
                   <Badge variant="outline">{geofence.externalId}</Badge>
                   <Badge variant="secondary">{geofence.tag}</Badge>
                 </div>
-                <p>{geofence.description || "Unknown geofence"}</p>
-                <p>Latitude: {geofence.geometryCenter.coordinates[1]}</p>
-                <p>Longitude: {geofence.geometryCenter.coordinates[0]}</p>
+                <table className="mt-4 geofence-info-table">
+                  <tbody>
+                    <tr>
+                      <td><strong>Tempat</strong></td>
+                      <td>:</td>
+                      <td>{geofence.description || "Unknown location"}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Latitude</strong></td>
+                      <td>:</td>
+                      <td>{geofence.geometryCenter.coordinates[1]}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Longitude</strong></td>
+                      <td>:</td>
+                      <td>{geofence.geometryCenter.coordinates[0]}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Alamat</strong></td>
+                      <td>:</td>
+                      <td>{geofenceAddress[geofence._id] || "Memuat..."}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </Popup>
             <Tooltip direction="top" offset={[0, -20]}>
