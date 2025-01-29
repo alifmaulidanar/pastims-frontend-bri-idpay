@@ -260,7 +260,7 @@ export default function Tickets() {
 
     setUploading(true);
     try {
-      const response = await fetch(`${BASE_URL}/ticket/upload`, {
+      const response = await fetch(`${BASE_URL}/tickets/upload`, {
         method: "POST",
         body: formData,
       });

@@ -379,7 +379,7 @@ export default function Places() {
 
     setUploading(true);
     try {
-      const response = await fetch(`${BASE_URL}/geofence/upload`, {
+      const response = await fetch(`${BASE_URL}/geofences/upload`, {
         method: "POST",
         body: formData,
       });

@@ -14,14 +14,14 @@ export const handleAddUser = async (
 
   const requestPayload = {
     email,
-    username,
     password,
+    username,
     phone,
     role,
   };
 
   try {
-    const response = await fetch(`${BASE_URL}/user/add`, {
+    const response = await fetch(`${BASE_URL}/adduser`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export const handleUpdateUser = async (
   try {
     const method = selectedUser ? 'PUT' : 'POST';
 
-    const response = await fetch(`${BASE_URL}/user/update`, {
+    const response = await fetch(`${BASE_URL}/updateuser`, {
       method: method,
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export const handleDeleteUser = async (
   selectedUser: User | null
 ): Promise<User[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/user/delete`, {
+    const response = await fetch(`${BASE_URL}/deleteuser`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
