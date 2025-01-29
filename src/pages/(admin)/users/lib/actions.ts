@@ -21,7 +21,7 @@ export const handleAddUser = async (
   };
 
   try {
-    const response = await fetch(`${BASE_URL}/adduser`, {
+    const response = await fetch(`${BASE_URL}/user/add`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export const handleUpdateUser = async (
   try {
     const method = selectedUser ? 'PUT' : 'POST';
 
-    const response = await fetch(`${BASE_URL}/updateuser`, {
+    const response = await fetch(`${BASE_URL}/user/update`, {
       method: method,
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export const handleDeleteUser = async (
   selectedUser: User | null
 ): Promise<User[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/deleteuser`, {
+    const response = await fetch(`${BASE_URL}/user/delete`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
