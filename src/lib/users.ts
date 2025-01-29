@@ -1,12 +1,12 @@
 import { UserRadar, User } from "@/types";
-const BASE_URL = import.meta.env.VITE_API_BASE_URL_V2;
+
+const BASE_URL = import.meta.env.VITE_abu_V2;
 
 // Fetch users from the backend API
 export const fetchUsers = async (): Promise<User[]> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/user/admin/users`, {
-      // const response = await fetch(`${BASE_URL}/user/users`, {
+    const response = await fetch(`${BASE_URL}/admin/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
@@ -28,8 +28,7 @@ export const fetchUsers = async (): Promise<User[]> => {
 export const fetchRadarUsers = async (): Promise<UserRadar[] | undefined> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/user/admin/radar/users`, {
-      // const response = await fetch(`${BASE_URL}/user/radar/users`, {
+    const response = await fetch(`${BASE_URL}/admin/users/radar/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
@@ -46,35 +45,3 @@ export const fetchRadarUsers = async (): Promise<UserRadar[] | undefined> => {
     console.error("Error fetching users:", error);
   }
 }
-
-// Get Radar Users' Locations
-export const fetchUserLocations = async (): Promise<UserRadar[] | undefined> => {
-  try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/user/radar/users`, {
-      headers: {
-        Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Failed to fetch user locations:", errorData.message);
-      return;
-    }
-
-    const data = await response.json();
-    const uniqueUsers = data.users.reduce((acc: Record<string, UserRadar>, user: UserRadar) => {
-      const existingUser = user.userId ? acc[user.userId] : undefined;
-      if (!existingUser || new Date(user.updatedAt) > new Date(existingUser.updatedAt)) {
-        if (user.userId) {
-          acc[user.userId] = user;
-        }
-      }
-      return acc;
-    }, {});
-    return Object.values(uniqueUsers);
-  } catch (error) {
-    console.error("Error fetching user locations:", error);
-  }
-};

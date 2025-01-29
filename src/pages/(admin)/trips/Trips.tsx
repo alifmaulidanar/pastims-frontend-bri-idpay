@@ -6,17 +6,14 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
-import { fetchRadarUsers } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { fetchGeofences } from "@/lib/geofences";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Trips() {
-  const [trips, setTrips] = useState<any[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("destinationGeofenceExternalId");
@@ -35,27 +32,27 @@ export default function Trips() {
     };
   }, []);
 
-  // Fetch trips
-  useEffect(() => {
-    fetchTrips(setTrips);
-  }, []);
-
-  // Fetch geofences
-  const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
-    queryKey: ['geofences'],
-    queryFn: fetchGeofences,
-    refetchInterval: 300000 // Refetch per 5 minutes
+  // Fetch Tickets
+  const { data: tripsData, isLoading, error } = useQuery({
+    queryKey: ['allTickets'],
+    queryFn: fetchTrips,
+    // refetchInterval: 300000, // Refetch every 5 minutes
   });
 
-  // Fetch users
-  const { data: users = [], isLoading: isLoadingUsers, error: userError } = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchRadarUsers,
-    refetchInterval: 300000, // Refetch every 5 minutes
-  });
+  const users = tripsData?.users ?? [];
+  const geofences = tripsData?.geofences ?? [];
+  const trips = tripsData?.trips ?? [];
+
+  // useEffect(() => {
+  //   if (trips) {
+  //     filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder, devMode);
+  //   }
+  // }, [trips, searchQuery, statusFilter, sortOrder, devMode]);
 
   useEffect(() => {
-    filterAndSortTrips(trips, searchQuery, statusFilter, sortOrder, devMode);
+    if (trips.length > 0) {
+      filterAndSortTrips(trips);
+    }
   }, [trips, searchQuery, statusFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +64,7 @@ export default function Trips() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortTrips(trips, searchQuery, statusFilter, order, devMode, key);
+    filterAndSortTrips(trips, key, order);
   };
 
   const getSortIcon = (key: string) => {
@@ -81,8 +78,10 @@ export default function Trips() {
     setStatusFilter(status);
   };
 
-  const filterAndSortTrips = (data: any, query: any, status: any, order: any, devMode: boolean, sortKey = "destinationGeofenceExternalId") => {
-    let filtered = data;
+  const filterAndSortTrips = (data: any[], sortKeyParam = sortKey, order = sortOrder) => {
+    if (!Array.isArray(data)) return;
+
+    let filtered = [...data]; // Salin array agar tidak merusak data asli
     const statusMapping: Record<string, string> = {
       started: "Dimulai",
       pending: "Menunggu",
@@ -94,45 +93,42 @@ export default function Trips() {
     };
 
     if (!devMode) {
-      filtered = filtered.filter((trip: any) => {
-        return trip?.destinationGeofenceTag !== "testing";
-      });
+      filtered = filtered.filter((trip) => trip?.destinationGeofenceTag !== "testing");
     }
 
-    // Filter by status
-    if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled" || status === "expired") {
-      filtered = filtered.filter((trip: any) => trip.status === status);
+    // Filter berdasarkan status
+    if (["assigned", "on_progress", "completed", "canceled", "expired"].includes(statusFilter)) {
+      filtered = filtered.filter((trip) => trip.status === statusFilter);
     }
 
-    // Filter by search query
-    if (query) {
-      filtered = filtered.filter(
-        (trip: any) =>
-          trip.externalId.toLowerCase().includes(query) ||
-          trip.destinationGeofenceExternalId.toLowerCase().includes(query) ||
-          users.find((user) => user.userId === trip.userId)?.metadata.user_id.toLowerCase().includes(query) ||
-          trip.destinationGeofenceTag.toLowerCase().includes(query) ||
-          geofences.find((geofence) => geofence.external_id === trip.destinationGeofenceExternalId)?.description.toLowerCase().includes(query) ||
-          users.find((user) => user.userId === trip.userId)?.metadata.username.toLowerCase().includes(query)
+    // Filter berdasarkan pencarian
+    if (searchQuery) {
+      filtered = filtered.filter((trip) =>
+        trip.externalId?.toLowerCase().includes(searchQuery) ||
+        trip.destinationGeofenceExternalId?.toLowerCase().includes(searchQuery) ||
+        users.find((user) => user.userId === trip.userId)?.metadata.user_id?.toLowerCase().includes(searchQuery) ||
+        trip.destinationGeofenceTag?.toLowerCase().includes(searchQuery) ||
+        geofences.find((geofence) => geofence.external_id === trip.destinationGeofenceExternalId)?.description?.toLowerCase().includes(searchQuery) ||
+        users.find((user) => user.userId === trip.userId)?.metadata.username?.toLowerCase().includes(searchQuery)
       );
     }
 
-    // Sort data
-    filtered = filtered.sort((a: any, b: any) => {
-      let aValue: string | number = a[sortKey] ?? "";
-      let bValue: string | number = b[sortKey] ?? "";
+    // Sorting data
+    filtered.sort((a, b) => {
+      let aValue: string | number = a[sortKeyParam] ?? "";
+      let bValue: string | number = b[sortKeyParam] ?? "";
 
-      if (sortKey === "destinationGeofenceExternalId") {
+      if (sortKeyParam === "destinationGeofenceExternalId") {
         aValue = geofences.find((g) => g.external_id === a.destinationGeofenceExternalId)?.description || "";
         bValue = geofences.find((g) => g.external_id === b.destinationGeofenceExternalId)?.description || "";
       }
 
-      if (sortKey === "username") {
+      if (sortKeyParam === "username") {
         aValue = users.find((u) => u.userId === a.userId)?.metadata.username || "";
         bValue = users.find((u) => u.userId === b.userId)?.metadata.username || "";
       }
 
-      if (sortKey === "status") {
+      if (sortKeyParam === "status") {
         aValue = statusMapping[a.status] || a.status;
         bValue = statusMapping[b.status] || b.status;
       }
@@ -228,8 +224,8 @@ export default function Trips() {
     document.body.removeChild(link);
   };
 
-  if (isLoadingGeofences || isLoadingUsers) return <div>Loading...</div>;
-  if (geofenceError || userError) return <div>Error loading data</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading trips: {error.message}</div>;
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">

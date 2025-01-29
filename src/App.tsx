@@ -1,4 +1,4 @@
-// import Radar from "radar-sdk-js";
+import Radar from "radar-sdk-js";
 import supabase from "@/utils/supabase";
 import { useRole } from "@/hooks/useRole";
 import { useState, useEffect } from "react";
@@ -13,14 +13,14 @@ import ProfilePage from "@/pages/(users)/profile/ProfilePage";
 import { SessionContextProvider, User } from "@supabase/auth-helpers-react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
-// const radarPublishableKey = import.meta.env.VITE_RADAR_TEST_PUBLISHABLE_KEY;
-// Radar.initialize(radarPublishableKey);
+const radarPublishableKey = import.meta.env.VITE_rlpk;
+Radar.initialize(radarPublishableKey);
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [, setUser] = useState<User | null>(null);
   const { loading: roleLoading } = useRole();
-  const userSession = localStorage.getItem(import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION);
+  const userSession = localStorage.getItem(import.meta.env.VITE_slss);
 
   useEffect(() => {
     const session = userSession ? JSON.parse(userSession) : null;
@@ -42,14 +42,10 @@ function App() {
             path="/"
             element={checkUser() ? <Navigate to="/maps" /> : <LandingPage />}
           />
-
-          {/* Halaman Login */}
           <Route
             path="/login"
             element={checkUser() ? <Navigate to="/maps" /> : <LoginForm />}
           />
-
-          {/* Halaman Dashboard */}
           <Route
             path="/maps"
             element={checkUser() ? <DashboardPage /> : <Navigate to="/login" />}
@@ -74,8 +70,6 @@ function App() {
             path="/profile"
             element={checkUser() ? <ProfilePage /> : <Navigate to="/login" />}
           />
-
-          {/* Halaman 404 */}
           <Route
             path="*"
             element={<Navigate to="/login" />}

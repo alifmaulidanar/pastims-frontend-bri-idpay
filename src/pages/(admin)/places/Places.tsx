@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -14,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { GeofenceRadar as Geofence } from "@/types";
 import { getLastGeofenceIndex } from "@/lib/actions";
 import { fetchGeofencesRadar } from "@/lib/geofences";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,10 +26,10 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
 
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_abu;
 
 export default function Places() {
-  const [geofences, setGeofences] = useState<Geofence[]>([]);
+  const queryClient = useQueryClient();
   const [filteredGeofences, setFilteredGeofences] = useState<Geofence[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("username");
@@ -46,25 +46,6 @@ export default function Places() {
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [devMode, setDevMode] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 20;
-
-  // const paginatedGeofences = geofences.slice(
-  //   (currentPage - 1) * itemsPerPage,
-  //   currentPage * itemsPerPage
-  // );
-
-  // const handleNextPage = () => {
-  //   if (currentPage < Math.ceil(geofences.length / itemsPerPage)) {
-  //     setCurrentPage(currentPage + 1);
-  //   }
-  // };
-
-  // const handlePrevPage = () => {
-  //   if (currentPage > 1) {
-  //     setCurrentPage(currentPage - 1);
-  //   }
-  // };
 
   // Create custom icons
   const geofenceIcon = L.icon({
@@ -85,82 +66,27 @@ export default function Places() {
     };
   }, []);
 
-  // const fetchGeofencesWithPagination = async () => {
-  //   let hasMore = true;
-  //   let geofencesList: Geofence[] = [];
-  //   let updatedBefore = null;
-
-  //   try {
-  //     while (hasMore) {
-  //       const params = new URLSearchParams({
-  //         limit: "100",
-  //       });
-  //       if (updatedBefore) {
-  //         params.append("updatedBefore", updatedBefore);
-  //       }
-
-  //       const response = await fetch(
-  //         `https://api.radar.io/v1/geofences?${params.toString()}`,
-  //         {
-  //           headers: {
-  //             Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.ok) {
-  //         console.error("Failed to fetch geofences");
-  //         return;
-  //       }
-
-  //       const data = await response.json();
-  //       geofencesList = [...geofencesList, ...data.geofences];
-  //       hasMore = data.meta.hasMore;
-
-  //       if (hasMore && data.geofences.length > 0) {
-  //         updatedBefore = data.geofences[data.geofences.length - 1].updatedAt;
-  //       }
-  //     }
-
-  //     setGeofences(geofencesList);
-  //   } catch (error) {
-  //     console.error("Error fetching geofences with pagination:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchGeofencesWithPagination();
-  // }, []);
-
   // Fetch geofences
-  useEffect(() => {
-    const getGeofences = async () => {
-      const fetchedGeofences = await fetchGeofencesRadar();
-      if (fetchedGeofences) {
-        setGeofences(fetchedGeofences);
-      }
-      filterAndSortGeofences(fetchedGeofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode);
-    }
-    getGeofences();
-  }, []);
+  const { data: geofencesData, isLoading, error } = useQuery({
+    queryKey: ["allGeofences"],
+    queryFn: fetchGeofencesRadar,
+    initialData: [],
+  })
+
+  const geofences = geofencesData ?? [];
 
   useEffect(() => {
-    // filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder);
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode);
-    // }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder]);
+    filterAndSortGeofences();
   }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
+    setSearchQuery(e.target.value.toLowerCase());
   };
 
   const handleSort = (key: string) => {
-    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     setSortKey(key);
-    setSortOrder(order);
-    // filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key);
-    filterAndSortGeofences(geofences, searchQuery, statusFilter, order, key, devMode);
+    filterAndSortGeofences();
   };
 
   const getSortIcon = (key: string) => {
@@ -172,65 +98,42 @@ export default function Places() {
 
   const handleFilterStatus = (status: string) => {
     setStatusFilter(status);
-    // filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder);
-    filterAndSortGeofences(geofences, searchQuery, tagFilter, status, sortOrder, devMode);
   };
 
   const handleFilterTag = (tag: string) => {
     setTagFilter(tag);
-    // filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder);
-    filterAndSortGeofences(geofences, searchQuery, tag, statusFilter, sortOrder, devMode);
   };
 
-  const filterAndSortGeofences = (
-    data: any,
-    query: any,
-    status: any,
-    tag: any,
-    order: any,
-    devMode: boolean,
-    sortKey = "description"
-  ) => {
-    let filtered = data;
+  const filterAndSortGeofences = () => {
+    if (!geofences) return;
 
-    // 🟨DEV MODE🟨
+    let filtered = [...geofences];
+
     if (!devMode) {
-      filtered = filtered.filter((geofence: any) => {
-        return geofence?.tag !== "testing";
-      });
+      filtered = filtered.filter((g) => g.tag !== "testing");
     }
 
-    // Filter by status
-    if (status === "Aktif" || status === "Tidak Aktif") {
+    if (statusFilter) {
+      filtered = filtered.filter((g) => (statusFilter === "Aktif" ? g.enabled : !g.enabled));
+    }
+
+    if (tagFilter && tagFilter !== "Semua") {
+      filtered = filtered.filter((g) => g.tag === tagFilter);
+    }
+
+    if (searchQuery) {
       filtered = filtered.filter(
-        (geofence: any) => geofence.enabled === (status === "Aktif")
+        (g) =>
+          g.externalId?.toLowerCase().includes(searchQuery) ||
+          g.description?.toLowerCase().includes(searchQuery) ||
+          g.tag?.toLowerCase().includes(searchQuery)
       );
     }
 
-    // Filter by tag
-    if (tag && tag !== "Semua") {
-      filtered = filtered.filter(
-        (geofence: any) => geofence.tag === tag
-      );
-    }
-
-    // Filter by search query
-    if (query) {
-      filtered = filtered.filter(
-        (geofence: any) =>
-          (geofence.externalId ?? "").toLowerCase().includes(query) ||
-          (geofence.description ?? "").toLowerCase().includes(query) ||
-          (geofence.tag ?? "").toLowerCase().includes(query)
-      );
-    }
-
-    // Sort data
-    filtered = filtered.sort((a: any, b: any) => {
-      const compareA = String(a[sortKey]).toLowerCase();
-      const compareB = String(b[sortKey]).toLowerCase();
-      return order === "asc"
-        ? compareA.localeCompare(compareB)
-        : compareB.localeCompare(compareA);
+    filtered.sort((a, b) => {
+      const aValue = String((a as any)[sortKey] ?? "").toLowerCase();
+      const bValue = String((b as any)[sortKey] ?? "").toLowerCase();
+      return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     });
 
     setFilteredGeofences(filtered);
@@ -312,7 +215,7 @@ export default function Places() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          Authorization: import.meta.env.VITE_rlsk,
         },
         body: JSON.stringify(body),
       });
@@ -344,19 +247,15 @@ export default function Places() {
         });
 
         if (!response.ok) {
-          console.error("Failed to save geofence to the backend");
+          console.error("Failed to save geofence");
           return;
         }
       } catch (error) {
-        console.error("Failed to save geofence to the backend:", error);
+        console.error("Failed to save geofence", error);
       }
 
-      if (selectedGeofence) {
-        setGeofences((prev) => prev.map((geofence) => (geofence.externalId === selectedGeofence.externalId ? data.geofence : geofence)));
-      } else {
-        setGeofences([...geofences, data.geofence]);
-      }
       setOpenAddPlaceDialog(false);
+      await queryClient.invalidateQueries({ queryKey: ["allGeofences"] });
       window.location.reload();
     } catch (error) {
       console.error("Failed to add geofence:", error);
@@ -431,7 +330,7 @@ export default function Places() {
       const response = await fetch(`https://api.radar.io/v1/geofences/${tag}/${externalId}`, {
         method: "DELETE",
         headers: {
-          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          Authorization: import.meta.env.VITE_rlsk,
         },
       });
 
@@ -458,8 +357,8 @@ export default function Places() {
         console.error("Failed to save geofence to the backend:", error);
       }
 
-      setGeofences((prev) => prev.filter((geofence) => geofence.externalId !== externalId));
       setOpenAlertDialog(false);
+      await queryClient.invalidateQueries({ queryKey: ["allGeofences"] });
       window.location.reload();
     } catch (error) {
       console.error("Failed to delete geofence:", error);
@@ -571,6 +470,9 @@ export default function Places() {
       alert("Koordinat tidak valid. Pastikan latitude di antara -90 hingga 90, dan longitude di antara -180 hingga 180.");
     }
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading places: {error.message}</div>;
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
@@ -791,9 +693,9 @@ export default function Places() {
           </TableHeader>
           <TableBody>
             {/* {paginatedGeofences.map((geofence) => ( */}
-            {filteredGeofences.map((geofence) => (
+            {filteredGeofences.map((geofence, index) => (
               <TableRow key={geofence._id} className="hover:bg-gray-50">
-                <TableCell>{geofences.indexOf(geofence) + 1}</TableCell>
+                <TableCell>{index + 1}</TableCell>
                 {/* <TableCell>{geofence._id || "-"}</TableCell> */}
                 <TableCell>{geofence.externalId || "-"}</TableCell>
                 <TableCell>{geofence.description || "-"}</TableCell>

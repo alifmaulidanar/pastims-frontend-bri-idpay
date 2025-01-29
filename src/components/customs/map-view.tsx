@@ -105,6 +105,8 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
             <Popup eventHandlers={{ add: handleUserClick }}>
               <div>
                 <Badge variant="outline">{user.userId}</Badge>
+
+                {/* User Table */}
                 <table className="user-info-table">
                   <tbody>
                     <tr>
@@ -141,6 +143,7 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                 </table>
               </div>
 
+              {/* Ticket Table */}
               <table className="my-4 ticket-card">
                 <tbody>
                   {tickets
@@ -158,6 +161,11 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                           <td><strong>Deskripsi</strong></td>
                           <td>:</td>
                           <td>{ticket.description}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Tempat</strong></td>
+                          <td>:</td>
+                          <td>{geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description || "Unknown location"}</td>
                         </tr>
                         <tr>
                           <td><strong>Status</strong></td>
@@ -224,6 +232,8 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                   <Badge variant="outline">{geofence.externalId}</Badge>
                   <Badge variant="secondary">{geofence.tag}</Badge>
                 </div>
+
+                {/* Geofence Table */}
                 <table className="mt-4 geofence-info-table">
                   <tbody>
                     <tr>

@@ -1,6 +1,6 @@
 import supabase from '@/utils/supabase';
 import { useEffect, useState } from 'react';
-const supabaseLocalStorageSession = import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION;
+const supabaseLocalStorageSession = import.meta.env.VITE_slss;
 
 export const useRole = () => {
   const [role, setRole] = useState<string | null>(localStorage.getItem('user_role'));

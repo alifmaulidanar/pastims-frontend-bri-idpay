@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
-import { Ticket, User } from "@/types";
-import { fetchUsers } from "@/lib/users";
+import { Ticket } from "@/types";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -10,23 +9,19 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { fetchGeofences } from "@/lib/geofences";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import { fetchTicketPhotos, fetchTickets } from "@/lib/tickets";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { fetchTrips } from "@/lib/trips";
 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/tickets-template.csv", import.meta.url).href;
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_abu;
+const queryClient = new QueryClient();
 
 export default function Tickets() {
-  const [trips, setTrips] = useState<any[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("username");
@@ -55,42 +50,28 @@ export default function Tickets() {
     };
   }, []);
 
-  // Fetch trips
-  useEffect(() => {
-    fetchTrips(setTrips);
-  }, []);
-
-  // Fetch tickets
-  useEffect(() => {
-    const getTickets = async () => {
-      const fetchedTickets = await fetchTickets();
-      setTickets(fetchedTickets);
-      filterAndSortTickets(fetchedTickets, searchQuery, statusFilter, sortOrder, devMode);
-    };
-    getTickets();
-  }, []);
-
-  // Fetch geofences
-  const { data: geofences = [], isLoading: isLoadingGeofences, error: geofenceError } = useQuery({
-    queryKey: ['geofences'],
-    queryFn: fetchGeofences,
+  // Fetch Tickets
+  const { data: ticketsData, isLoading, error } = useQuery({
+    queryKey: ['allTickets'],
+    queryFn: fetchTickets,
+    // refetchInterval: 300000, // Refetch every 5 minutes
   });
 
-  // Fetch users
-  useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await fetchUsers();
-        setUsers(response);
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
-      }
-    };
-    getUsers();
-  }, []);
+  const users = ticketsData?.users ?? [];
+  const geofences = ticketsData?.geofences ?? [];
+  const tickets = ticketsData?.tickets ?? [];
+  const trips = ticketsData?.trips ?? [];
+
+  // useEffect(() => {
+  //   if (tickets) {
+  //     filterAndSortTickets(tickets, searchQuery, statusFilter, sortOrder, devMode);
+  //   }
+  // }, [tickets, searchQuery, statusFilter, sortOrder, devMode]);
 
   useEffect(() => {
-    filterAndSortTickets(tickets, searchQuery, statusFilter, sortOrder, devMode);
+    if (tickets.length > 0) {
+      filterAndSortTickets(tickets);
+    }
   }, [tickets, searchQuery, statusFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +83,7 @@ export default function Tickets() {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(order);
-    filterAndSortTickets(tickets, searchQuery, statusFilter, order, devMode, key);
+    filterAndSortTickets(tickets, key, order);
   };
 
   const getSortIcon = (key: string) => {
@@ -116,15 +97,10 @@ export default function Tickets() {
     setStatusFilter(status);
   };
 
-  const filterAndSortTickets = (
-    data: Ticket[],
-    query: any,
-    status: any,
-    order: any,
-    devMode: boolean,
-    sortKey = "description"
-  ) => {
-    let filtered = data;
+  const filterAndSortTickets = (data: any[], sortKeyParam = sortKey, order = sortOrder) => {
+    if (!Array.isArray(data)) return;
+
+    let filtered = [...data]; // Salin array agar tidak merusak data asli
     const statusMapping: Record<string, string> = {
       assigned: "Ditugaskan",
       on_progress: "Berjalan",
@@ -133,55 +109,49 @@ export default function Tickets() {
     };
 
     if (!devMode) {
-      filtered = filtered.filter((ticket) => {
+      filtered = filtered.filter(ticket => {
         const user = users.find((user) => user.user_id === ticket.user_id);
         return user?.username !== "[DevUser]";
       });
     }
 
-    // Filter by status
-    if (status === "assigned" || status === "on_progress" || status === "completed" || status === "canceled") {
-      filtered = filtered.filter(
-        (ticket: any) => ticket.status === status
+    // Filter berdasarkan status
+    if (["assigned", "on_progress", "completed", "canceled"].includes(statusFilter)) {
+      filtered = filtered.filter(ticket => ticket.status === statusFilter);
+    }
+
+    // Filter berdasarkan pencarian
+    if (searchQuery) {
+      filtered = filtered.filter(ticket =>
+        ticket.ticket_id?.toLowerCase().includes(searchQuery) ||
+        geofences.find(geofence => geofence.external_id === ticket.geofence_id)?.description?.toLowerCase().includes(searchQuery) ||
+        users.find(user => user.user_id === ticket.user_id)?.username?.toLowerCase().includes(searchQuery)
       );
     }
 
-    // Filter by search query
-    if (query) {
-      filtered = filtered.filter(
-        (ticket: any) =>
-          ticket.ticket_id.toLowerCase().includes(query) ||
-          trips.find((trip) => trip.externalId === ticket.trip_id)?.externalId.toLowerCase().includes(query) ||
-          geofences.find((geofence) => geofence.external_id === ticket.geofence_id)?.external_id.toLowerCase().includes(query) ||
-          users.find((user) => user.user_id === ticket.user_id)?.user_id.toLowerCase().includes(query) ||
-          ticket.description.toLowerCase().includes(query) ||
-          geofences.find((geofence) => geofence.external_id === ticket.geofence_id)?.description.toLowerCase().includes(query) ||
-          users.find((user) => user.user_id === ticket.user_id)?.username.toLowerCase().includes(query)
-      );
-    }
+    // Sorting data
+    filtered.sort((a, b) => {
+      let aValue: string | number = a[sortKeyParam] ?? "";
+      let bValue: string | number = b[sortKeyParam] ?? "";
 
-    // Sort data
-    filtered = filtered.sort((a: any, b: any) => {
-      let aValue: string | number = a[sortKey] ?? "";
-      let bValue: string | number = b[sortKey] ?? "";
-
-      if (sortKey === "geofence_id") {
-        aValue = geofences.find((g) => g.external_id === a.geofence_id)?.description || "";
-        bValue = geofences.find((g) => g.external_id === b.geofence_id)?.description || "";
+      if (sortKeyParam === "geofence_id") {
+        aValue = geofences.find(g => g.external_id === a.geofence_id)?.description || "";
+        bValue = geofences.find(g => g.external_id === b.geofence_id)?.description || "";
       }
 
-      if (sortKey === "username") {
-        aValue = users.find((u) => u.user_id === a.user_id)?.username || "";
-        bValue = users.find((u) => u.user_id === b.user_id)?.username || "";
+      if (sortKeyParam === "username") {
+        aValue = users.find(u => u.user_id === a.user_id)?.username || "";
+        bValue = users.find(u => u.user_id === b.user_id)?.username || "";
       }
 
-      if (sortKey === "status") {
+      if (sortKeyParam === "status") {
         aValue = statusMapping[a.status] || a.status;
         bValue = statusMapping[b.status] || b.status;
       }
 
       aValue = String(aValue).toLowerCase();
       bValue = String(bValue).toLowerCase();
+
       return order === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     });
 
@@ -195,7 +165,7 @@ export default function Tickets() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          Authorization: import.meta.env.VITE_rlsk,
         },
         body: JSON.stringify(formValues),
       });
@@ -205,9 +175,8 @@ export default function Tickets() {
         return;
       }
 
-      const newTicket = await response.json();
-      setTickets((prevTickets) => [...prevTickets, newTicket]);
       setOpenDialog(false);
+      await queryClient.invalidateQueries({ queryKey: ['allTickets'] }); // Refresh data
       window.location.reload();
     } catch (error) {
       console.error("Error adding ticket:", error);
@@ -228,7 +197,7 @@ export default function Tickets() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          Authorization: import.meta.env.VITE_rlsk,
         },
         body: JSON.stringify(ticketData),
       });
@@ -238,11 +207,8 @@ export default function Tickets() {
         return;
       }
 
-      const updatedTicket = await response.json();
-      setTickets((prevTickets) =>
-        prevTickets.map((ticket) => (ticket.ticket_id === updatedTicket.ticket_id ? updatedTicket : ticket))
-      );
       setOpenDialog(false);
+      await queryClient.invalidateQueries({ queryKey: ['allTickets'] }); // Refresh data
       window.location.reload();
     } catch (error) {
       console.error("Error updating ticket:", error);
@@ -410,7 +376,7 @@ export default function Tickets() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_RADAR_TEST_SECRET_KEY,
+          Authorization: import.meta.env.VITE_rlsk,
         },
         body: JSON.stringify({ ticket_id: selectedTicket.ticket_id, status: "canceled" }),
       });
@@ -421,14 +387,14 @@ export default function Tickets() {
       }
 
       setOpenAlertDialog(false);
-      window.location.reload();
+      await queryClient.invalidateQueries({ queryKey: ['allTickets'] }); // Refresh data
     } catch (error) {
       console.error("Error updating ticket status:", error);
     }
   };
 
-  if (isLoadingGeofences) return <div>Loading...</div>;
-  if (geofenceError) return <div>Error loading data</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading tickets: {error.message}</div>;
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">

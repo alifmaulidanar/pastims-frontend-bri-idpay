@@ -1,21 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const fetchTrips = async (setTrips: any) => {
+import { Geofence, UserRadar } from '@/types';
+
+const BASE_URL = import.meta.env.VITE_abu_V2;
+
+// Fetch tickets from the backend API
+export const fetchTrips = async (): Promise<{
+  users: UserRadar[];
+  geofences: Geofence[];
+  trips: any[];
+}> => {
   try {
-    const token = localStorage.getItem(import.meta.env.VITE_SUPABASE_LOCAL_STORAGE_SESSION);
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/trip/admin/radar/trips`, {
-      // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL_V2}/trip/radar/trips`, {
+    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const response = await fetch(`${BASE_URL}/admin/trips`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
     });
 
     if (!response.ok) {
-      console.error("Failed to fetch geofences");
-      return;
+      const errorData = await response.json();
+      console.error("Failed to fetch tickets data:", errorData.message);
+      throw new Error(errorData.message);
     }
-    const data = await response.json();
-    setTrips(data.trips || []);
+
+    return response.json();
   } catch (error) {
-    console.error("Failed to fetch geofences:", error);
+    console.error("Error fetching tickets data:", error);
+    throw error;
   }
 };

@@ -1,6 +1,6 @@
 import supabase from "@/utils/supabase";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_abu;
 
 const canWriteData = () => {
   const lastWritten = localStorage.getItem('lastWritten');

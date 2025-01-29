@@ -1,5 +1,6 @@
 import { GeofenceRadar, Ticket, UserRadar } from "@/types";
-const BASE_URL = import.meta.env.VITE_API_BASE_URL_V2;
+
+const BASE_URL = import.meta.env.VITE_abu_V2;
 
 export const fetchMaps = async (): Promise<{
   users: UserRadar[];
@@ -8,7 +9,7 @@ export const fetchMaps = async (): Promise<{
 }> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/dashboard/maps`, {
+    const response = await fetch(`${BASE_URL}/admin/maps`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
