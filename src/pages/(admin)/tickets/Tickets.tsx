@@ -99,8 +99,7 @@ export default function Tickets() {
 
   const filterAndSortTickets = (data: any[], sortKeyParam = sortKey, order = sortOrder) => {
     if (!Array.isArray(data)) return;
-
-    let filtered = [...data]; // Salin array agar tidak merusak data asli
+    let filtered = [...data];
     const statusMapping: Record<string, string> = {
       assigned: "Ditugaskan",
       on_progress: "Berjalan",
@@ -311,7 +310,7 @@ export default function Tickets() {
       "Nama Pengguna",
       "Status",
       "Diperbarui (WIB)",
-      "Foto Tiket",
+      "Link PDF",
     ];
 
     // Table Data
@@ -319,14 +318,6 @@ export default function Tickets() {
       filteredTickets.map(async (ticket) => {
         const geofence = geofences.find((g) => g.external_id === ticket.geofence_id)?.description;
         const user = users.find((u) => u.user_id === ticket.user_id);
-        const { photos = [] } = await fetchTicketPhotos(ticket.ticket_id);
-        const photoUrls = Array.isArray(photos)
-          ? (photos as unknown as { url: string }[])
-            .filter((photo) => photo && typeof photo.url === "string")
-            .map((photo) => photo.url)
-            .join("\n")
-          : "";
-
         return [
           ticket.ticket_id,
           ticket.trip_id || "-",
@@ -344,7 +335,7 @@ export default function Tickets() {
             hour: "2-digit",
             minute: "2-digit",
           }).replace(".", ":"),
-          photoUrls || "-",
+          `${import.meta.env.VITE_abu_V2}/admin/tickets/pdf/${ticket.ticket_id}/${user?.user_id}/${ticket.geofence_id}`,
         ];
       })
     );
