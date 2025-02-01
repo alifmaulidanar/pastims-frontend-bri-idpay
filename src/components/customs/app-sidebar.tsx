@@ -30,6 +30,11 @@ const items = [
     url: "/trips",
     icon: Truck,
   },
+  // {
+  //   title: "Emergency",
+  //   url: "/emergency-only",
+  //   icon: FileWarningIcon,
+  // },
 ];
 
 export function AppSidebar() {
@@ -39,6 +44,13 @@ export function AppSidebar() {
     const storedRole = localStorage.getItem('user_role');
     if (storedRole) setRole(storedRole);
   }, []);
+
+  const handleEmergencyClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, url: string) => {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to access the Emergency section?")) {
+      window.location.href = url;
+    }
+  };
 
   return (
     <Sidebar>
@@ -52,9 +64,12 @@ export function AppSidebar() {
                   return true;
                 })
                 .map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.title} className={item.title === "Emergency" ? "text-red-600" : ""}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <a
+                        href={item.url}
+                        onClick={item.title === "Emergency" ? (e) => handleEmergencyClick(e, item.url) : undefined}
+                      >
                         <item.icon />
                         <span>{item.title}</span>
                       </a>

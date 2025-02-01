@@ -3,6 +3,7 @@ import supabase from "@/utils/supabase";
 import { useRole } from "@/hooks/useRole";
 import { useState, useEffect } from "react";
 import LandingPage from "./pages/LandingPage";
+import EmergencyPage from "@/pages/EmergencyPage";
 import UsersPage from "@/pages/(admin)/users/UsersPage";
 import TripsPage from "./pages/(admin)/trips/TripsPage";
 import PlacesPage from "./pages/(admin)/places/PlacesPage";
@@ -41,6 +42,10 @@ function App() {
           <Route
             path="/"
             element={checkUser() ? <Navigate to="/maps" /> : <LandingPage />}
+          />
+          <Route
+            path="/emergency-only"
+            element={checkUser() ? <EmergencyPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/login"
