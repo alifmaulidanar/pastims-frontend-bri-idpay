@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
 import { Ticket } from "@/types";
+import { subDays, format } from "date-fns";
+import DatePicker from "react-datepicker";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -9,6 +11,7 @@ import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import "react-datepicker/dist/react-datepicker.css";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { fetchTicketPhotos, fetchTickets } from "@/lib/tickets";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { fetchTripInfo } from "@/lib/trips";
 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
@@ -37,7 +41,12 @@ export default function Tickets() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [ticketPhotos, setTicketPhotos] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [tripInfo, setTripInfo] = useState<any>(null);
   const [devMode, setDevMode] = useState(false);
+
+  // const [startDate, setStartDate] = useState<Date | null>(new Date()); // Default: Today
+  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 7)); // 7 days ago
+  const [endDate, setEndDate] = useState<Date | null>(new Date()); // Default: Today
 
   // Disable body scroll when dialog is open
   useEffect(() => {
@@ -51,16 +60,19 @@ export default function Tickets() {
   }, []);
 
   // Fetch Tickets
-  const { data: ticketsData, isLoading, error } = useQuery({
-    queryKey: ['allTickets'],
-    queryFn: fetchTickets,
+  const { data: ticketsData, isLoading, error, refetch } = useQuery({
+    queryKey: ["allTickets", startDate, endDate],
+    queryFn: () => fetchTickets(format(startDate || new Date(), "yyyy-MM-dd"), format(endDate || new Date(), "yyyy-MM-dd")),
     // refetchInterval: 300000, // Refetch every 5 minutes
   });
 
   const users = ticketsData?.users ?? [];
   const geofences = ticketsData?.geofences ?? [];
   const tickets = ticketsData?.tickets ?? [];
-  const trips = ticketsData?.trips ?? [];
+
+  useEffect(() => {
+    refetch(); // Refetch data when date range changes
+  }, [startDate, endDate]);
 
   // useEffect(() => {
   //   if (tickets) {
@@ -72,7 +84,7 @@ export default function Tickets() {
     if (tickets.length > 0) {
       filterAndSortTickets(tickets);
     }
-  }, [tickets, searchQuery, statusFilter, sortOrder, devMode]);
+  }, [tickets, searchQuery, statusFilter, sortOrder, devMode, startDate, endDate]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -106,6 +118,13 @@ export default function Tickets() {
       completed: "Selesai",
       canceled: "Dibatalkan",
     };
+
+    if (startDate && endDate) {
+      filtered = filtered.filter(ticket => {
+        const ticketDate = new Date(ticket.updated_at).toISOString().split('T')[0];
+        return ticketDate >= startDate.toISOString().split('T')[0] && ticketDate <= endDate.toISOString().split('T')[0];
+      });
+    }
 
     if (!devMode) {
       filtered = filtered.filter(ticket => {
@@ -226,6 +245,15 @@ export default function Tickets() {
 
   const handleInfo = async (ticket: Ticket | null) => {
     const getTicketPhotos = await fetchTicketPhotos(ticket?.ticket_id || "");
+
+    setTripInfo(null);
+    if (ticket?.trip_id) {
+      const tripData = await fetchTripInfo(ticket.trip_id);
+      console.log({ tripData });
+      setTripInfo(tripData);
+      console.log({ tripInfo });
+    }
+
     setTicketPhotos(getTicketPhotos.photos);
     setSelectedTicket(ticket);
     setFormValues({
@@ -481,6 +509,29 @@ export default function Tickets() {
           </SelectContent>
         </Select>
 
+        <div className="flex items-center gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium">Dari Tanggal:</label>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              className="w-full p-2 border rounded"
+              dateFormat="dd/MM/yyyy"
+              maxDate={new Date()} // Tidak bisa pilih tanggal di masa depan
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Sampai Tanggal:</label>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              className="w-full p-2 border rounded"
+              dateFormat="dd/MM/yyyy"
+              maxDate={new Date()} // Tidak bisa pilih tanggal di masa depan
+            />
+          </div>
+        </div>
+
         {/* Download CSV button */}
         <Button onClick={downloadCSV} variant="secondary">
           <Download className="inline" />
@@ -715,235 +766,236 @@ export default function Tickets() {
           <DialogTitle>Detail Tiket</DialogTitle>
           {/* <div className="grid grid-cols-3 gap-x-8"> */}
           <div className="grid grid-cols-4 gap-x-6">
-            {/* Tiket */}
-            <div>
-              <h3 className="mb-4 font-medium">Tiket</h3>
-              <div className="grid grid-cols-1 gap-y-4">
+            {tripInfo ? (
+              <>
+                {/* Tiket */}
                 <div>
-                  <label className="block text-sm">ID Tiket</label>
-                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {selectedTicket?.ticket_id || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Deskripsi</label>
-                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {selectedTicket?.description || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Dibuat pada (WIB)</label>
-                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', {
-                      timeZone: 'Asia/Jakarta',
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }).replace('.', ':')}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Diperbarui pada (WIB)</label>
-                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', {
-                      timeZone: 'Asia/Jakarta',
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }).replace('.', ':')}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Status Tiket</label>
-                  <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                    {selectedTicket?.status === "assigned" && "Ditugaskan"}
-                    {selectedTicket?.status === "started" && "Dimulai"}
-                    {selectedTicket?.status === "pending" && "Menunggu"}
-                    {selectedTicket?.status === "approaching" && "Mendekati"}
-                    {selectedTicket?.status === "arrived" && "Tiba"}
-                    {selectedTicket?.status === "completed" && "Selesai"}
-                    {selectedTicket?.status === "expired" && "Kadaluarsa"}
-                    {selectedTicket?.status === "canceled" && "Dibatalkan"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Geofence */}
-            <div>
-              <h3 className="mb-4 font-medium">Tempat Tujuan</h3>
-              <div className="grid grid-cols-1 gap-y-4">
-                <div>
-                  <label className="block text-sm">ID Tempat</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {selectedTicket?.geofence_id || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Nama Tempat</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Tag</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.tag || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Radius</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.radius || "-"} m
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Koordinat</label>
-                  <div className="grid px-4 py-2 bg-gray-100 border rounded">
-                    <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[1] || "-"} (<span className="italic">Latitude</span>)</span>
-                    <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[0] || "-"} (<span className="italic">Longitude</span>)</span>
+                  <h3 className="mb-4 font-medium">Tiket</h3>
+                  <div className="grid grid-cols-1 gap-y-4">
+                    <div>
+                      <label className="block text-sm">ID Tiket</label>
+                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                        {selectedTicket?.ticket_id || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Deskripsi</label>
+                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                        {selectedTicket?.description || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Dibuat pada (WIB)</label>
+                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                        {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).replace('.', ':')}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Diperbarui pada (WIB)</label>
+                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                        {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).replace('.', ':')}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Status Tiket</label>
+                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
+                        {selectedTicket?.status === "assigned" && "Ditugaskan"}
+                        {selectedTicket?.status === "started" && "Dimulai"}
+                        {selectedTicket?.status === "pending" && "Menunggu"}
+                        {selectedTicket?.status === "approaching" && "Mendekati"}
+                        {selectedTicket?.status === "arrived" && "Tiba"}
+                        {selectedTicket?.status === "completed" && "Selesai"}
+                        {selectedTicket?.status === "expired" && "Kadaluarsa"}
+                        {selectedTicket?.status === "canceled" && "Dibatalkan"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Pengguna */}
-            <div>
-              <h3 className="mb-4 font-medium">Pengguna</h3>
-              <div className="grid grid-cols-1 gap-y-4">
+                {/* Geofence */}
                 <div>
-                  <label className="block text-sm">ID Pengguna</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {selectedTicket?.user_id || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Nama Pengguna</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.username || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Email</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.email || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">No. HP</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {users.find((user) => user.user_id === selectedTicket?.user_id)?.phone || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Status Pengguna</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {users.find((user) => user.user_id === selectedTicket?.user_id) ? (users.find((user) => user.user_id === selectedTicket?.user_id)?.status === "active" ? "Aktif" : "Tidak Aktif") : "-"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Perjalanan */}
-            <div>
-              <h3 className="mb-4 font-medium">Perjalanan</h3>
-              <div className="grid grid-cols-1 gap-y-4">
-                <div>
-                  <label className="block text-sm">ID Perjalanan</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.externalId || "-"}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Dimulai pada (WIB)</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.startedAt).toLocaleString('id-ID', {
-                      timeZone: 'Asia/Jakarta',
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }).replace('.', ':')}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Diselesaikan pada (WIB)</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {new Date(trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.endedAt).toLocaleString('id-ID', {
-                      timeZone: 'Asia/Jakarta',
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }).replace('.', ':')}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Durasi</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {(() => {
-                      const trip = trips.find((trip) => trip.externalId === selectedTicket?.trip_id);
-                      if (!trip || !trip.startedAt || !trip.endedAt) return "-";
-
-                      const startedAt = new Date(trip.startedAt);
-                      const endedAt = new Date(trip.endedAt);
-                      const diffMs = endedAt.getTime() - startedAt.getTime();
-
-                      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-                      const duration = [];
-                      if (hours > 0) duration.push(`${hours} jam`);
-                      if (minutes > 0) duration.push(`${minutes} menit`);
-                      if (seconds > 0) duration.push(`${seconds} detik`);
-
-                      return duration.length > 0 ? duration.join(" ") : "-";
-                    })()}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm">Status Perjalanan</label>
-                  <p className="px-4 py-2 bg-gray-100 border rounded">
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "assigned" && "Ditugaskan"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "started" && "Dimulai"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "pending" && "Menunggu"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "approaching" && "Mendekati"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "arrived" && "Tiba"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "completed" && "Selesai"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "expired" && "Kadaluarsa"}
-                    {trips.find((trip) => trip.externalId === selectedTicket?.trip_id)?.status === "canceled" && "Dibatalkan"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Foto Tiket */}
-            <div className="col-span-4">
-              <h3 className="mt-4 mb-2 font-medium">Foto Tiket</h3>
-              <div className="flex gap-4">
-                {ticketPhotos.length > 0 ? (
-                  ticketPhotos.map((photo, index) => (
-                    <div key={index} className="relative overflow-hidden border rounded-lg">
-                      <img
-                        src={photo.url}
-                        alt={`Foto ${index + 1}`}
-                        className="object-cover h-32"
-                        onClick={() => setSelectedImage(photo.url)}
-                      />
+                  <h3 className="mb-4 font-medium">Tempat Tujuan</h3>
+                  <div className="grid grid-cols-1 gap-y-4">
+                    <div>
+                      <label className="block text-sm">ID Tempat</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {selectedTicket?.geofence_id || "-"}
+                      </p>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">Tidak ada foto yang tersedia.</p>
-                )}
-              </div>
-            </div>
+                    <div>
+                      <label className="block text-sm">Nama Tempat</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Tag</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.tag || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Radius</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.radius || "-"} m
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Koordinat</label>
+                      <div className="grid px-4 py-2 bg-gray-100 border rounded">
+                        <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[1] || "-"} (<span className="italic">Latitude</span>)</span>
+                        <span>{geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.coordinates[0] || "-"} (<span className="italic">Longitude</span>)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Pengguna */}
+                <div>
+                  <h3 className="mb-4 font-medium">Pengguna</h3>
+                  <div className="grid grid-cols-1 gap-y-4">
+                    <div>
+                      <label className="block text-sm">ID Pengguna</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {selectedTicket?.user_id || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Nama Pengguna</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {users.find((user) => user.user_id === selectedTicket?.user_id)?.username || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Email</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {users.find((user) => user.user_id === selectedTicket?.user_id)?.email || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">No. HP</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {users.find((user) => user.user_id === selectedTicket?.user_id)?.phone || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Status Pengguna</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {users.find((user) => user.user_id === selectedTicket?.user_id) ? (users.find((user) => user.user_id === selectedTicket?.user_id)?.status === "active" ? "Aktif" : "Tidak Aktif") : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {/* Perjalanan */}
+                <div>
+                  <h3 className="mb-4 font-medium">Perjalanan</h3>
+                  <div className="grid grid-cols-1 gap-y-4">
+                    <div>
+                      <label className="block text-sm">ID Perjalanan</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {tripInfo.trip.externalId || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Dimulai pada (WIB)</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {new Date(tripInfo.trip.startedAt).toLocaleString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).replace('.', ':')}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Diselesaikan pada (WIB)</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {new Date(tripInfo.trip.endedAt).toLocaleString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).replace('.', ':')}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Durasi</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {(() => {
+                          // const trip = tripInfo.trip.externalId === selectedTicket?.trip_id;
+                          if (!tripInfo || !tripInfo.trip.startedAt || !tripInfo.trip.endedAt) return "-";
+
+                          const startedAt = new Date(tripInfo.trip.startedAt);
+                          const endedAt = new Date(tripInfo.trip.endedAt);
+                          const diffMs = endedAt.getTime() - startedAt.getTime();
+
+                          const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                          const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                          const duration = [];
+                          if (hours > 0) duration.push(`${hours} jam`);
+                          if (minutes > 0) duration.push(`${minutes} menit`);
+                          if (seconds > 0) duration.push(`${seconds} detik`);
+
+                          return duration.length > 0 ? duration.join(" ") : "-";
+                        })()}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm">Status Perjalanan</label>
+                      <p className="px-4 py-2 bg-gray-100 border rounded">
+                        {tripInfo.trip.status === "assigned" && "Ditugaskan"}
+                        {tripInfo.trip.status === "started" && "Dimulai"}
+                        {tripInfo.trip.status === "pending" && "Menunggu"}
+                        {tripInfo.trip.status === "approaching" && "Mendekati"}
+                        {tripInfo.trip.status === "arrived" && "Tiba"}
+                        {tripInfo.trip.status === "completed" && "Selesai"}
+                        {tripInfo.trip.status === "expired" && "Kadaluarsa"}
+                        {tripInfo.trip.status === "canceled" && "Dibatalkan"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {/* Foto Tiket */}
+                <div className="col-span-4">
+                  <h3 className="mt-4 mb-2 font-medium">Foto Tiket</h3>
+                  <div className="flex gap-4">
+                    {ticketPhotos.length > 0 ? (
+                      ticketPhotos.map((photo, index) => (
+                        <div key={index} className="relative overflow-hidden border rounded-lg">
+                          <img
+                            src={photo.url}
+                            alt={`Foto ${index + 1}`}
+                            className="object-cover h-32"
+                            onClick={() => setSelectedImage(photo.url)} />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500">Tidak ada foto yang tersedia.</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-gray-500">Memuat informasi perjalanan...</p>
+            )}
           </div>
           {selectedImage && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setSelectedImage(null)}>

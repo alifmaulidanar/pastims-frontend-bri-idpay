@@ -29,3 +29,25 @@ export const fetchTrips = async (): Promise<{
     throw error;
   }
 };
+
+export const fetchTripInfo = async (trip_id: string): Promise<any> => {
+  try {
+    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const response = await fetch(`${BASE_URL}/admin/trips/trip/${trip_id}`, {
+      headers: {
+        Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Failed to fetch trip data:", errorData.message);
+      throw new Error(errorData.message);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching trip data:", error);
+    throw error;
+  }
+};

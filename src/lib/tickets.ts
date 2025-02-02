@@ -4,15 +4,18 @@ import { Geofence, Ticket, TicketPhoto, User } from '@/types';
 const BASE_URL = import.meta.env.VITE_abu_V2;
 
 // Fetch tickets from the backend API
-export const fetchTickets = async (): Promise<{
+export const fetchTickets = async (startDate?: string, endDate?: string): Promise<{
   users: User[];
   geofences: Geofence[];
   tickets: Ticket[];
-  trips: any[];
 }> => {
   try {
     const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
-    const response = await fetch(`${BASE_URL}/admin/tickets`, {
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+
+    const response = await fetch(`${BASE_URL}/admin/tickets?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
