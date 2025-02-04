@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { handleLogout } from "@/auth/userAuth";
 import { Button } from "@/components/ui/button";
-import { Home, ListTodo, LogOutIcon, MapPinCheck, Truck, User } from "lucide-react";
+import { FileWarningIcon, Home, ListTodo, LogOutIcon, MapPinCheck, Truck, User } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 const items = [
@@ -30,11 +30,11 @@ const items = [
     url: "/trips",
     icon: Truck,
   },
-  // {
-  //   title: "Emergency",
-  //   url: "/emergency-only",
-  //   icon: FileWarningIcon,
-  // },
+  {
+    title: "Perbaikan (Emergency)",
+    url: "/emergency-only",
+    icon: FileWarningIcon,
+  },
 ];
 
 export function AppSidebar() {
@@ -45,12 +45,12 @@ export function AppSidebar() {
     if (storedRole) setRole(storedRole);
   }, []);
 
-  const handleEmergencyClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, url: string) => {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to access the Emergency section?")) {
-      window.location.href = url;
-    }
-  };
+  // const handleEmergencyClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, url: string) => {
+  //   e.preventDefault();
+  //   if (window.confirm("Apakah anda yakin ingin membuka halaman ini?")) {
+  //     window.location.href = url;
+  //   }
+  // };
 
   return (
     <Sidebar>
@@ -64,11 +64,11 @@ export function AppSidebar() {
                   return true;
                 })
                 .map((item) => (
-                  <SidebarMenuItem key={item.title} className={item.title === "Emergency" ? "text-red-600" : ""}>
+                  <SidebarMenuItem key={item.title} className={item.title === "Perbaikan (Emergency)" ? "text-red-600 mt-12" : ""}>
                     <SidebarMenuButton asChild>
                       <a
                         href={item.url}
-                        onClick={item.title === "Emergency" ? (e) => handleEmergencyClick(e, item.url) : undefined}
+                      // onClick={item.title === "Emergency" ? (e) => handleEmergencyClick(e, item.url) : undefined}
                       >
                         <item.icon />
                         <span>{item.title}</span>
@@ -80,7 +80,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="p-4 mt-auto">
+        <div className="p-4 mt-auto mb-8">
           <Button
             onClick={handleLogout}
             className="w-full py-2 text-white bg-red-600 rounded hover:bg-red-800"

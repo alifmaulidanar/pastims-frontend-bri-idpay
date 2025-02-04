@@ -23,6 +23,7 @@ import { fetchTripInfo } from "@/lib/trips";
 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
+const BASE_URL2 = import.meta.env.VITE_abu_V2;
 const queryClient = new QueryClient();
 
 export default function Tickets() {
@@ -287,7 +288,7 @@ export default function Tickets() {
 
     setUploading(true);
     try {
-      const response = await fetch(`${BASE_URL}/tickets/upload`, {
+      const response = await fetch(`${BASE_URL2}/admin/tickets/upload`, {
         method: "POST",
         body: formData,
       });
