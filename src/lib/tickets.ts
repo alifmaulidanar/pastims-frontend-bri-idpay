@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Geofence, Ticket, TicketPhoto, User } from '@/types';
-
 const BASE_URL = import.meta.env.VITE_abu_V2;
 
 // Fetch tickets from the backend API

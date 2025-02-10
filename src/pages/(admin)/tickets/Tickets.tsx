@@ -16,7 +16,7 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import { fetchTicketPhotos, fetchTickets } from "@/lib/tickets";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, InfoIcon, Pencil, Save, TicketPlus, Trash2, Trash2Icon, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { fetchTripInfo } from "@/lib/trips";
@@ -666,7 +666,7 @@ export default function Tickets() {
                 }).replace('.', ':')}
               </TableCell>
               <TableCell className="flex">
-                {(ticket.status !== "completed" && ticket.status !== "canceled") &&
+                {(ticket.status !== "completed" && ticket.status !== "canceled" && ticket.status !== "on_progress") &&
                   <>
                     <Button
                       onClick={() => handleAddOrUpdate(ticket)}
@@ -681,7 +681,7 @@ export default function Tickets() {
                     </Button>
                   </>
                 }
-                {(ticket.status === "completed" || ticket.status === "canceled") &&
+                {(ticket.status === "completed" || ticket.status === "canceled" || ticket.status === "on_progress") &&
                   <Button
                     onClick={() => handleInfo(ticket)}
                     variant="ghost"
@@ -815,6 +815,7 @@ export default function Tickets() {
                       <label className="block text-sm">Status Tiket</label>
                       <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
                         {selectedTicket?.status === "assigned" && "Ditugaskan"}
+                        {selectedTicket?.status === "on_progress" && "Berjalan"}
                         {selectedTicket?.status === "started" && "Dimulai"}
                         {selectedTicket?.status === "pending" && "Menunggu"}
                         {selectedTicket?.status === "approaching" && "Mendekati"}
@@ -998,11 +999,40 @@ export default function Tickets() {
               <p className="text-gray-500">Memuat informasi perjalanan...</p>
             )}
           </div>
-          {selectedImage && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setSelectedImage(null)}>
-              <img src={selectedImage} alt="Detail gambar" className="object-contain w-full h-full" />
-            </div>
-          )}
+          {selectedImage ? (
+            <Dialog open={selectedImage !== ""} onOpenChange={() => setSelectedImage("")}>
+              {/* <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setSelectedImage(null)}>
+                <img src={selectedImage} alt="Detail gambar" className="object-contain w-full h-full" />
+              </div> */}
+              <DialogTrigger asChild>
+                <Button className="hidden" />
+              </DialogTrigger>
+              <DialogContent>
+                <img src={selectedImage} alt="Foto Tiket" />
+              </DialogContent>
+            </Dialog>
+          ) : null}
+
+          <div className="flex justify-end mt-4 space-x-2">
+            {(selectedTicket) &&
+              <>
+                <Button
+                  // onClick={() => handleAddOrUpdate(selectedTicket)}
+                  variant="outline"
+                >
+                  <Pencil className="inline" />
+                  Edit Tiket
+                </Button>
+                <Button
+                  // onClick={() => handleAlertDialog(selectedTicket)}
+                  variant="destructive"
+                >
+                  <Trash2Icon className="inline" />
+                  Hapus Tiket
+                </Button>
+              </>
+            }
+          </div>
         </DialogContent>
       </Dialog>
 
