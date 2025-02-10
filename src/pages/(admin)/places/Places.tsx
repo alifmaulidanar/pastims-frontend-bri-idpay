@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -10,9 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { fetchGeofences } from "@/lib/geofences";
 import { GeofenceRadar as Geofence } from "@/types";
 import { getLastGeofenceIndex } from "@/lib/actions";
-import { fetchGeofencesRadar } from "@/lib/geofences";
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
@@ -45,6 +47,10 @@ export default function Places() {
   const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [pageSize, setPageSize] = useState(10);  // Default: 10 items per page
+  const [currentPage, setCurrentPage] = useState(1);  // Default: Page 1
+  const [totalPages, setTotalPages] = useState(1);  // Default: 1 page
+  const [goToPage, setGoToPage] = useState<string>('');  // Go to page input
   const [devMode, setDevMode] = useState(false);
 
   // Create custom icons
@@ -68,16 +74,37 @@ export default function Places() {
 
   // Fetch geofences
   const { data: geofencesData, isLoading, error } = useQuery({
-    queryKey: ["allGeofences"],
-    queryFn: fetchGeofencesRadar,
-    initialData: [],
-  })
+    queryKey: ["allGeofences", pageSize, currentPage],
+    queryFn: ({ queryKey }) => fetchGeofences({ queryKey: queryKey as [string, number, number] }),
+    initialData: { geofences: [], count: 0 },
+  });
 
-  const geofences = geofencesData ?? [];
+  const { geofences, count } = geofencesData ?? { geofences: [], count: 0 };
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(count / pageSize));
+  }, [count, pageSize]);
+
+  // Pagination controls
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(goToPage);
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      setGoToPage('');
+    }
+  };
 
   useEffect(() => {
     filterAndSortGeofences();
-  }, [geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode]);
+  }, [currentPage, geofences, searchQuery, statusFilter, tagFilter, sortOrder, devMode]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value.toLowerCase());
@@ -579,11 +606,11 @@ export default function Places() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Semua">Semua Tag</SelectItem>
-            {[...new Set(geofences.map((geofence) => geofence.tag))]
+            {[...new Set(geofences.map((geofence: any) => geofence.tag))]
               .filter((tag) => devMode || tag !== "testing")
               .map((tag) => (
-                <SelectItem key={tag} value={tag ?? ""}>
-                  {tag}
+                <SelectItem key={String(tag)} value={String(tag ?? "")}>
+                  {String(tag)}
                 </SelectItem>
               ))}
           </SelectContent>
@@ -608,8 +635,27 @@ export default function Places() {
         </div>
       </div>
 
-      <div className='mb-2'>
-        <p className="text-sm font-bold text-gray-500">
+      <div className='flex mb-2 gap-x-4'>
+        {/* Page size selector */}
+        <Select
+          onValueChange={(value) => {
+            const newSize = value === 'all' ? count : parseInt(value);
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          value={pageSize === count ? 'all' : pageSize.toString()}
+        >
+          <SelectTrigger className="w-24">
+            <SelectValue placeholder="Items per page" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">per 10</SelectItem>
+            <SelectItem value="20">per 20</SelectItem>
+            <SelectItem value="50">per 50</SelectItem>
+            <SelectItem value="all">Semua</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="mt-4 text-sm font-bold text-gray-500">
           Menampilkan tempat: {filteredGeofences.length}
         </p>
       </div>
@@ -640,118 +686,163 @@ export default function Places() {
       </div> */}
 
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No.</TableHead>
-              <TableHead onClick={() => handleSort("externalId")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("externalId")}
-                  ID Tempat
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("description")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("description")}
-                  Nama Tempat
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("tag")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("tag")}
-                  Tag
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("geometryRadius")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("geometryRadius")}
-                  Radius (m)
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("geometryCenter.coordinates")}
-                  Koordinat
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("enabled")}>
-                <div className='flex items-center gap-x-2'>
-                  {getSortIcon("enabled")}
-                  Status
-                </div>
-              </TableHead>
-              {/* <TableHead className="text-left">ID</TableHead> */}
-              {/* <TableHead className="text-left">ID Tempat</TableHead>
-              <TableHead className="text-left">Nama Tempat</TableHead> */}
-              {/* <TableHead className="text-left">Tag</TableHead> */}
-              {/* <TableHead className="text-left">Tipe</TableHead> */}
-              {/* <TableHead className="text-left">Radius (m)</TableHead>
-              <TableHead className="text-left">Koordinat (Latitude, Longitude)</TableHead>
-              <TableHead className="text-left">Status</TableHead> */}
-              <TableHead className="text-left">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* {paginatedGeofences.map((geofence) => ( */}
-            {filteredGeofences.map((geofence, index) => (
-              <TableRow key={geofence._id} className="hover:bg-gray-50">
-                <TableCell>{index + 1}</TableCell>
-                {/* <TableCell>{geofence._id || "-"}</TableCell> */}
-                <TableCell>{geofence.externalId || "-"}</TableCell>
-                <TableCell>{geofence.description || "-"}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{geofence.tag || "-"}</Badge>
-                </TableCell>
-                {/* <TableCell>{geofence.type}</TableCell> */}
-                <TableCell>{geofence.geometryRadius}</TableCell>
-                <TableCell>
-                  {geofence.geometryCenter.coordinates[1]}, {geofence.geometryCenter.coordinates[0]}
-                </TableCell>
-                <TableCell>{geofence.enabled ? "Aktif" : "Tidak Aktif"}</TableCell>
-                <TableCell>
-                  <div className='flex flex-nowrap'>
-                    <Button onClick={() => handleEditPlace(geofence)} variant="outline" className="mr-2">
-                      <Pencil className="inline" />
-                      {/* Edit */}
-                    </Button>
-                    <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" onClick={() => setSelectedGeofence(geofence)}>
-                          <Trash2 className="inline" />
-                          {/* Hapus */}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Hapus Tempat</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        {/* <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div> */}
-                        <AlertDialogFooter>
-                          <Button variant="outline" onClick={() => setOpenAlertDialog(false)}>
-                            <X className="inline" />
-                            Batal
-                          </Button>
-                          <Button variant="destructive" onClick={handleDeletePlace}>
-                            <Trash2 className="inline" />
-                            Hapus
-                          </Button>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+        <ScrollArea className="w-full h-[560px] p-4 border rounded-md">
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-white">
+              <TableRow>
+                <TableHead>No.</TableHead>
+                <TableHead onClick={() => handleSort("externalId")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("externalId")}
+                    ID Tempat
                   </div>
-                </TableCell>
+                </TableHead>
+                <TableHead onClick={() => handleSort("description")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("description")}
+                    Nama Tempat
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort("tag")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("tag")}
+                    Tag
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort("geometryRadius")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("geometryRadius")}
+                    Radius (m)
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("geometryCenter.coordinates")}
+                    Koordinat
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort("enabled")}>
+                  <div className='flex items-center gap-x-2'>
+                    {getSortIcon("enabled")}
+                    Status
+                  </div>
+                </TableHead>
+                <TableHead className="text-left">Aksi</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {/* {paginatedGeofences.map((geofence) => ( */}
+              {filteredGeofences.map((geofence, index) => (
+                <TableRow key={geofence._id} className="hover:bg-gray-50">
+                  <TableCell>{index + 1}</TableCell>
+                  {/* <TableCell>{geofence._id || "-"}</TableCell> */}
+                  <TableCell>{geofence.externalId || "-"}</TableCell>
+                  <TableCell>{geofence.description || "-"}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{geofence.tag || "-"}</Badge>
+                  </TableCell>
+                  {/* <TableCell>{geofence.type}</TableCell> */}
+                  <TableCell>{geofence.geometryRadius}</TableCell>
+                  <TableCell>
+                    {geofence.geometryCenter.coordinates[1]}, {geofence.geometryCenter.coordinates[0]}
+                  </TableCell>
+                  <TableCell>{geofence.enabled ? "Aktif" : "Tidak Aktif"}</TableCell>
+                  <TableCell>
+                    <div className='flex flex-nowrap'>
+                      <Button onClick={() => handleEditPlace(geofence)} variant="outline" className="mr-2">
+                        <Pencil className="inline" />
+                        {/* Edit */}
+                      </Button>
+                      <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" onClick={() => setSelectedGeofence(geofence)}>
+                            <Trash2 className="inline" />
+                            {/* Hapus */}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Hapus Tempat</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          {/* <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div> */}
+                          <AlertDialogFooter>
+                            <Button variant="outline" onClick={() => setOpenAlertDialog(false)}>
+                              <X className="inline" />
+                              Batal
+                            </Button>
+                            <Button variant="destructive" onClick={handleDeletePlace}>
+                              <Trash2 className="inline" />
+                              Hapus
+                            </Button>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </div >
 
-      {geofences.length === 0 && (
-        <div className="mt-4 text-center text-gray-500">Tidak ada data tempat untuk ditampilkan.</div>
-      )}
+      {
+        geofences.length === 0 && (
+          <div className="mt-4 text-center text-gray-500">Tidak ada data tempat untuk ditampilkan.</div>
+        )
+      }
+
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-sm text-gray-600">
+          Total {count} tempat • Halaman {currentPage} dari {totalPages}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            variant="outline"
+          >
+            Sebelumnya
+          </Button>
+
+          {/* Input lompat ke halaman */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Lompat ke:</span>
+            <Input
+              type="number"
+              value={goToPage}
+              onChange={(e) => setGoToPage(e.target.value)}
+              min={1}
+              max={totalPages}
+              className="w-20"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleGoToPage();
+                }
+              }}
+            />
+            <Button
+              onClick={handleGoToPage}
+              variant="outline"
+              disabled={!goToPage || isNaN(parseInt(goToPage))}
+            >
+              Go
+            </Button>
+          </div>
+
+          <Button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            variant="outline"
+          >
+            Selanjutnya
+          </Button>
+        </div>
+      </div>
 
       {/* Add Place Dialog/Modal */}
       <Dialog open={openAddPlaceDialog} onOpenChange={setOpenAddPlaceDialog}>
@@ -864,6 +955,6 @@ export default function Places() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
