@@ -64,7 +64,7 @@ export default function Tickets() {
   const { data: ticketsData, isLoading, error, refetch } = useQuery({
     queryKey: ["allTickets", startDate, endDate],
     queryFn: () => fetchTickets(format(startDate || new Date(), "yyyy-MM-dd"), format(endDate || new Date(), "yyyy-MM-dd")),
-    // refetchInterval: 300000, // Refetch every 5 minutes
+    refetchInterval: 600000, // Refetch every 10 minutes
   });
 
   const users = ticketsData?.users ?? [];

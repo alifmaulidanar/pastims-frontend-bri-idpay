@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GeofenceRadar } from "@/types";
+const SLSS = import.meta.env.VITE_slss;
 
 // Fetch geofences from the Radar API
 export const fetchGeofencesRadar = async (): Promise<GeofenceRadar[] | undefined> => {
   try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const token = localStorage.getItem(`${SLSS}`);
     const response = await fetch(`${import.meta.env.VITE_abu_V2}/admin/geofences/radar/geofences`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
@@ -26,7 +26,7 @@ export const fetchGeofencesRadar = async (): Promise<GeofenceRadar[] | undefined
 // Fetch geofences from the database with pagination
 export const fetchGeofences = async ({ queryKey }: { queryKey: [string, number, number] }) => {
   try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const token = localStorage.getItem(`${SLSS}`);
     const [, limit, page] = queryKey;
     const response = await fetch(`${import.meta.env.VITE_abu_V2}/admin/geofences?limit=${limit}&page=${page}`,
       {

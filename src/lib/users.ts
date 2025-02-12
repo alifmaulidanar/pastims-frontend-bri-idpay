@@ -1,11 +1,12 @@
 import { UserRadar, User } from "@/types";
 
 const BASE_URL = import.meta.env.VITE_abu_V2;
+const SLSS = import.meta.env.VITE_slss;
 
 // Fetch users from the backend API
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const token = localStorage.getItem(`${SLSS}`);
     const response = await fetch(`${BASE_URL}/admin/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
@@ -27,7 +28,7 @@ export const fetchUsers = async (): Promise<User[]> => {
 // Get Radar Users
 export const fetchRadarUsers = async (): Promise<UserRadar[] | undefined> => {
   try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const token = localStorage.getItem(`${SLSS}`);
     const response = await fetch(`${BASE_URL}/admin/users/radar/users`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,

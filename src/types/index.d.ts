@@ -98,3 +98,15 @@ export interface Ticket {
 export interface TicketPhoto {
   photos: string[];
 }
+
+export interface Trip {
+  externalId: string,
+  userId: string,
+  username: string,
+  geofenceId: string,
+  geofenceDescription: string,
+  geofenceTag: string,
+  status: string,
+  createdAt: string,
+  updatedAt: string,
+}

@@ -15,14 +15,14 @@ export default function Landing() {
     <div className="flex flex-col min-h-screen">
       {/* Set Page Title */}
       <Helmet>
-        <title>PastiMS</title>
+        <title>{import.meta.env.VITE_PT}</title>
       </Helmet>
 
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center max-w-screen-lg mx-auto h-14">
           <Link to="/" className="flex items-center space-x-2">
             <Navigation className="w-6 h-6 text-emerald-500" />
-            <span className="font-bold">PastiMS Admin</span>
+            <span className="font-bold">{import.meta.env.VITE_LT}</span>
           </Link>
           <nav className="flex gap-4 ml-auto">
             <Link to="/login">

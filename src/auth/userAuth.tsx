@@ -1,5 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import supabase from '@/utils/supabase';
 const BASE_URL = import.meta.env.VITE_abu_V2;
+const SLSS = import.meta.env.VITE_slss;
 const supabaseLocalStorageSession = import.meta.env.VITE_slss;
 
 export const handleLogin = async (email: string, password: string) => {
@@ -39,7 +41,7 @@ export const handleLogout = async () => {
   if (!isConfirmed) return;
 
   try {
-    const token = localStorage.getItem("sb-dobdbdahljvbkymkssgm-auth-token");
+    const token = localStorage.getItem(`${SLSS}`);
     const response = await fetch(`${BASE_URL}/auth/logout`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
