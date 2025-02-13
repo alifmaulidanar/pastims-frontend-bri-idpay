@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "leaflet/dist/leaflet.css";
 import { Ticket } from "@/types";
@@ -36,17 +37,21 @@ export default function Tickets() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openInfoDialog, setOpenInfoDialog] = useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
-  const [formValues, setFormValues] = useState({ user_id: "", geofence_id: "", description: "" });
+  const [formValues, setFormValues] = useState({ user_id: "", geofence_id: "", description: "", status: "", created_at: "", updated_at: "" });
   const [openUploadDialog, setOpenUploadDialog] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [ticketPhotos, setTicketPhotos] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [alertAction, setAlertAction] = useState<any>("cancel");
+  // const [searchTerm, setSearchTerm] = useState("");
+  // const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [devMode, setDevMode] = useState(false);
 
   // const [startDate, setStartDate] = useState<Date | null>(new Date()); // Default: Today
-  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 7)); // 7 days ago
+  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 1)); // 1 day ago
   const [endDate, setEndDate] = useState<Date | null>(new Date()); // Default: Today
 
   // Disable body scroll when dialog is open
@@ -60,11 +65,17 @@ export default function Tickets() {
     };
   }, []);
 
+  // useEffect(() => {
+  //   if (!isSelectOpen) {
+  //     setSearchTerm(""); // Reset pencarian saat dropdown ditutup
+  //   }
+  // }, [isSelectOpen]);
+
   // Fetch Tickets
   const { data: ticketsData, isLoading, error, refetch } = useQuery({
     queryKey: ["allTickets", startDate, endDate],
     queryFn: () => fetchTickets(format(startDate || new Date(), "yyyy-MM-dd"), format(endDate || new Date(), "yyyy-MM-dd")),
-    refetchInterval: 600000, // Refetch every 10 minutes
+    // refetchInterval: 600000, // Refetch every 10 minutes
   });
 
   const users = ticketsData?.users ?? [];
@@ -202,8 +213,8 @@ export default function Tickets() {
     }
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!selectedTicket) return;
 
     const ticketData = {
@@ -221,14 +232,10 @@ export default function Tickets() {
         body: JSON.stringify(ticketData),
       });
 
-      if (!response.ok) {
-        console.error("Failed to update ticket");
-        return;
-      }
+      if (!response.ok) throw new Error("Update failed");
 
-      setOpenDialog(false);
-      await queryClient.invalidateQueries({ queryKey: ['allTickets'] }); // Refresh data
-      window.location.reload();
+      setIsEditing(false);
+      await queryClient.invalidateQueries({ queryKey: ['allTickets'] });
     } catch (error) {
       console.error("Error updating ticket:", error);
     }
@@ -240,6 +247,9 @@ export default function Tickets() {
       user_id: ticket?.user_id || "",
       geofence_id: ticket?.geofence_id || "",
       description: ticket?.description || "",
+      status: ticket?.status || "",
+      created_at: ticket?.created_at || "",
+      updated_at: ticket?.updated_at || "",
     });
     setOpenDialog(true);
   };
@@ -250,9 +260,7 @@ export default function Tickets() {
     setTripInfo(null);
     if (ticket?.trip_id) {
       const tripData = await fetchTripInfo(ticket.trip_id);
-      console.log({ tripData });
       setTripInfo(tripData);
-      console.log({ tripInfo });
     }
 
     setTicketPhotos(getTicketPhotos.photos);
@@ -261,13 +269,17 @@ export default function Tickets() {
       user_id: ticket?.user_id || "",
       geofence_id: ticket?.geofence_id || "",
       description: ticket?.description || "",
+      status: ticket?.status || "",
+      created_at: ticket?.created_at || "",
+      updated_at: ticket?.updated_at || "",
     });
     setOpenInfoDialog(true);
   };
 
-  const handleAlertDialog = (ticket: Ticket | null) => {
+  const handleAlertDialog = (ticket: Ticket | null, action: "cancel" | "delete") => {
     setSelectedTicket(ticket);
-    setOpenAlertDialog(true)
+    setAlertAction(action);
+    setOpenAlertDialog(true);
   };
 
   const handleFormChange = (field: string, value: string) => {
@@ -388,15 +400,42 @@ export default function Tickets() {
     document.body.removeChild(link);
   };
 
-  const handleDelete = async () => {
+  const handleCancelTicket = async () => {
     if (!selectedTicket) return;
 
     try {
-      const response = await fetch(`${BASE_URL}/ticket/status/not-running`, {
+      const token = localStorage.getItem(import.meta.env.VITE_slss);
+      const response = await fetch(`${BASE_URL2}/admin/tickets/status/cancel`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_rlsk,
+          Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
+        },
+        body: JSON.stringify({ ticket_id: selectedTicket.ticket_id, status: "canceled" }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to update ticket status");
+        return;
+      }
+
+      setOpenAlertDialog(false);
+      await queryClient.invalidateQueries({ queryKey: ['allTickets'] }); // Refresh data
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    if (!selectedTicket) return;
+
+    try {
+      const token = localStorage.getItem(import.meta.env.VITE_slss);
+      const response = await fetch(`${BASE_URL2}/admin/tickets/delete/${selectedTicket.ticket_id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
         },
         body: JSON.stringify({ ticket_id: selectedTicket.ticket_id, status: "canceled" }),
       });
@@ -415,6 +454,20 @@ export default function Tickets() {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading tickets: {error.message}</div>;
+
+  // function handleEditPhoto(url: any): void {
+  //   console.log("Edit photo: ", url);
+  //   throw new Error("Function not implemented.");
+  // }
+
+  function handleDeletePhoto(url: string): void {
+    console.log(`Deleting photo: ${url}`);
+  }
+
+  // const filteredGeofences = geofences.filter((geofence) =>
+  //   geofence.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   geofence.external_id.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   return (
     <div className="w-[85%] max-w-screen-xxl p-6">
@@ -674,10 +727,16 @@ export default function Tickets() {
                       <Pencil className="inline" />
                     </Button>
                     <Button
-                      onClick={() => handleAlertDialog(ticket)}
-                      variant="destructive"
+                      onClick={() => handleAlertDialog(ticket, "cancel")}
+                      variant="destructive" className="mr-2"
                     >
                       <X className="inline" />
+                    </Button>
+                    <Button
+                      onClick={() => handleAlertDialog(ticket, "delete")}
+                      variant="destructive"
+                    >
+                      <Trash2Icon className="inline" />
                     </Button>
                   </>
                 }
@@ -695,7 +754,7 @@ export default function Tickets() {
         </TableBody>
       </Table>
 
-      {/* Dialog for adding or updating user */}
+      {/* Dialog for adding or updating ticket */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogTrigger asChild>
           <Button className="hidden" />
@@ -757,7 +816,7 @@ export default function Tickets() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for showing ticket detail */}
+      {/* Dialog for showing ticket detail / Modal Detail Ticket */}
       <Dialog open={openInfoDialog} onOpenChange={setOpenInfoDialog}>
         <DialogTrigger asChild>
           <Button className="hidden" />
@@ -775,55 +834,73 @@ export default function Tickets() {
                   <div className="grid grid-cols-1 gap-y-4">
                     <div>
                       <label className="block text-sm">ID Tiket</label>
-                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                        {selectedTicket?.ticket_id || "-"}
-                      </p>
+                      <input
+                        type="text"
+                        value={selectedTicket?.ticket_id || "-"}
+                        disabled
+                        className="w-full px-4 py-2 whitespace-pre-line bg-gray-100 border rounded"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm">Deskripsi</label>
-                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                        {selectedTicket?.description || "-"}
-                      </p>
+                      <input
+                        type="text"
+                        value={selectedTicket?.description || "-"}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2 border rounded ${isEditing ? 'bg-white' : 'bg-gray-100'}`}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm">Dibuat pada (WIB)</label>
-                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                        {new Date(selectedTicket?.created_at ?? '').toLocaleString('id-ID', {
-                          timeZone: 'Asia/Jakarta',
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }).replace('.', ':')}
-                      </p>
+                      <DatePicker
+                        selected={new Date(formValues.created_at)}
+                        onChange={(date) => handleFormChange("created_at", date?.toISOString() || "")}
+                        className="px-4 py-2 border rounded"
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        disabled={!isEditing}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm">Diperbarui pada (WIB)</label>
-                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                        {new Date(selectedTicket?.updated_at ?? '').toLocaleString('id-ID', {
-                          timeZone: 'Asia/Jakarta',
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }).replace('.', ':')}
-                      </p>
+                      <DatePicker
+                        selected={new Date(formValues.updated_at)}
+                        onChange={(date) => handleFormChange("updated_at", date?.toISOString() || "")}
+                        className="w-full px-4 py-2 border rounded"
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        disabled={!isEditing}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm">Status Tiket</label>
-                      <p className="px-4 py-2 whitespace-pre-line bg-gray-100 border rounded">
-                        {selectedTicket?.status === "assigned" && "Ditugaskan"}
-                        {selectedTicket?.status === "on_progress" && "Berjalan"}
-                        {selectedTicket?.status === "started" && "Dimulai"}
-                        {selectedTicket?.status === "pending" && "Menunggu"}
-                        {selectedTicket?.status === "approaching" && "Mendekati"}
-                        {selectedTicket?.status === "arrived" && "Tiba"}
-                        {selectedTicket?.status === "completed" && "Selesai"}
-                        {selectedTicket?.status === "expired" && "Kadaluarsa"}
-                        {selectedTicket?.status === "canceled" && "Dibatalkan"}
-                      </p>
+                      <Select
+                        onValueChange={(value) => handleFormChange("status", value)}
+                        value={formValues.status || selectedTicket?.status}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className={`w-full px-4 py-2 border rounded ${isEditing ? 'bg-white' : 'bg-gray-100'}`}>
+                          <SelectValue placeholder="Pilih Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="assigned">
+                            <Badge variant="assigned">Ditugaskan</Badge>
+                          </SelectItem>
+                          <SelectItem value="on_progress">
+                            <Badge variant="warning">Berjalan</Badge>
+                          </SelectItem>
+                          <SelectItem value="completed">
+                            <Badge variant="success">Selesai</Badge>
+                          </SelectItem>
+                          <SelectItem value="canceled">
+                            <Badge variant="destructive">Dibatalkan</Badge>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -833,15 +910,52 @@ export default function Tickets() {
                   <div className="grid grid-cols-1 gap-y-4">
                     <div>
                       <label className="block text-sm">ID Tempat</label>
-                      <p className="px-4 py-2 bg-gray-100 border rounded">
-                        {selectedTicket?.geofence_id || "-"}
-                      </p>
+                      <input
+                        type="text"
+                        value={selectedTicket?.geofence_id || ""}
+                        disabled
+                        className="w-full px-4 py-2 whitespace-pre-line bg-gray-100 border rounded"
+                      />
+                      {/* <Select
+                        onValueChange={(value) => handleFormChange("geofence_id", value)}
+                        value={formValues.geofence_id || selectedTicket?.geofence_id}
+                        // disabled={!isEditing}
+                        disabled
+                        onOpenChange={(open) => setIsSelectOpen(open)}
+                      >
+                        <SelectTrigger className={`w-full px-4 py-2 border rounded ${isEditing ? 'bg-white' : 'bg-gray-100'}`}>
+                          <SelectValue placeholder="Pilih Tempat" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <div className="p-2">
+                            <Input
+                              type="text"
+                              placeholder="Cari tempat..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="w-full"
+                            />
+                          </div>
+                          {filteredGeofences.length > 0 ? (
+                            filteredGeofences.map((geofence) => (
+                              <SelectItem key={geofence.external_id} value={geofence.external_id}>
+                                <Badge variant="secondary">{geofence.external_id}</Badge> {geofence.description}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-2 text-sm text-gray-500">Tidak ditemukan.</div>
+                          )}
+                        </SelectContent>
+                      </Select> */}
                     </div>
                     <div>
                       <label className="block text-sm">Nama Tempat</label>
-                      <p className="px-4 py-2 bg-gray-100 border rounded">
-                        {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description || "-"}
-                      </p>
+                      <input
+                        type="text"
+                        value={geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description || "-"}
+                        disabled
+                        className={`w-full px-4 py-2 border rounded bg-gray-100`}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm">Tag</label>
@@ -976,7 +1090,8 @@ export default function Tickets() {
                   </div>
                 </div>
                 {/* Foto Tiket */}
-                <div className="col-span-4">
+                <div>
+                  <div className="col-span-4"></div>
                   <h3 className="mt-4 mb-2 font-medium">Foto Tiket</h3>
                   <div className="flex gap-4">
                     {ticketPhotos.length > 0 ? (
@@ -985,18 +1100,40 @@ export default function Tickets() {
                           <img
                             src={photo.url}
                             alt={`Foto ${index + 1}`}
-                            className="object-cover h-32"
+                            className="object-cover h-32 cursor-pointer"
                             onClick={() => setSelectedImage(photo.url)} />
+                          {isEditing && (
+                            <div className="absolute top-0 right-0 p-1">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeletePhoto(photo.url)}
+                              >
+                                <Trash2 size={12} />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
                       <p className="text-gray-500">Tidak ada foto yang tersedia.</p>
                     )}
                   </div>
+                  {isEditing && ticketPhotos.length > 0 && (
+                    <div className="mt-4">
+                      <Button
+                        variant="destructive"
+                        onClick={() => ticketPhotos.forEach(photo => handleDeletePhoto(photo.url))}
+                      >
+                        <Trash2 className="inline" />
+                        Hapus Semua Foto
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
-              <p className="text-gray-500">Memuat informasi perjalanan...</p>
+              <p className="text-gray-500">Tidak ada informasi perjalanan yang tersedia.</p>
             )}
           </div>
           {selectedImage ? (
@@ -1014,24 +1151,82 @@ export default function Tickets() {
           ) : null}
 
           <div className="flex justify-end mt-4 space-x-2">
-            {(selectedTicket) &&
+            {selectedTicket && (
               <>
-                <Button
-                  // onClick={() => handleAddOrUpdate(selectedTicket)}
-                  variant="outline"
-                >
-                  <Pencil className="inline" />
-                  Edit Tiket
-                </Button>
-                <Button
-                  // onClick={() => handleAlertDialog(selectedTicket)}
-                  variant="destructive"
-                >
-                  <Trash2Icon className="inline" />
-                  Hapus Tiket
-                </Button>
+                {!isEditing ? (
+                  // Default mode (non-editing)
+                  <>
+                    <a
+                      href={`${BASE_URL2}/admin/tickets/pdf/${selectedTicket.ticket_id}/${selectedTicket.user_id}/${selectedTicket.geofence_id}`}
+                      target="_blank"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-500 hover:underline gap-x-2"
+                    >
+                      <Download className="inline" size="16" />
+                      Unduh PDF
+                    </a>
+                    {/* <Button
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                    >
+                      <Pencil className="inline" />
+                      Edit Tiket
+                    </Button> */}
+                    {selectedTicket.status !== "canceled" && (
+                      <Button
+                        onClick={() => handleAlertDialog(selectedTicket, "cancel")}
+                        variant="destructive"
+                      >
+                        <X className="inline" />
+                        Batalkan Tiket
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => handleAlertDialog(selectedTicket, "delete")}
+                      variant="destructive"
+                    >
+                      <Trash2Icon className="inline" />
+                      Hapus Tiket
+                    </Button>
+                  </>
+                ) : (
+                  // Editing mode
+                  <>
+                    <div className="p-4 mb-4 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50">
+                      {/* <div className="flex items-center mb-2">
+                        <InfoIcon className="w-5 h-5 mr-2" />
+                        <span className="font-medium">Informasi</span>
+                      </div> */}
+                      {/* <Badge variant="warning">Berjalan</Badge> */}
+                      <p>Jika terdapat kesalahan pemilihan Tempat atau Pengguna, maka pembuatan tiket harus diulangi dari awal.</p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setFormValues({
+                          user_id: selectedTicket.user_id,
+                          geofence_id: selectedTicket.geofence_id,
+                          description: selectedTicket.description || "",
+                          status: selectedTicket.status,
+                          created_at: selectedTicket.created_at,
+                          updated_at: selectedTicket.updated_at,
+                        });
+                      }}
+                      variant="outline"
+                    >
+                      <X className="inline" />
+                      Batal
+                    </Button>
+                    <Button
+                      onClick={() => handleUpdate()}
+                      variant="default"
+                    >
+                      <Save className="inline" />
+                      Simpan Perubahan
+                    </Button>
+                  </>
+                )}
               </>
-            }
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -1039,17 +1234,23 @@ export default function Tickets() {
       {/* Alert Dialog for delete confirmation */}
       <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
         <AlertDialogContent>
-          <AlertDialogTitle>Apakah yakin ingin membatalkan tiket ini?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Apakah yakin ingin {alertAction === "delete" ? "menghapus" : "membatalkan"} tiket ini?<br />
+            - {selectedTicket?.ticket_id}<br />
+            - {selectedTicket?.geofence_id} - {geofences.find((geofence) => geofence.external_id === selectedTicket?.geofence_id)?.description}<br />
+            - {selectedTicket?.description}
+          </AlertDialogTitle>
           <div className="flex justify-end space-x-2">
             <AlertDialogCancel onClick={() => setOpenAlertDialog(false)}>
               <X className="inline" />
               Tidak jadi
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => handleDelete()}
+              onClick={alertAction === "delete" ? handleDeleteTicket : handleCancelTicket}
+              className="bg-red-500 hover:bg-red-600"
             >
               <Trash2 className="inline" />
-              Ya, batalkan tiket
+              {alertAction === "delete" ? "Hapus" : "Batalkan"} Tiket
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

@@ -473,7 +473,7 @@ export default function Trips() {
       {/* Pagination controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="text-sm text-gray-600">
-          Total {count} tempat • Halaman {currentPage} dari {totalPages}
+          Total {count} perjalanan • Halaman {currentPage} dari {totalPages}
         </div>
         <div className="flex items-center space-x-2">
           <Button
