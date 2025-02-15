@@ -1090,8 +1090,7 @@ export default function Tickets() {
                   </div>
                 </div>
                 {/* Foto Tiket */}
-                <div>
-                  <div className="col-span-4"></div>
+                <div className="col-span-4">
                   <h3 className="mt-4 mb-2 font-medium">Foto Tiket</h3>
                   <div className="flex gap-4">
                     {ticketPhotos.length > 0 ? (
