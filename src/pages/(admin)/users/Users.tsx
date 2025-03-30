@@ -540,7 +540,7 @@ export default function Users() {
               className="w-full px-4 py-2 border rounded"
             />
             <div className="flex justify-end space-x-2">
-              <Button onClick={() => setOpenDialog(false)} variant="outline">
+              <Button type='button' onClick={() => setOpenDialog(false)} variant="outline">
                 <X className="inline" />
                 Batal
               </Button>

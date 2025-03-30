@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "leaflet/dist/leaflet.css";
+import Papa from "papaparse";
 import { Ticket } from "@/types";
+import "leaflet/dist/leaflet.css";
 import DatePicker from "react-datepicker";
 import { subDays, format } from "date-fns";
 import { Helmet } from "react-helmet-async";
@@ -23,7 +24,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronDown, ChevronUp, Download, Info, InfoIcon, Pencil, Save, TicketPlus, Trash2, Trash2Icon, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import Papa from "papaparse";
 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/new-tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
@@ -1005,7 +1005,7 @@ export default function Tickets() {
               </div>
 
               <div className="flex justify-end space-x-2">
-                <Button onClick={() => setOpenDialog(false)} variant="outline">
+                <Button type="button" onClick={() => setOpenDialog(false)} variant="outline">
                   <X className="inline" /> Batal
                 </Button>
                 <Button type="submit">
