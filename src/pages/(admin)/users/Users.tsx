@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { LoadingOverlay } from '@/components/customs/loading-state';
+import { ResponseStatus } from '@/components/customs/response-alert';
 import { handleAddUser, handleDeleteUser, handleUpdateUser } from './lib/actions';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +18,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Memuat data...");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("username");
@@ -25,6 +29,12 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<string>(selectedUser?.role || 'user');
+  const [apiResponse, setApiResponse] = useState<{
+    status: 'idle' | 'success' | 'error' | 'warning'
+    title?: string
+    description?: string
+    errors?: Array<{ message: string, details?: string }>
+  }>({ status: 'idle' })
   const [devMode, setDevMode] = useState(false);
   // const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default 10 rows
   // const [currentPage, setCurrentPage] = useState<number>(1);
@@ -43,10 +53,22 @@ export default function Users() {
   //  Fetch users on mount
   useEffect(() => {
     const getUsers = async () => {
-      const fetchedUsers = await fetchUsers();
-      setUsers(fetchedUsers);
-      // filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder);
-      filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder, devMode);
+      setIsLoading(true);
+      setLoadingMessage("Memuat data pengguna...");
+      try {
+        const fetchedUsers = await fetchUsers();
+        setUsers(fetchedUsers);
+        filterAndSortUsers(fetchedUsers, searchQuery, statusFilter, sortOrder, devMode);
+      } catch (error: any) {
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: `Gagal memuat data pengguna. ${error}`,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
     getUsers();
   }, []);
@@ -70,34 +92,51 @@ export default function Users() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setOpenDialog(false);
+    setIsLoading(true);
+    setLoadingMessage("Menyimpan pengguna...");
     const formData = new FormData(e.target as HTMLFormElement);
     formData.set('role', selectedRole);
     const updatedUsers = await handleAddUser(users, formData);
     setUsers(updatedUsers);
-    setOpenDialog(false);
-    window.location.reload();
+    setIsLoading(false);
+    setApiResponse({
+      status: 'success',
+      title: 'Berhasil',
+      description: `Pengguna ${formData.get('username')} berhasil ditambahkan.`,
+    });
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!selectedUser) return;
-
+    setOpenDialog(false);
+    setIsLoading(true);
+    setLoadingMessage("Memperbarui pengguna...");
     const formData = new FormData(e.target as HTMLFormElement);
     const updatedUsers = await handleUpdateUser(selectedUser, users, formData);
     setUsers(updatedUsers);
-    setOpenDialog(false);
-    window.location.reload();
+    setIsLoading(false);
+    setApiResponse({
+      status: 'success',
+      title: 'Berhasil',
+      description: `Pengguna ${formData.get('username')} berhasil diperbarui.`,
+    });
   };
 
   const handleDelete = async () => {
     if (!selectedUser) return;
-
+    setOpenAlertDialog(false);
+    setIsLoading(true);
+    setLoadingMessage("Menghapus pengguna...");
     const deletedUsers = await handleDeleteUser(users, selectedUser);
     setUsers(deletedUsers);
-    setOpenAlertDialog(false);
-    window.location.reload();
+    setIsLoading(false);
+    setApiResponse({
+      status: 'success',
+      title: 'Berhasil',
+      description: `Pengguna ${selectedUser.username} berhasil dihapus.`,
+    });
   };
 
   const handleAddOrUpdate = (user: User | null) => {
@@ -146,8 +185,8 @@ export default function Users() {
       filtered = filtered.filter((user: any) => {
         // return !/^\[.*\]$/.test(user.username);
         return !/^\[.*\]$/.test(user.username) &&
-          !user.email.endsWith('@example.com') &&
-          user.phone !== '~';
+          !user.email.endsWith('@example.com')
+        // user.phone !== '~';
       });
     }
 
@@ -530,6 +569,16 @@ export default function Users() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      <LoadingOverlay isLoading={isLoading} message={loadingMessage} />
+      {apiResponse.status !== 'idle' && (
+        <ResponseStatus
+          status={apiResponse.status}
+          title={apiResponse.title || ''}
+          description={apiResponse.description}
+          errors={apiResponse.errors}
+          onDismiss={() => setApiResponse({ status: 'idle' })}
+        />
+      )}
     </div>
   );
 }

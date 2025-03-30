@@ -2,20 +2,23 @@
 import "leaflet/dist/leaflet.css";
 import { fetchDBTrips } from "@/lib/trips";
 import { Helmet } from "react-helmet-async";
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import "leaflet-geosearch/dist/geosearch.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { LoadingOverlay } from "@/components/customs/loading-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Trips() {
   const [filteredTrips, setFilteredTrips] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Memuat...");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("destinationGeofenceExternalId");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -38,12 +41,32 @@ export default function Trips() {
   }, []);
 
   // Fetch Tickets
-  const { data: tripsData, isLoading, error } = useQuery({
+  const { data: tripsData, isLoading: isDataLoading, error } = useQuery({
     queryKey: ['allTrips', pageSize, currentPage],
     queryFn: ({ queryKey }) => fetchDBTrips({ queryKey: queryKey as [string, number, number] }),
     initialData: { trips: [], count: 0 },
     refetchInterval: 600000, // Refetch every 10 minutes
   });
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isDataLoading) {
+      setLoadingMessage("Memuat data perjalanan...");
+      setIsLoading(true);
+    }
+
+    if (!isDataLoading && isMounted.current) {
+      setIsLoading(false);
+    }
+  }, [isDataLoading]);
 
   // const { trips, count } = tripsData ?? { trips: [], count: 0 };
   const { trips, count } = tripsData ?? { trips: [], count: 0 };
@@ -238,7 +261,6 @@ export default function Trips() {
     document.body.removeChild(link);
   };
 
-  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading trips: {error.message}</div>;
 
   return (
@@ -463,12 +485,12 @@ export default function Trips() {
               ))}
             </TableBody>
           </Table>
+          {trips.length === 0 && (
+            <div className="mt-4 text-center text-gray-500">Tidak ada data perjalanan untuk ditampilkan.</div>
+          )}
         </ScrollArea>
       </div>
 
-      {trips.length === 0 && (
-        <div className="mt-4 text-center text-gray-500">Tidak ada data perjalanan untuk ditampilkan.</div>
-      )}
 
       {/* Pagination controls */}
       <div className="flex items-center justify-between mt-4">
@@ -518,6 +540,7 @@ export default function Trips() {
           </Button>
         </div>
       </div>
+      <LoadingOverlay isLoading={isLoading} message={loadingMessage} />
     </div>
   );
 }

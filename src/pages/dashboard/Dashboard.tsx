@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from "@supabase/auth-helpers-react";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
+import { LoadingOverlay } from "@/components/customs/loading-state";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -22,6 +23,8 @@ const MapView = lazy(() => import("../../components/customs/map-view")); // Lazy
 const Dashboard = () => {
   const user = useUser();
   const mapRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Memuat...");
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [tileLayer, setTileLayer] = useState<string>("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 
@@ -34,11 +37,31 @@ const Dashboard = () => {
   }, []);
 
   // Fetch all map data (users, geofences, tickets)
-  const { data: mapsData, isLoading, error } = useQuery({
+  const { data: mapsData, isLoading: isDataLoading, error } = useQuery({
     queryKey: ['maps'],
     queryFn: fetchMaps,
     refetchInterval: 600000, // Refetch every 10 minutes
   });
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isDataLoading) {
+      setLoadingMessage("Memuat data...");
+      setIsLoading(true);
+    }
+
+    if (!isDataLoading && isMounted.current) {
+      setIsLoading(false);
+    }
+  }, [isDataLoading]);
 
   // Extract data from mapsData
   const geofences = mapsData?.geofences ?? [];
@@ -83,10 +106,8 @@ const Dashboard = () => {
     setTileLayer(layer);
   };
 
-  // Render the map
-  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data</div>;
-  if (!location) return <div>Loading...</div>;
+  if (!location) return <div>Memuat peta lokasi...</div>;
 
   return (
     <>
@@ -157,6 +178,7 @@ const Dashboard = () => {
           )}
         </Suspense>
       </div>
+      <LoadingOverlay isLoading={isLoading} message={loadingMessage} />
     </>
   );
 };

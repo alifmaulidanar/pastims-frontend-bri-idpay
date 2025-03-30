@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
+import Papa from "papaparse";
 import "leaflet/dist/leaflet.css";
 import { Helmet } from "react-helmet-async";
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge"
 import { useDropzone } from "react-dropzone";
 import "leaflet-geosearch/dist/geosearch.css";
@@ -12,27 +12,34 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { fetchGeofences } from "@/lib/geofences";
+import { useEffect, useRef, useState } from "react";
 import { GeofenceRadar as Geofence } from "@/types";
 import { getLastGeofenceIndex } from "@/lib/actions";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { LoadingOverlay } from "@/components/customs/loading-state";
 import { SearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { MapContainer, TileLayer, Circle, Marker, useMapEvents } from "react-leaflet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Download, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Info, MapPinPlus, Pencil, Save, SearchIcon, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // Define custom icons
 import geofenceIconUrl from "../../../assets/marker-icons/marker-icon.png";
+import { ResponseStatus } from "@/components/customs/response-alert";
 
-const csvGeofencesTemplate = new URL("@/assets/csv-templates/geofences-template.csv", import.meta.url).href;
+const csvGeofencesTemplate = new URL("@/assets/csv-templates/new-geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
+const BASE_URL_V2 = import.meta.env.VITE_abu_V2;
+const SLSS = import.meta.env.VITE_slss;
 
 export default function Places() {
   const queryClient = useQueryClient();
   const [filteredGeofences, setFilteredGeofences] = useState<Geofence[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Memuat...");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("username");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -51,6 +58,12 @@ export default function Places() {
   const [currentPage, setCurrentPage] = useState(1);  // Default: Page 1
   const [totalPages, setTotalPages] = useState(1);  // Default: 1 page
   const [goToPage, setGoToPage] = useState<string>('');  // Go to page input
+  const [apiResponse, setApiResponse] = useState<{
+    status: 'idle' | 'success' | 'error' | 'warning'
+    title?: string
+    description?: string
+    errors?: Array<{ message: string, details?: string }>
+  }>({ status: 'idle' })
   const [devMode, setDevMode] = useState(false);
 
   // Create custom icons
@@ -73,11 +86,31 @@ export default function Places() {
   }, []);
 
   // Fetch geofences
-  const { data: geofencesData, isLoading, error } = useQuery({
+  const { data: geofencesData, isLoading: isDataLoading, error } = useQuery({
     queryKey: ["allGeofences", pageSize, currentPage],
     queryFn: ({ queryKey }) => fetchGeofences({ queryKey: queryKey as [string, number, number] }),
     initialData: { geofences: [], count: 0 },
   });
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isDataLoading) {
+      setLoadingMessage("Memuat data...");
+      setIsLoading(true);
+    }
+
+    if (!isDataLoading && isMounted.current) {
+      setIsLoading(false);
+    }
+  }, [isDataLoading]);
 
   const { geofences, count } = geofencesData ?? { geofences: [], count: 0 };
 
@@ -210,10 +243,19 @@ export default function Places() {
     e.preventDefault();
     const tag = formValues.tag;
 
+    setOpenAddPlaceDialog(false);
+    setIsLoading(true);
+    setLoadingMessage("Menyimpan lokasi...");
+
     // Get latest geofence index
     const latestGeofenceIndex = await getLastGeofenceIndex();
     if (!latestGeofenceIndex) {
-      console.error('Failed to get latest geofence index');
+      setIsLoading(false);
+      setApiResponse({
+        status: 'error',
+        title: 'Kesalahan',
+        description: 'Gagal mendapatkan indeks geofence terbaru.',
+      });
       return;
     }
 
@@ -248,7 +290,12 @@ export default function Places() {
       });
 
       if (!response.ok) {
-        console.error("Failed to save geofence");
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: 'Gagal menambahkan lokasi.',
+        });
         return;
       }
 
@@ -274,16 +321,31 @@ export default function Places() {
         });
 
         if (!response.ok) {
-          console.error("Failed to save geofence");
+          setIsLoading(false);
+          setApiResponse({
+            status: 'error',
+            title: 'Kesalahan',
+            description: 'Gagal menyimpan lokasi.',
+          });
           return;
         }
       } catch (error) {
-        console.error("Failed to save geofence", error);
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: `Gagal menyimpan lokasi. ${error}`,
+        });
+        return;
       }
 
-      setOpenAddPlaceDialog(false);
       await queryClient.invalidateQueries({ queryKey: ["allGeofences"] });
-      window.location.reload();
+      setIsLoading(false);
+      setApiResponse({
+        status: 'success',
+        title: 'Berhasil',
+        description: `Lokasi ${formValues.description} berhasil disimpan.`,
+      });
     } catch (error) {
       console.error("Failed to add geofence:", error);
     }
@@ -347,10 +409,18 @@ export default function Places() {
   // Handle delete place
   const handleDeletePlace = async () => {
     if (!selectedGeofence) return;
+    setOpenAlertDialog(false);
+    setIsLoading(true);
+    setLoadingMessage(`Menghapus lokasi ${selectedGeofence.description}...`);
     const { tag, externalId } = selectedGeofence;
     try {
       if (!tag || !externalId) {
-        console.error("Invalid geofence tag or external ID");
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: 'ID atau Tag lokasi tidak ditemukan.',
+        });
         return;
       }
 
@@ -362,7 +432,12 @@ export default function Places() {
       });
 
       if (!response.ok) {
-        console.error("Failed to delete geofence");
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: 'Gagal menghapus lokasi.',
+        });
         return;
       }
 
@@ -377,18 +452,38 @@ export default function Places() {
         });
 
         if (!response.ok) {
-          console.error("Failed to save geofence to the backend");
+          setIsLoading(false);
+          setApiResponse({
+            status: 'error',
+            title: 'Kesalahan',
+            description: 'Gagal menghapus lokasi.',
+          });
           return;
         }
-      } catch (error) {
-        console.error("Failed to save geofence to the backend:", error);
+      } catch (error: any) {
+        setIsLoading(false);
+        setApiResponse({
+          status: 'error',
+          title: 'Kesalahan',
+          description: `Gagal menghapus lokasi. ${error}`,
+        });
+        return;
       }
 
-      setOpenAlertDialog(false);
       await queryClient.invalidateQueries({ queryKey: ["allGeofences"] });
-      window.location.reload();
+      setIsLoading(false);
+      setApiResponse({
+        status: 'success',
+        title: 'Berhasil',
+        description: `Lokasi ${selectedGeofence.description} berhasil dihapus.`,
+      });
     } catch (error) {
-      console.error("Failed to delete geofence:", error);
+      setIsLoading(false);
+      setApiResponse({
+        status: 'error',
+        title: 'Kesalahan',
+        description: `Gagal menghapus lokasi. ${error}`,
+      });
     }
   };
 
@@ -398,38 +493,152 @@ export default function Places() {
     }
   };
 
+  const validateCSV = async (file: File) => {
+    return new Promise<{ valid: boolean; errors: string[] }>((resolve) => {
+      const errors: string[] = [];
+      Papa.parse(file, {
+        header: true,
+        delimiter: ";",
+        skipEmptyLines: "greedy",
+        encoding: "utf-8",
+        complete: (results: any) => {
+          // Header validation
+          const requiredHeaders = [
+            "Nama Tempat",
+            "Tag (untuk pengelompokkan tempat)",
+            "Radius (dalam meter, default = 30)",
+            "Latitude, Longitude"
+          ];
+
+          const missingHeaders = requiredHeaders.filter(
+            (h) => !results.meta.fields?.includes(h)
+          );
+
+          if (missingHeaders.length > 0) {
+            errors.push(`Kolom wajib tidak ada: ${missingHeaders.join(", ")}. Pastikan Anda tidak menghapus kolom apapun dari template CSV yg diberikan.`);
+            resolve({ valid: false, errors });
+            return;
+          }
+
+          // Rows validation
+          results.data.forEach((row: any, index: any) => {
+            const rowNumber = index + 2;
+            if (!row["Nama Tempat"]?.trim()) {
+              errors.push(`Baris ${rowNumber}: Kolom 'Nama Tempat' wajib diisi`);
+            }
+            if (!row["Tag (untuk pengelompokkan tempat)"]?.trim()) {
+              errors.push(`Baris ${rowNumber}: Kolom 'Tag' wajib diisi`);
+            }
+
+            // Radius validation
+            const radius = row["Radius (dalam meter, default = 30)"] || "30";
+            if (isNaN(Number(radius))) {
+              errors.push(`Baris ${rowNumber}: Radius harus angka`);
+            }
+
+            // Latitude, Longitude validation
+            const latLng = row["Latitude, Longitude"]?.split(/,\s*/);
+            if (!latLng || latLng.length !== 2) {
+              errors.push(`Baris ${rowNumber}: Format koordinat tidak valid (contoh: "-6.200000, 106.816666"). Silakan baca panduan pengisian CSV data tempat.`);
+            } else {
+              const [lat, lng] = latLng;
+              if (isNaN(lat) || lat < -90 || lat > 90) {
+                errors.push(`Baris ${rowNumber}: Latitude tidak valid`);
+              }
+              if (isNaN(lng) || lng < -180 || lng > 180) {
+                errors.push(`Baris ${rowNumber}: Longitude tidak valid`);
+              }
+            }
+          });
+          resolve({ valid: errors.length === 0, errors });
+        },
+        error: (err: any) => {
+          errors.push(`Gagal parsing CSV: ${err.message}`);
+          resolve({ valid: false, errors });
+        },
+      });
+    });
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
+    setOpenUploadDialog(false);
+    setIsLoading(true);
+    setLoadingMessage("Validasi file CSV...");
+
+    const { valid, errors } = await validateCSV(selectedFile);
+    if (!valid) {
+      setApiResponse({
+        status: 'error',
+        title: 'Validasi CSV Gagal',
+        description: 'Terdapat kesalahan dalam format file CSV:',
+        errors: errors.map(msg => ({ message: msg }))
+      });
+      setIsLoading(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", selectedFile);
 
     setUploading(true);
+    setLoadingMessage("Mengunggah file CSV...");
     try {
-      const response = await fetch(`${BASE_URL}/geofences/upload`, {
+      const token = localStorage.getItem(`${SLSS}`);
+      const response = await fetch(`${BASE_URL_V2}/admin/geofences/upload`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
+        },
         body: formData,
       });
 
       if (!response.ok) {
-        console.error("Failed to upload tickets");
+        const errorData = await response.json();
+        setApiResponse({
+          status: 'error',
+          title: 'Gagal Mengunggah File',
+          description: errorData.message || 'Terjadi kesalahan saat mengunggah file',
+          errors: errorData.errors?.map((e: string) => ({ message: e }))
+        });
         setUploading(false);
         return;
       }
 
       const data = await response.json();
       if (data.error) {
-        console.error("Error uploading tickets:", data.error);
+        setApiResponse({
+          status: 'error',
+          title: 'Error Pemrosesan Data',
+          description: data.error,
+          errors: data.failed?.map((f: any) => ({
+            message: `Baris ${f.row}: ${f.error}`,
+            details: f.details
+          }))
+        });
         setUploading(false);
         return;
       }
 
-      setOpenUploadDialog(false);
+      setApiResponse({
+        status: 'success',
+        title: 'Upload Berhasil!',
+        description: `${data.saved} data berhasil diproses` +
+          (data.failed > 0 ? ` (${data.failed} gagal)` : '')
+      });
       setSelectedFile(null);
       setUploading(false);
-      window.location.reload();
     } catch (error) {
-      console.error("Error uploading tickets:", error);
+      setApiResponse({
+        status: 'error',
+        title: 'Kesalahan Jaringan',
+        description: 'Tidak dapat terhubung ke server',
+        errors: [{
+          message: 'Pastikan koneksi internet Anda stabil',
+          details: (error as Error).message
+        }]
+      });
+
       setUploading(false);
     }
   };
@@ -466,15 +675,9 @@ export default function Places() {
       geofence.enabled ? "Aktif" : "Tidak Aktif"
     ]);
 
-    // Combine headers and rows
-    const csvContent =
-      [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
-
-    // Create Blob object to store CSV content
+    const csvContent = [headers.join(";"), ...rows.map((row) => row.map((value) => `"${value}"`).join(";"))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-
-    // Trigger file download
     const link = document.createElement("a");
     link.href = url;
     const date = new Date();
@@ -498,173 +701,181 @@ export default function Places() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading places: {error.message}</div>;
 
   return (
-    <div className="w-[85%] max-w-screen-xxl p-6">
-      {/* Set Page Title */}
-      <Helmet>
-        <title>Tempat</title>
-      </Helmet>
+    <>
+      <div className="w-[85%] max-w-screen-xxl p-6">
+        {/* Set Page Title */}
+        <Helmet>
+          <title>Tempat</title>
+        </Helmet>
 
-      <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
+        <h1 className="mb-4 text-2xl font-semibold">Daftar Tempat</h1>
 
-      <div className="flex items-center mb-4 space-x-4">
-        {/* Add place button */}
-        <Button onClick={handleAddPlace}>
-          <MapPinPlus className="inline" />
-          Tambahkan Tempat
-        </Button>
+        <div className="flex items-center mb-4 space-x-4">
+          {/* Add place button */}
+          <Button onClick={handleAddPlace}>
+            <MapPinPlus className="inline" />
+            Tambahkan Tempat
+          </Button>
 
-        {/* Upload CSV button */}
-        <Button variant="secondary" onClick={() => setOpenUploadDialog(true)}>
-          <Upload className="inline" />
-          Unggah CSV
-        </Button>
+          {/* Upload CSV button */}
+          <Button variant="secondary" onClick={() => setOpenUploadDialog(true)}>
+            <Upload className="inline" />
+            Unggah CSV
+          </Button>
 
-        {/* Download CSV Template */}
-        <div>
-          <a
-            href={csvGeofencesTemplate}
-            download="geofences-template.csv"
-            className="text-blue-500 hover:underline"
-          >
-            Unduh Template Tempat CSV (.csv)
-          </a>
+          {/* Download CSV Template */}
+          <div>
+            <a
+              href={csvGeofencesTemplate}
+              download="template-lokasi-baru.csv"
+              className="text-blue-500 hover:underline"
+            >
+              Unduh Template Tempat CSV (.csv)
+            </a>
+          </div>
         </div>
-      </div>
 
-      <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
-        <DialogTrigger asChild>
-          <Button className="hidden" />
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Unggah File CSV
-            </DialogTitle>
-          </DialogHeader>
-          <DialogDescription>
-            File yang diunggah harus tipe CSV dan mengikuti format sesuai template. Disarankan setelah mengunduh template, gunakan Notepad untuk mengedit isi CSV dan dapatkan koordinat latitude dan longitude dari Google Maps.
-          </DialogDescription>
+        <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+          <DialogTrigger asChild>
+            <Button className="hidden" />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Unggah File CSV
+              </DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              <div>
+                <p className="text-base">
+                  File yang diunggah harus bertipe CSV dan mengikuti format sesuai template. <span className="font-bold">BACALAH PANDUAN</span> melalui tombol di bawah ini sebelum mengunggah file CSV.
+                </p>
+                <Button variant="default" onClick={() => window.open("https://drive.google.com/file/d/1k0C8ruKoMltE20Lh8NoS2X5nU04RhMGc/view?usp=sharing", "_blank")} className="mt-2 text-base">
+                  <Info className="inline" size={12} />
+                  Panduan Unggah CSV Data Tempat/Lokasi
+                </Button>
+              </div>
+            </DialogDescription>
 
-          <div
-            {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
-          >
-            <input {...getInputProps()} />
-            {selectedFile ? (
-              <p>{`File: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`}</p>
-            ) : (
-              <p>Tarik dan lepaskan file CSV di sini atau klik untuk memilih file</p>
-            )}
-          </div>
-          <div className="flex justify-end mt-4 space-x-2">
-            <Button variant="outline" onClick={() => { setSelectedFile(null); setOpenUploadDialog(false); }}>
-              Batal
-            </Button>
-            <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
-              {uploading ? "Mengunggah..." : "Unggah"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            <div
+              {...getRootProps({ className: "w-full h-48 border-2 border-dashed rounded flex justify-center items-center" })}
+            >
+              <input {...getInputProps()} />
+              {selectedFile ? (
+                <p>{`File: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`}</p>
+              ) : (
+                <p>Tarik dan lepaskan file CSV di sini atau klik untuk memilih file</p>
+              )}
+            </div>
+            <div className="flex justify-end mt-4 space-x-2">
+              <Button variant="outline" onClick={() => { setSelectedFile(null); setOpenUploadDialog(false); }}>
+                Batal
+              </Button>
+              <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
+                {uploading ? "Mengunggah..." : "Unggah"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-      {/* Search, Sort, and Filter */}
-      <div className="flex items-center mb-4 space-x-4">
-        {/* Search Bar */}
-        <Input
-          type="text"
-          placeholder="Cari tempat..."
-          value={searchQuery}
-          onChange={handleSearch}
-          className="w-1/3"
-        />
-
-        {/* Filter by Status */}
-        <Select
-          onValueChange={(value) => handleFilterStatus(value)}
-          value={statusFilter}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Semua Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Semua">Semua Status</SelectItem>
-            <SelectItem value="Aktif">Aktif</SelectItem>
-            <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Filter by Tag */}
-        <Select
-          onValueChange={(value) => handleFilterTag(value)}
-          value={tagFilter}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Semua Tag" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Semua">Semua Tag</SelectItem>
-            {[...new Set(geofences.map((geofence: any) => geofence.tag))]
-              .filter((tag) => devMode || tag !== "testing")
-              .map((tag) => (
-                <SelectItem key={String(tag)} value={String(tag ?? "")}>
-                  {String(tag)}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-
-        {/* Download CSV button */}
-        <Button onClick={downloadCSV} variant="secondary">
-          <Download className="inline" />
-          Unduh Data Tempat
-        </Button>
-
-        {/* Development Mode Toggle */}
-        <div className="flex items-center mb-6 space-x-4">
-          <Switch
-            id="dev-mode-toggle"
-            checked={devMode}
-            onCheckedChange={(checked) => setDevMode(checked)}
+        {/* Search, Sort, and Filter */}
+        <div className="flex items-center mb-4 space-x-4">
+          {/* Search Bar */}
+          <Input
+            type="text"
+            placeholder="Cari tempat..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="w-1/3"
           />
-          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
-            Development Mode
-          </label>
-        </div>
-      </div>
 
-      <div className='flex mb-2 gap-x-4'>
-        {/* Page size selector */}
-        <Select
-          onValueChange={(value) => {
-            const newSize = value === 'all' ? count : parseInt(value);
-            setPageSize(newSize);
-            setCurrentPage(1);
-          }}
-          value={pageSize === count ? 'all' : pageSize.toString()}
-        >
-          <SelectTrigger className="w-24">
-            <SelectValue placeholder="Items per page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">per 10</SelectItem>
-            <SelectItem value="20">per 20</SelectItem>
-            <SelectItem value="50">per 50</SelectItem>
-            <SelectItem value="all">Semua</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="mt-4 text-sm font-bold text-gray-500">
-          Menampilkan tempat: {filteredGeofences.length}
-        </p>
-      </div>
-      <div className='mb-2'>
-        <p className="text-sm text-gray-500">
-          Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
-        </p>
-      </div>
-      {/* <div className="flex items-center justify-between mt-4">
+          {/* Filter by Status */}
+          <Select
+            onValueChange={(value) => handleFilterStatus(value)}
+            value={statusFilter}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Semua Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Semua">Semua Status</SelectItem>
+              <SelectItem value="Aktif">Aktif</SelectItem>
+              <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Filter by Tag */}
+          <Select
+            onValueChange={(value) => handleFilterTag(value)}
+            value={tagFilter}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Semua Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Semua">Semua Tag</SelectItem>
+              {[...new Set(geofences.map((geofence: any) => geofence.tag))]
+                .filter((tag) => devMode || tag !== "testing")
+                .map((tag) => (
+                  <SelectItem key={String(tag)} value={String(tag ?? "")}>
+                    {String(tag)}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+
+          {/* Download CSV button */}
+          <Button onClick={downloadCSV} variant="secondary">
+            <Download className="inline" />
+            Unduh Data Tempat
+          </Button>
+
+          {/* Development Mode Toggle */}
+          <div className="flex items-center mb-6 space-x-4">
+            <Switch
+              id="dev-mode-toggle"
+              checked={devMode}
+              onCheckedChange={(checked) => setDevMode(checked)}
+            />
+            <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+              Development Mode
+            </label>
+          </div>
+        </div>
+
+        <div className='flex mb-2 gap-x-4'>
+          {/* Page size selector */}
+          <Select
+            onValueChange={(value) => {
+              const newSize = value === 'all' ? count : parseInt(value);
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            value={pageSize === count ? 'all' : pageSize.toString()}
+          >
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">per 10</SelectItem>
+              <SelectItem value="20">per 20</SelectItem>
+              <SelectItem value="50">per 50</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="mt-4 text-sm font-bold text-gray-500">
+            Menampilkan tempat: {filteredGeofences.length}
+          </p>
+        </div>
+        <div className='mb-2'>
+          <p className="text-sm text-gray-500">
+            Klik pada <span className='italic'>header</span> kolom untuk mengurutkan data.
+          </p>
+        </div>
+        {/* <div className="flex items-center justify-between mt-4">
         <Button
           onClick={handlePrevPage}
           disabled={currentPage === 1}
@@ -685,276 +896,286 @@ export default function Places() {
         </Button>
       </div> */}
 
-      <div className="overflow-x-auto">
-        <ScrollArea className="w-full h-[560px] p-4 border rounded-md">
-          <Table>
-            <TableHeader className="sticky top-0 z-10 bg-white">
-              <TableRow>
-                <TableHead>No.</TableHead>
-                <TableHead onClick={() => handleSort("externalId")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("externalId")}
-                    ID Tempat
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort("description")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("description")}
-                    Nama Tempat
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort("tag")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("tag")}
-                    Tag
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort("geometryRadius")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("geometryRadius")}
-                    Radius (m)
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("geometryCenter.coordinates")}
-                    Koordinat
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort("enabled")}>
-                  <div className='flex items-center gap-x-2'>
-                    {getSortIcon("enabled")}
-                    Status
-                  </div>
-                </TableHead>
-                <TableHead className="text-left">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {/* {paginatedGeofences.map((geofence) => ( */}
-              {filteredGeofences.map((geofence, index) => (
-                <TableRow key={geofence._id} className="hover:bg-gray-50">
-                  <TableCell>{index + 1}</TableCell>
-                  {/* <TableCell>{geofence._id || "-"}</TableCell> */}
-                  <TableCell>{geofence.externalId || "-"}</TableCell>
-                  <TableCell>{geofence.description || "-"}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{geofence.tag || "-"}</Badge>
-                  </TableCell>
-                  {/* <TableCell>{geofence.type}</TableCell> */}
-                  <TableCell>{geofence.geometryRadius}</TableCell>
-                  <TableCell>
-                    {geofence.geometryCenter.coordinates[1]}, {geofence.geometryCenter.coordinates[0]}
-                  </TableCell>
-                  <TableCell>{geofence.enabled ? "Aktif" : "Tidak Aktif"}</TableCell>
-                  <TableCell>
-                    <div className='flex flex-nowrap'>
-                      <Button onClick={() => handleEditPlace(geofence)} variant="outline" className="mr-2">
-                        <Pencil className="inline" />
-                        {/* Edit */}
-                      </Button>
-                      <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" onClick={() => setSelectedGeofence(geofence)}>
-                            <Trash2 className="inline" />
-                            {/* Hapus */}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Hapus Tempat</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          {/* <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div> */}
-                          <AlertDialogFooter>
-                            <Button variant="outline" onClick={() => setOpenAlertDialog(false)}>
-                              <X className="inline" />
-                              Batal
-                            </Button>
-                            <Button variant="destructive" onClick={handleDeletePlace}>
-                              <Trash2 className="inline" />
-                              Hapus
-                            </Button>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+        <div className="overflow-x-auto">
+          <ScrollArea className="w-full h-[560px] p-4 border rounded-md">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-white">
+                <TableRow>
+                  <TableHead>No.</TableHead>
+                  <TableHead onClick={() => handleSort("externalId")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("externalId")}
+                      ID Tempat
                     </div>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("description")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("description")}
+                      Nama Tempat
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("tag")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("tag")}
+                      Tag
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("geometryRadius")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("geometryRadius")}
+                      Radius (m)
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("geometryCenter.coordinates")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("geometryCenter.coordinates")}
+                      Koordinat
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("enabled")}>
+                    <div className='flex items-center gap-x-2'>
+                      {getSortIcon("enabled")}
+                      Status
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-left">Aksi</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div >
+              </TableHeader>
+              <TableBody>
+                {/* {paginatedGeofences.map((geofence) => ( */}
+                {filteredGeofences.map((geofence, index) => (
+                  <TableRow key={geofence._id} className="hover:bg-gray-50">
+                    <TableCell>{index + 1}</TableCell>
+                    {/* <TableCell>{geofence._id || "-"}</TableCell> */}
+                    <TableCell>{geofence.externalId || "-"}</TableCell>
+                    <TableCell>{geofence.description || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{geofence.tag || "-"}</Badge>
+                    </TableCell>
+                    {/* <TableCell>{geofence.type}</TableCell> */}
+                    <TableCell>{geofence.geometryRadius}</TableCell>
+                    <TableCell>
+                      {geofence.geometryCenter.coordinates[1]}, {geofence.geometryCenter.coordinates[0]}
+                    </TableCell>
+                    <TableCell>{geofence.enabled ? "Aktif" : "Tidak Aktif"}</TableCell>
+                    <TableCell>
+                      <div className='flex flex-nowrap'>
+                        <Button onClick={() => handleEditPlace(geofence)} variant="outline" className="mr-2">
+                          <Pencil className="inline" />
+                          {/* Edit */}
+                        </Button>
+                        <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" onClick={() => setSelectedGeofence(geofence)}>
+                              <Trash2 className="inline" />
+                              {/* Hapus */}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Hapus Tempat</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            {/* <div>Apakah Anda yakin ingin menghapus <span className='font-bold'>{selectedGeofence?.description}</span>?</div> */}
+                            <AlertDialogFooter>
+                              <Button variant="outline" onClick={() => setOpenAlertDialog(false)}>
+                                <X className="inline" />
+                                Batal
+                              </Button>
+                              <Button variant="destructive" onClick={handleDeletePlace}>
+                                <Trash2 className="inline" />
+                                Hapus
+                              </Button>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {
+              geofences.length === 0 && (
+                <div className="mt-4 text-center text-gray-500">Tidak ada data tempat untuk ditampilkan.</div>
+              )
+            }
+          </ScrollArea>
+        </div >
 
-      {
-        geofences.length === 0 && (
-          <div className="mt-4 text-center text-gray-500">Tidak ada data tempat untuk ditampilkan.</div>
-        )
-      }
-
-      {/* Pagination controls */}
-      <div className="flex items-center justify-between mt-4">
-        <div className="text-sm text-gray-600">
-          Total {count} tempat • Halaman {currentPage} dari {totalPages}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            variant="outline"
-          >
-            Sebelumnya
-          </Button>
-
-          {/* Input lompat ke halaman */}
+        {/* Pagination controls */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-gray-600">
+            Total {count} tempat • Halaman {currentPage} dari {totalPages}
+          </div>
           <div className="flex items-center space-x-2">
-            <span className="text-sm">Lompat ke:</span>
-            <Input
-              type="number"
-              value={goToPage}
-              onChange={(e) => setGoToPage(e.target.value)}
-              min={1}
-              max={totalPages}
-              className="w-20"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleGoToPage();
-                }
-              }}
-            />
             <Button
-              onClick={handleGoToPage}
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
               variant="outline"
-              disabled={!goToPage || isNaN(parseInt(goToPage))}
             >
-              Go
+              Sebelumnya
+            </Button>
+
+            {/* Input lompat ke halaman */}
+            <div className="flex items-center space-x-2">
+              <span className="text-sm">Lompat ke:</span>
+              <Input
+                type="number"
+                value={goToPage}
+                onChange={(e) => setGoToPage(e.target.value)}
+                min={1}
+                max={totalPages}
+                className="w-20"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleGoToPage();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleGoToPage}
+                variant="outline"
+                disabled={!goToPage || isNaN(parseInt(goToPage))}
+              >
+                Go
+              </Button>
+            </div>
+
+            <Button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              variant="outline"
+            >
+              Selanjutnya
             </Button>
           </div>
-
-          <Button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            variant="outline"
-          >
-            Selanjutnya
-          </Button>
         </div>
-      </div>
 
-      {/* Add Place Dialog/Modal */}
-      <Dialog open={openAddPlaceDialog} onOpenChange={setOpenAddPlaceDialog}>
-        <DialogTrigger asChild>
-          <Button className="hidden" />
-        </DialogTrigger>
-        <DialogContent className="max-w-6xl">
-          <DialogTitle>{selectedGeofence ? "Edit Tempat" : "Tambahkan Tempat"}</DialogTitle>
-          <DialogDescription>
-            {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru dengan cara mengisi koordinat lokasi, lalu klik tombol \"Cari\" atau masukkan nama tempat di kolom pencarian."}
-          </DialogDescription>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <form className="space-y-4" onSubmit={handleSubmitAddPlace}>
-              <div className="items-center">
-                <Label>Deskripsi</Label>
-                <input
-                  type="text"
-                  name="description"
-                  placeholder="Deskripsi"
-                  value={formValues.description}
-                  onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
-                  className="w-full px-4 py-2 border rounded"
-                />
-              </div>
-              <div className="items-center">
-                <Label>Tag</Label>
-                <input
-                  type="text"
-                  name="tag"
-                  placeholder="Tag (kelompok)"
-                  value={formValues.tag}
-                  onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
-                  className="w-full px-4 py-2 border rounded"
-                />
-              </div>
-              <div className="items-center">
-                <Label>Radius (m)</Label>
-                <input
-                  type="number"
-                  name="radius"
-                  placeholder="Radius (meter)"
-                  value={formValues.radius}
-                  onChange={handleFormChange}
-                  // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
-                  className="w-full px-4 py-2 border rounded"
-                />
-              </div>
-              <div className="items-center">
-                <Label>Koordinat</Label>
-                <div className="grid items-stretch grid-cols-6 gap-4">
-                  <div className="grid grid-cols-2 col-span-5 gap-4">
-                    <input
-                      type="number"
-                      name="latitude"
-                      placeholder="Latitude"
-                      value={formValues.latitude}
-                      onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                    <input
-                      type="number"
-                      name="longitude"
-                      placeholder="Longitude"
-                      value={formValues.longitude}
-                      onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <Button onClick={handleSearchCoordinates} variant="default" className="w-full h-full">
-                      <SearchIcon className="inline" />
-                      Cari
-                    </Button>
+        {/* Add Place Dialog/Modal */}
+        <Dialog open={openAddPlaceDialog} onOpenChange={setOpenAddPlaceDialog}>
+          <DialogTrigger asChild>
+            <Button className="hidden" />
+          </DialogTrigger>
+          <DialogContent className="max-w-6xl">
+            <DialogTitle>{selectedGeofence ? "Edit Tempat" : "Tambahkan Tempat"}</DialogTitle>
+            <DialogDescription>
+              {selectedGeofence ? "Edit tempat yang sudah ada" : "Tambahkan tempat baru dengan cara mengisi koordinat lokasi, lalu klik tombol \"Cari\" atau masukkan nama tempat di kolom pencarian."}
+            </DialogDescription>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <form className="space-y-4" onSubmit={handleSubmitAddPlace}>
+                <div className="items-center">
+                  <Label>Koordinat</Label>
+                  <div className="grid items-stretch grid-cols-6 gap-4">
+                    <div className="grid grid-cols-2 col-span-5 gap-4">
+                      <input
+                        type="number"
+                        name="latitude"
+                        placeholder="Latitude"
+                        value={formValues.latitude}
+                        onChange={(e) => setFormValues({ ...formValues, latitude: e.target.value })}
+                        className="w-full px-4 py-2 border rounded"
+                      />
+                      <input
+                        type="number"
+                        name="longitude"
+                        placeholder="Longitude"
+                        value={formValues.longitude}
+                        onChange={(e) => setFormValues({ ...formValues, longitude: e.target.value })}
+                        className="w-full px-4 py-2 border rounded"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <Button type="button" onClick={handleSearchCoordinates} variant="default" className="w-full h-full">
+                        <SearchIcon className="inline" />
+                        Cari
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex justify-end pt-4 space-x-2">
-                <Button variant="outline" onClick={() => setOpenAddPlaceDialog(false)}>
-                  <X className="inline" />
-                  Batal
-                </Button>
-                <Button type="submit">
-                  <Save className="inline" />
-                  {selectedGeofence ? "Simpan Perubahan" : "Tambah"}
-                </Button>
-              </div>
-            </form>
+                <div className="items-center">
+                  <Label>Deskripsi</Label>
+                  <input
+                    type="text"
+                    name="description"
+                    placeholder="Deskripsi"
+                    value={formValues.description}
+                    onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                </div>
+                <div className="items-center">
+                  <Label>Tag</Label>
+                  <input
+                    type="text"
+                    name="tag"
+                    placeholder="Tag (kelompok)"
+                    value={formValues.tag}
+                    onChange={(e) => setFormValues({ ...formValues, tag: e.target.value })}
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                </div>
+                <div className="items-center">
+                  <Label>Radius (m)</Label>
+                  <input
+                    type="number"
+                    name="radius"
+                    placeholder="Radius (meter)"
+                    value={formValues.radius}
+                    onChange={handleFormChange}
+                    // onChange={(e) => setFormValues({ ...formValues, radius: e.target.value })}
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                </div>
+                <div className="flex justify-end pt-4 space-x-2">
+                  <Button variant="outline" onClick={() => setOpenAddPlaceDialog(false)}>
+                    <X className="inline" />
+                    Batal
+                  </Button>
+                  <Button type="submit">
+                    <Save className="inline" />
+                    {selectedGeofence ? "Simpan Perubahan" : "Tambah"}
+                  </Button>
+                </div>
+              </form>
 
-            {/* Map Preview */}
-            <div className="w-full overflow-hidden border rounded h-96">
-              <MapContainer
-                center={previewCoordinates || [-6.2088, 106.8456]}
-                zoom={previewCoordinates ? 20 : 11}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <MapWithSearchAndDraw />
-                {previewCoordinates && (
-                  <>
-                    <Marker position={previewCoordinates} icon={geofenceIcon}></Marker>
-                    <Circle
-                      center={previewCoordinates}
-                      radius={previewRadius}
-                      pathOptions={{ color: "blue" }}
-                    />
-                  </>
-                )}
-              </MapContainer>
+              {/* Map Preview */}
+              <div className="w-full overflow-hidden border rounded h-96">
+                <MapContainer
+                  center={previewCoordinates || [-6.2088, 106.8456]}
+                  zoom={previewCoordinates ? 20 : 11}
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <MapWithSearchAndDraw />
+                  {previewCoordinates && (
+                    <>
+                      <Marker position={previewCoordinates} icon={geofenceIcon}></Marker>
+                      <Circle
+                        center={previewCoordinates}
+                        radius={previewRadius}
+                        pathOptions={{ color: "blue" }}
+                      />
+                    </>
+                  )}
+                </MapContainer>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div >
+          </DialogContent>
+        </Dialog>
+      </div >
+      <LoadingOverlay isLoading={isLoading} message={loadingMessage} />
+      {apiResponse.status !== 'idle' && (
+        <ResponseStatus
+          status={apiResponse.status}
+          title={apiResponse.title || ''}
+          description={apiResponse.description}
+          errors={apiResponse.errors}
+          onDismiss={() => setApiResponse({ status: 'idle' })}
+        />
+      )}
+    </>
   );
 }
