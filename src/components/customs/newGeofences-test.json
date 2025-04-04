@@ -1,0 +1,44 @@
+[
+  {
+    "radar_id": "67a9e5e1af70bb0d056d9562",
+    "external_id": "LK189",
+    "coordinates": [112.7272325, -7.5731341],
+    "city": "Pasuruan"
+  },
+  {
+    "radar_id": "67a9e5e1d348fac99fc1a1e6",
+    "external_id": "LK190",
+    "coordinates": [110.4113916, -6.9939631],
+    "city": "Semarang"
+  },
+  {
+    "radar_id": "67a9e5e1437f6714b9ea09c0",
+    "external_id": "LK191",
+    "coordinates": [112.742376, -7.2986857],
+    "city": "Surabaya"
+  },
+  {
+    "radar_id": "67a9e5e1a70a80579406d2f0",
+    "external_id": "LK192",
+    "coordinates": [106.818664, -6.2112985],
+    "city": "Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e12e0a56176899471e",
+    "external_id": "LK193",
+    "coordinates": [112.7455051, -7.2780709],
+    "city": "Surabaya"
+  },
+  {
+    "radar_id": "67a81a0f74f57b34953226c3",
+    "external_id": "LK2",
+    "coordinates": [106.847319602966, -6.20964491757957],
+    "city": "Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e134b3b3d589785e6f",
+    "external_id": "LK194",
+    "coordinates": [112.7558114, -7.260402],
+    "city": "Surabaya"
+  }
+]

@@ -1,13 +1,14 @@
 import Radar from "radar-sdk-js";
 import supabase from "@/utils/supabase";
 import { useRole } from "@/hooks/useRole";
+import MapPage from "@/pages/map/MapPage";
 import { useState, useEffect } from "react";
 import LandingPage from "./pages/LandingPage";
 import EmergencyPage from "@/pages/EmergencyPage";
 import UsersPage from "@/pages/(admin)/users/UsersPage";
 import TripsPage from "./pages/(admin)/trips/TripsPage";
 import PlacesPage from "./pages/(admin)/places/PlacesPage";
-import DashboardPage from "@/pages/dashboard/DashboardPage";
+import DashboardPage from "./pages/dashboard/DashboardPage";
 import { LoginForm } from "@/components/customs/login-form";
 import TicketsPage from "./pages/(admin)/tickets/TicketsPage";
 import ProfilePage from "@/pages/(users)/profile/ProfilePage";
@@ -52,8 +53,12 @@ function App() {
             element={checkUser() ? <Navigate to="/maps" /> : <LoginForm />}
           />
           <Route
-            path="/maps"
+            path="/dashboard"
             element={checkUser() ? <DashboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/maps"
+            element={checkUser() ? <MapPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/tickets"

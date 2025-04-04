@@ -6,9 +6,14 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu
 
 const items = [
   {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
     title: "Peta Lokasi",
     url: "/maps",
-    icon: Home,
+    icon: MapPinCheck,
   },
   {
     title: "Pengguna",

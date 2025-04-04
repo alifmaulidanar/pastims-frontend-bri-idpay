@@ -22,7 +22,7 @@ export function LoginForm() {
     }
 
     setError("");
-    navigate("/dashboard");
+    navigate("/maps");
     window.location.reload();
   };
 
