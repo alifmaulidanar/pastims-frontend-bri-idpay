@@ -1,0 +1,1832 @@
+[
+  {
+    "radar_id": "67a9e5e1af70bb0d056d9562",
+    "external_id": "LK189",
+    "coordinates": [112.7272325, -7.5731341],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e1d348fac99fc1a1e6",
+    "external_id": "LK190",
+    "coordinates": [110.4113916, -6.9939631],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9e5e1437f6714b9ea09c0",
+    "external_id": "LK191",
+    "coordinates": [112.742376, -7.2986857],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e1a70a80579406d2f0",
+    "external_id": "LK192",
+    "coordinates": [106.818664, -6.2112985],
+    "province": "DKI Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e12e0a56176899471e",
+    "external_id": "LK193",
+    "coordinates": [112.7455051, -7.2780709],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a81a0f74f57b34953226c3",
+    "external_id": "LK2",
+    "coordinates": [106.847319602966, -6.20964491757957],
+    "province": "DKI Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e134b3b3d589785e6f",
+    "external_id": "LK194",
+    "coordinates": [112.7558114, -7.260402],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e1a636ca701d1925db",
+    "external_id": "LK195",
+    "coordinates": [106.8891878, -6.2352083],
+    "province": "DKI Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e1157f56d4a6f60ee7",
+    "external_id": "LK196",
+    "coordinates": [106.7966023, -6.1858978],
+    "province": "DKI Jakarta"
+  },
+  {
+    "radar_id": "67a9e5e1c91092b8097f8106",
+    "external_id": "LK197",
+    "coordinates": [106.841402, -6.3804785],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e1c3b7a2c138ab9163",
+    "external_id": "LK198",
+    "coordinates": [111.5371912, -7.6252009],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e20c8c42e6bbbf4e62",
+    "external_id": "LK199",
+    "coordinates": [106.6269611, -6.2606168],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9e5e22e0a561768994763",
+    "external_id": "LK200",
+    "coordinates": [106.7139027, -6.3157083],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9e5e3476a11d1eb6b7f34",
+    "external_id": "LK201",
+    "coordinates": [106.65253, -6.2686354],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9e5e22355e66cf7b0b3f1",
+    "external_id": "LK202",
+    "coordinates": [106.0814636, -6.0711762],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e2ace25bbd979c5fe3",
+    "external_id": "LK203",
+    "coordinates": [107.644409763336, -6.92114908470536],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e25eeddee4f0dc899e",
+    "external_id": "LK204",
+    "coordinates": [113.6948241, -8.1709664],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e35ba167f998d9ea28",
+    "external_id": "LK205",
+    "coordinates": [106.8028097, -6.2122208],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e3e99a7901cab80293",
+    "external_id": "LK206",
+    "coordinates": [112.59217, -7.9539157],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59b21c5453c87818603",
+    "external_id": "LK3",
+    "coordinates": [107.6095038, -6.9226957],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59b74c7867afdd8d0da",
+    "external_id": "LK4",
+    "coordinates": [107.6131794, -6.8994706],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59b8eaaed0142bc5200",
+    "external_id": "LK5",
+    "coordinates": [107.6164774, -6.9302779],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59bc3b7a2c138a27acb",
+    "external_id": "LK6",
+    "coordinates": [110.9114657, -7.0888564],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a59b6e739366cf007119",
+    "external_id": "LK7",
+    "coordinates": [106.0773731, -6.0364042],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59b742264909b7ec0a7",
+    "external_id": "LK8",
+    "coordinates": [106.9219277, -6.2597673],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59b1ff0db3d34f20fd2",
+    "external_id": "LK9",
+    "coordinates": [106.9388025, -6.3646266],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59b337947c26c4a6fc6",
+    "external_id": "LK10",
+    "coordinates": [114.351738, -8.239582],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59b64b35fbc333578f8",
+    "external_id": "LK11",
+    "coordinates": [111.5338299, -7.6265381],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59b9a6200a922e19911",
+    "external_id": "LK12",
+    "coordinates": [106.8197689, -6.183765],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59c337947c26c4a6ff5",
+    "external_id": "LK13",
+    "coordinates": [107.006706, -6.268497],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59cd348fac99fb84a1f",
+    "external_id": "LK14",
+    "coordinates": [111.728427, -8.118992],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59c4d70ac52bfc354f2",
+    "external_id": "LK15",
+    "coordinates": [106.0773731, -6.0364042],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59c8ef8d0cd6c89e7e8",
+    "external_id": "LK16",
+    "coordinates": [106.0773731, -6.0364042],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59cc6f3b86c8bbf67f1",
+    "external_id": "LK17",
+    "coordinates": [106.8361631, -6.2408553],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59c2b2c49fd82a6f1c8",
+    "external_id": "LK18",
+    "coordinates": [108.2309718, -7.3306871],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a59c689ca735237932a1",
+    "external_id": "LK19",
+    "coordinates": [106.7439619, -6.2362477],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a59c9d8bbc1cb3a9ed42",
+    "external_id": "LK20",
+    "coordinates": [106.8052007, -6.236945],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59cfec7b5fd32f606f1",
+    "external_id": "LK21",
+    "coordinates": [113.711471, -8.149965],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59cf7d158a1c62f63a8",
+    "external_id": "LK22",
+    "coordinates": [106.820554, -6.2242785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e3078f5df078274f9",
+    "external_id": "LK23",
+    "coordinates": [106.820554, -6.2242785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e93c5be350b451c2b",
+    "external_id": "LK24",
+    "coordinates": [106.820554, -6.2242785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e9ec0f1e6dabbf7dc",
+    "external_id": "LK25",
+    "coordinates": [106.820554, -6.2242785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e4163f45e84c4fc41",
+    "external_id": "LK26",
+    "coordinates": [106.820554, -6.2242785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e2e0a5617688fdbce",
+    "external_id": "LK27",
+    "coordinates": [106.833663, -6.227831],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e33c800264c10c53a",
+    "external_id": "LK28",
+    "coordinates": [106.822982, -6.224273],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e337947c26c4a7030",
+    "external_id": "LK29",
+    "coordinates": [112.9014459, -7.648937],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59e95f6ee1f0a044f57",
+    "external_id": "LK30",
+    "coordinates": [106.8428933, -6.2191688],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59e2e0a5617688fdbe2",
+    "external_id": "LK31",
+    "coordinates": [106.645383, -6.184976],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a59e314450d926ff38a7",
+    "external_id": "LK32",
+    "coordinates": [106.87168, -6.172409],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59f42f555c4279826ce",
+    "external_id": "LK33",
+    "coordinates": [106.645383, -6.184976],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a59f95f6ee1f0a044f86",
+    "external_id": "LK34",
+    "coordinates": [112.648064, -7.259554],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59fd348fac99fb84b62",
+    "external_id": "LK35",
+    "coordinates": [112.733783, -7.275789],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a59f41d953c68a360f5f",
+    "external_id": "LK36",
+    "coordinates": [106.645383, -6.184976],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a59f04e77feba92f4a07",
+    "external_id": "LK37",
+    "coordinates": [106.762467, -6.2983299],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a59ff46218120b74e6cc",
+    "external_id": "LK38",
+    "coordinates": [106.922519, -6.178687],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a041d953c68a360f7d",
+    "external_id": "LK39",
+    "coordinates": [106.6445272, -6.2075546],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a0742264909b7ec0db",
+    "external_id": "LK40",
+    "coordinates": [110.8482733, -7.4163995],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a00c8c42e6bbb5b124",
+    "external_id": "LK41",
+    "coordinates": [112.648061, -7.259564],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a041043f46409313c2",
+    "external_id": "LK42",
+    "coordinates": [107.4407695, -6.4006648],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a195f6ee1f0a044fbd",
+    "external_id": "LK43",
+    "coordinates": [112.6137839, -7.3652741],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a1c6f3b86c8bbf68b0",
+    "external_id": "LK44",
+    "coordinates": [108.6146381, -7.4899253],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a1d348fac99fb84bc8",
+    "external_id": "LK45",
+    "coordinates": [108.6261659, -7.6714032],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a13636a986ab3f9d64",
+    "external_id": "LK46",
+    "coordinates": [108.547758, -6.7182143],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a19ec0f1e6dabbf919",
+    "external_id": "LK47",
+    "coordinates": [110.410984, -7.066704],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a18eaaed0142bc545f",
+    "external_id": "LK48",
+    "coordinates": [106.703, -6.241],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a193c5be350b451d1d",
+    "external_id": "LK49",
+    "coordinates": [107.7095566, -6.9302058],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a11ff0db3d34f210d3",
+    "external_id": "LK50",
+    "coordinates": [110.3280098, -7.0769482],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a1f46218120b74e7b0",
+    "external_id": "LK51",
+    "coordinates": [112.0268614, -7.8393609],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a1f7d158a1c62f6603",
+    "external_id": "LK52",
+    "coordinates": [110.355029, -7.821866],
+    "province": "Yogyakarta"
+  },
+  {
+    "radar_id": "67a9a5a264b35fbc33357b7d",
+    "external_id": "LK53",
+    "coordinates": [112.434737, -7.471276],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a249b970e1e864edf3",
+    "external_id": "LK54",
+    "coordinates": [110.4157776, -7.0158749],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a21ff0db3d34f21148",
+    "external_id": "LK55",
+    "coordinates": [108.2302555, -7.1241968],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a2475915ee22be17c6",
+    "external_id": "LK56",
+    "coordinates": [106.8726933, -6.1653884],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a29d8bbc1cb3a9eddd",
+    "external_id": "LK57",
+    "coordinates": [107.5939094, -6.8803558],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a2fd7a9c273b681623",
+    "external_id": "LK58",
+    "coordinates": [112.716104, -7.465605],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a34adaeb379cb05c4e",
+    "external_id": "LK59",
+    "coordinates": [108.533762, -6.708195],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a3422891378f193c0e",
+    "external_id": "LK60",
+    "coordinates": [108.390624, -7.323502],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a3c2269574dd7a3223",
+    "external_id": "LK61",
+    "coordinates": [107.5954679, -6.9105205],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a34efcb35999f97ae3",
+    "external_id": "LK62",
+    "coordinates": [104.715073, -3.0076963],
+    "province": "Sumatra Selatan"
+  },
+  {
+    "radar_id": "67a9a5a4af70bb0d0563e393",
+    "external_id": "LK63",
+    "coordinates": [106.837722, -6.144802],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a4627ef571c098642e",
+    "external_id": "LK64",
+    "coordinates": [106.6069505, -6.2504433],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a4798398e3925d10f6",
+    "external_id": "LK65",
+    "coordinates": [112.756797, -7.270664],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a449b970e1e864ee6a",
+    "external_id": "LK66",
+    "coordinates": [106.933985, -6.922268],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a4a636ca701d0f6808",
+    "external_id": "LK67",
+    "coordinates": [106.8420664, -6.2204773],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a48eaaed0142bc575d",
+    "external_id": "LK68",
+    "coordinates": [110.8249137, -6.804043],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a4798398e3925d1102",
+    "external_id": "LK69",
+    "coordinates": [110.8249137, -6.804043],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a43831a4f9d3076546",
+    "external_id": "LK70",
+    "coordinates": [110.8249137, -6.804043],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a4c2269574dd7a32a5",
+    "external_id": "LK71",
+    "coordinates": [110.396699, -7.7588041],
+    "province": "Yogyakarta"
+  },
+  {
+    "radar_id": "67a9a5a43636a986ab3f9e7d",
+    "external_id": "LK72",
+    "coordinates": [106.8114453, -6.2359952],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a68eaaed0142bc585c",
+    "external_id": "LK73",
+    "coordinates": [106.7032305, -6.2922481],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5a6476a11d1eb61dd70",
+    "external_id": "LK74",
+    "coordinates": [106.7266572, -6.2707414],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5a64377f8a375fdb25a",
+    "external_id": "LK75",
+    "coordinates": [106.9677234, -6.3050013],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a6689ca735237933fa",
+    "external_id": "LK76",
+    "coordinates": [106.8897347, -6.2393592],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a621ed011a3e477f36",
+    "external_id": "LK77",
+    "coordinates": [106.7299588, -6.3429011],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5a649b970e1e864ef6e",
+    "external_id": "LK78",
+    "coordinates": [112.7428727, -7.2668403],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a64163f45e84c4ff40",
+    "external_id": "LK79",
+    "coordinates": [106.6126166, -6.2198125],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a62adf71d9c7889bf8",
+    "external_id": "LK80",
+    "coordinates": [106.6118302, -6.2108016],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a62e0a5617688fdd82",
+    "external_id": "LK81",
+    "coordinates": [112.631941, -7.94722],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a6ecd2cdb6f10b19a0",
+    "external_id": "LK82",
+    "coordinates": [109.196558, -6.923369],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a79d8bbc1cb3a9ef4b",
+    "external_id": "LK83",
+    "coordinates": [106.851766, -6.393869],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a7ef260e210ed2d39f",
+    "external_id": "LK84",
+    "coordinates": [106.768945, -6.25424],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a76e739366cf0073d9",
+    "external_id": "LK85",
+    "coordinates": [106.4759242, -6.3569907],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a741d953c68a361039",
+    "external_id": "LK86",
+    "coordinates": [106.9368659, -6.2578512],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a7a636ca701d0f6903",
+    "external_id": "LK87",
+    "coordinates": [106.9721281, -6.172033],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5a7a73945ebe20855b8",
+    "external_id": "LK88",
+    "coordinates": [112.7340401, -7.2614307],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a7c3b7a2c138a27f11",
+    "external_id": "LK89",
+    "coordinates": [110.821123, -7.563828],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5a73831a4f9d307674f",
+    "external_id": "LK90",
+    "coordinates": [106.804987, -6.212297],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a771bc08d736c6f92a",
+    "external_id": "LK91",
+    "coordinates": [106.922519, -6.178687],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a849b970e1e864f075",
+    "external_id": "LK92",
+    "coordinates": [112.711772, -7.449309],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5a96e97f7932a960009",
+    "external_id": "LK93",
+    "coordinates": [106.891786, -6.14582],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a93636a986ab3fa035",
+    "external_id": "LK94",
+    "coordinates": [106.841546, -6.178343],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a97b566b0e793b1b69",
+    "external_id": "LK95",
+    "coordinates": [106.899974, -6.218378],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a941d953c68a361092",
+    "external_id": "LK96",
+    "coordinates": [106.785271, -6.17387],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a9d956555cc4bdb939",
+    "external_id": "LK97",
+    "coordinates": [106.785271, -6.17387],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5a964b35fbc33357e38",
+    "external_id": "LK98",
+    "coordinates": [106.899974, -6.218378],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5aaba90cec5a40e32a7",
+    "external_id": "LK99",
+    "coordinates": [106.785271, -6.17387],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5aa2b2c49fd82a6f427",
+    "external_id": "LK100",
+    "coordinates": [106.748006, -6.357553],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5aae99a7901caae024b",
+    "external_id": "LK101",
+    "coordinates": [106.814031, -6.610831],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aa64b35fbc33357e54",
+    "external_id": "LK102",
+    "coordinates": [106.619668, -6.18264],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab3831a4f9d307684e",
+    "external_id": "LK103",
+    "coordinates": [106.838117, -6.354128],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5abf820e176f820707c",
+    "external_id": "LK104",
+    "coordinates": [106.811268, -6.23265],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5abfdbe3eeafd8f1062",
+    "external_id": "LK105",
+    "coordinates": [106.795697, -6.291305],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab2b2c49fd82a6f463",
+    "external_id": "LK106",
+    "coordinates": [106.614717, -6.229566],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab314450d926ff3bfa",
+    "external_id": "LK107",
+    "coordinates": [106.825426, -6.185714],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5abfec7b5fd32f60cbd",
+    "external_id": "LK108",
+    "coordinates": [106.797477, -6.250222],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab4d70ac52bfc35738",
+    "external_id": "LK109",
+    "coordinates": [106.785271, -6.17387],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab689ca735237935a4",
+    "external_id": "LK110",
+    "coordinates": [106.791107, -6.561519],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5abbce8b29a2ba506a9",
+    "external_id": "LK111",
+    "coordinates": [106.822148, -6.163396],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ab33c800264c10c786",
+    "external_id": "LK112",
+    "coordinates": [106.791107, -6.561519],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5ad9a6200a922e19f69",
+    "external_id": "LK113",
+    "coordinates": [109.121708, -6.869235],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5adc2269574dd7a359d",
+    "external_id": "LK114",
+    "coordinates": [106.840049, -6.306486],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ad41043f4640931a69",
+    "external_id": "LK115",
+    "coordinates": [116.836311, -1.267805],
+    "province": "East Kalimantan"
+  },
+  {
+    "radar_id": "67a9a5ad8f40dee099232b15",
+    "external_id": "LK116",
+    "coordinates": [106.739512, -6.575432],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5ade99a7901caae02b2",
+    "external_id": "LK117",
+    "coordinates": [110.807432, -7.566499],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5ad49b970e1e864f238",
+    "external_id": "LK118",
+    "coordinates": [106.788388, -6.594571],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5ad8ef8d0cd6c89ec6d",
+    "external_id": "LK119",
+    "coordinates": [106.817408, -6.408858],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5adcf7642f4db47b5b0",
+    "external_id": "LK120",
+    "coordinates": [109.569464, -7.629242],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5ad627ef571c0986522",
+    "external_id": "LK121",
+    "coordinates": [107.151258, -6.333572],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5ad8eaaed0142bc5cdc",
+    "external_id": "LK122",
+    "coordinates": [106.839918, -6.16146],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e3476a11d1eb6b7f19",
+    "external_id": "LK207",
+    "coordinates": [106.8428933, -6.2191688],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ae7b566b0e793b1da9",
+    "external_id": "LK123",
+    "coordinates": [110.209711, -6.964076],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5ae3c9916ff650e359a",
+    "external_id": "LK124",
+    "coordinates": [106.93102, -6.098762],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5ae7b566b0e793b1daf",
+    "external_id": "LK125",
+    "coordinates": [109.902788, -7.363017],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5ae49b970e1e864f2df",
+    "external_id": "LK126",
+    "coordinates": [106.974148, -6.40684],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5ae68863b3c8f7137d2",
+    "external_id": "LK127",
+    "coordinates": [108.120796, -7.399291],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aeecd2cdb6f10b1a84",
+    "external_id": "LK128",
+    "coordinates": [107.593214, -6.916031],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aea636ca701d0f6c43",
+    "external_id": "LK129",
+    "coordinates": [106.813268, -6.372758],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aeefb9d695587d8e60",
+    "external_id": "LK130",
+    "coordinates": [108.209214, -7.354883],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aebce8b29a2ba50797",
+    "external_id": "LK131",
+    "coordinates": [107.295991, -6.298448],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5aeecd2cdb6f10b1a8c",
+    "external_id": "LK132",
+    "coordinates": [107.079374, -6.29215],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b049b970e1e864f35f",
+    "external_id": "LK133",
+    "coordinates": [110.818992, -7.610204],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5b0ace25bbd97930b26",
+    "external_id": "LK134",
+    "coordinates": [106.816705, -6.194826],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b0c9d2c54d74af961b",
+    "external_id": "LK135",
+    "coordinates": [106.1523926, -6.1213785],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b0f7d158a1c62f6d73",
+    "external_id": "LK136",
+    "coordinates": [106.1219081, -6.2282697],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b0c8dec4dbfbe17614",
+    "external_id": "LK137",
+    "coordinates": [106.7215946, -6.2744176],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5b0437f6714b9e07453",
+    "external_id": "LK138",
+    "coordinates": [105.8383561, -6.3912038],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b06e739366cf007513",
+    "external_id": "LK139",
+    "coordinates": [107.594485, -6.8862941],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b08f40dee099232b7b",
+    "external_id": "LK140",
+    "coordinates": [106.6213049, -6.1783395],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b0ba90cec5a40e3307",
+    "external_id": "LK141",
+    "coordinates": [106.7376773, -6.3002612],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9a5b0c2269574dd7a374b",
+    "external_id": "LK142",
+    "coordinates": [114.1437365, -8.3631576],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b1a73945ebe20857e5",
+    "external_id": "LK143",
+    "coordinates": [107.658391, -6.942204],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b12e7551af2bde558d",
+    "external_id": "LK144",
+    "coordinates": [106.791107, -6.561519],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b193c5be350b4521f9",
+    "external_id": "LK145",
+    "coordinates": [115.1263595, -8.6280898],
+    "province": "Bali"
+  },
+  {
+    "radar_id": "67a9a5b1ecd2cdb6f10b1b46",
+    "external_id": "LK146",
+    "coordinates": [112.7417336, -7.2914837],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b1ace25bbd97930b65",
+    "external_id": "LK147",
+    "coordinates": [106.8511706, -6.2289615],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b121c5453c87818943",
+    "external_id": "LK148",
+    "coordinates": [112.7417336, -7.2914837],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b13c9916ff650e3659",
+    "external_id": "LK149",
+    "coordinates": [106.798437, -6.346888],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b141043f4640931cbe",
+    "external_id": "LK150",
+    "coordinates": [106.798437, -6.346888],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b1689ca73523793738",
+    "external_id": "LK151",
+    "coordinates": [106.855667, -6.257269],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b1fec7b5fd32f60e6c",
+    "external_id": "LK152",
+    "coordinates": [106.855667, -6.257269],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b36e739366cf00762b",
+    "external_id": "LK153",
+    "coordinates": [112.7272325, -7.5731341],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b32c2a831843b29c70",
+    "external_id": "LK154",
+    "coordinates": [110.9209497, -7.8077533],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5b349b970e1e864f44a",
+    "external_id": "LK155",
+    "coordinates": [112.437403, -7.4867768],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b3195ce60be3f436bf",
+    "external_id": "LK156",
+    "coordinates": [112.7393264, -7.3292526],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b39d8bbc1cb3a9f142",
+    "external_id": "LK157",
+    "coordinates": [106.822131, -6.193027],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b302b70b3ccecf02bb",
+    "external_id": "LK158",
+    "coordinates": [106.808253, -6.230754],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b3fbb55c5866b392ed",
+    "external_id": "LK159",
+    "coordinates": [106.795874, -6.487103],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b32e7551af2bde55ef",
+    "external_id": "LK160",
+    "coordinates": [106.798373, -6.243623],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b32355e66cf7a7375b",
+    "external_id": "LK161",
+    "coordinates": [104.7589744, -2.9868814],
+    "province": "Sumatra Selatan"
+  },
+  {
+    "radar_id": "67a9a5b3e99a7901caae0445",
+    "external_id": "LK162",
+    "coordinates": [109.2448437, -7.4944342],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5b4e99a7901caae0491",
+    "external_id": "LK163",
+    "coordinates": [111.978543, -7.630924],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b43636a986ab3fa28f",
+    "external_id": "LK164",
+    "coordinates": [106.9803142, -6.1868747],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b4437f6714b9e0756b",
+    "external_id": "LK165",
+    "coordinates": [106.9160841, -6.1073407],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b4cf44db2502df2146",
+    "external_id": "LK166",
+    "coordinates": [108.564922, -6.73808],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b449b970e1e864f4e0",
+    "external_id": "LK167",
+    "coordinates": [106.848965, -6.354741],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b4ace25bbd97930bb5",
+    "external_id": "LK168",
+    "coordinates": [106.848965, -6.354741],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b544158c4830991e1a",
+    "external_id": "LK169",
+    "coordinates": [106.848965, -6.354741],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b5f820e176f8207214",
+    "external_id": "LK170",
+    "coordinates": [108.206115, -7.304994],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b5798398e3925d14d4",
+    "external_id": "LK171",
+    "coordinates": [113.683885, -8.166063],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b571bc08d736c6fd15",
+    "external_id": "LK172",
+    "coordinates": [106.899974, -6.218378],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b6a636ca701d0f6e59",
+    "external_id": "LK173",
+    "coordinates": [110.2809667, -7.5748016],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9a5b60dabc47d5d08d805",
+    "external_id": "LK174",
+    "coordinates": [110.4003314, -7.8304382],
+    "province": "Yogyakarta"
+  },
+  {
+    "radar_id": "67a9a5b649b970e1e864f52b",
+    "external_id": "LK175",
+    "coordinates": [112.628827, -7.938505],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b6798398e3925d152c",
+    "external_id": "LK176",
+    "coordinates": [106.79877, -6.603042],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b6157f56d4a6ec9cf6",
+    "external_id": "LK177",
+    "coordinates": [106.7962773, -6.2217718],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9a5b63c9916ff650e36fa",
+    "external_id": "LK178",
+    "coordinates": [112.697123, -7.285229],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b6f820e176f820726e",
+    "external_id": "LK179",
+    "coordinates": [112.697123, -7.285229],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b6314450d926ff3d94",
+    "external_id": "LK180",
+    "coordinates": [108.533747, -6.708222],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b6c9d2c54d74af96e2",
+    "external_id": "LK181",
+    "coordinates": [104.7404138, -2.9742224],
+    "province": "Sumatra Selatan"
+  },
+  {
+    "radar_id": "67a9a5b63636a986ab3fa2c8",
+    "external_id": "LK182",
+    "coordinates": [106.9082275, -6.4220539],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b776e4389142a9fb6b",
+    "external_id": "LK183",
+    "coordinates": [107.0526681, -6.2601715],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b7422891378f193f61",
+    "external_id": "LK184",
+    "coordinates": [106.9357851, -6.2862096],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b71ff0db3d34f2170a",
+    "external_id": "LK185",
+    "coordinates": [112.7366074, -7.2630794],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b7a73945ebe2085a69",
+    "external_id": "LK186",
+    "coordinates": [112.6152871, -7.9568082],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9a5b78ef8d0cd6c89edeb",
+    "external_id": "LK187",
+    "coordinates": [106.9852099, -6.249043],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9a5b70dabc47d5d08d8a8",
+    "external_id": "LK188",
+    "coordinates": [114.3724722, -8.2109694],
+    "province": "Jawa Timur"
+  },
+  {
+    "radar_id": "67a9e5e36e739366cf09e8c6",
+    "external_id": "LK208",
+    "coordinates": [106.9078988, -6.1708185],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e5d348fac99fc1a377",
+    "external_id": "LK209",
+    "coordinates": [106.7145121, -6.2374685],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e5ecd2cdb6f11455b6",
+    "external_id": "LK210",
+    "coordinates": [107.4957601, -6.8551337],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e5157f56d4a6f61036",
+    "external_id": "LK211",
+    "coordinates": [106.7984058, -6.2001479],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e52b2c49fd82afe1d4",
+    "external_id": "LK212",
+    "coordinates": [110.3888909, -6.9526344],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9e5e5195ce60be3fd60bf",
+    "external_id": "LK213",
+    "coordinates": [106.8216151, -6.1401149],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e5282d406caa300cd1",
+    "external_id": "LK214",
+    "coordinates": [106.7965047, -6.2414549],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e5f7d158a1c638a852",
+    "external_id": "LK215",
+    "coordinates": [106.81877, -6.4130888],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e5ecd2cdb6f11455d9",
+    "external_id": "LK216",
+    "coordinates": [106.8187888, -6.1966439],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e549b970e1e86e093e",
+    "external_id": "LK217",
+    "coordinates": [106.8042487, -6.2152915],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e5314450d92608c70b",
+    "external_id": "LK218",
+    "coordinates": [106.885913, -6.3660803],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e644158c4830a2e579",
+    "external_id": "LK219",
+    "coordinates": [106.8206927, -6.3927082],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e6ce343647d8dcb72c",
+    "external_id": "LK220",
+    "coordinates": [106.9050449, -6.1578037],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e60c763d6ba9be9dab",
+    "external_id": "LK221",
+    "coordinates": [106.7027287, -6.2575266],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9e5e65ac835d343334225",
+    "external_id": "LK222",
+    "coordinates": [106.9586886, -6.1942722],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e6437f6714b9ea0ae8",
+    "external_id": "LK223",
+    "coordinates": [106.7822251, -6.3030947],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e6f85917330818c14d",
+    "external_id": "LK224",
+    "coordinates": [106.7003763, -6.1528461],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e6cf7642f4db51262c",
+    "external_id": "LK225",
+    "coordinates": [106.792149, -6.273452],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e6437f6714b9ea0afe",
+    "external_id": "LK226",
+    "coordinates": [106.9193408, -6.1426658],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e75291e657af682a4f",
+    "external_id": "LK227",
+    "coordinates": [106.8046447, -6.6013518],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e6f820e176f829dab4",
+    "external_id": "LK228",
+    "coordinates": [106.7786604, -6.5840681],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e87862140290cd9453",
+    "external_id": "LK229",
+    "coordinates": [106.8045505, -6.6014168],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e86e97f7932a9f0d3a",
+    "external_id": "LK230",
+    "coordinates": [106.8045505, -6.6014168],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e855d4fd6b15e9e345",
+    "external_id": "LK231",
+    "coordinates": [106.862649, -6.2624099],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e8ef260e210edbc7ca",
+    "external_id": "LK232",
+    "coordinates": [106.6896735, -6.0424279],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e8337947c26c53d1ad",
+    "external_id": "LK233",
+    "coordinates": [106.6630689, -6.4385467],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e874c7867afde272c2",
+    "external_id": "LK234",
+    "coordinates": [106.8783724, -6.223371],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e933c800264c1a5566",
+    "external_id": "LK235",
+    "coordinates": [106.5789331, -6.3592141],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e96f0414fcc3a8c69a",
+    "external_id": "LK236",
+    "coordinates": [106.8144894, -6.6216304],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5e9475915ee22c7756e",
+    "external_id": "LK237",
+    "coordinates": [106.8284056, -6.3512992],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5e9816746eb603c8b0b",
+    "external_id": "LK238",
+    "coordinates": [106.4779627, -6.3569908],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ebafbdf385cdbf4784",
+    "external_id": "LK239",
+    "coordinates": [106.4779627, -6.3569908],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5eb7917a23a2b27b23d",
+    "external_id": "LK240",
+    "coordinates": [106.834737, -6.182125],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb0dabc47d5d1293df",
+    "external_id": "LK241",
+    "coordinates": [106.5850441, -6.135],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb2b2c49fd82afe46a",
+    "external_id": "LK242",
+    "coordinates": [106.8513309, -6.1924316],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ebc8dec4dbfbea8eac",
+    "external_id": "LK243",
+    "coordinates": [106.6367873, -6.2063112],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb34b3b3d5897863a8",
+    "external_id": "LK244",
+    "coordinates": [106.8130977, -6.187619],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb627ef571c0a1ee55",
+    "external_id": "LK245",
+    "coordinates": [106.7894035, -6.246567],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb4caf86c6b61d90f5",
+    "external_id": "LK246",
+    "coordinates": [106.9728247, -6.3994449],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ec64b35fbc333f8730",
+    "external_id": "LK247",
+    "coordinates": [106.85859, -6.1727395],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5eb437f6714b9ea0d28",
+    "external_id": "LK248",
+    "coordinates": [106.814017, -6.4002178],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ed2adf71d9c7925bc6",
+    "external_id": "LK249",
+    "coordinates": [106.7399572, -6.1109826],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5edc6e6c77c6c43bdac",
+    "external_id": "LK250",
+    "coordinates": [106.7974654, -6.2187432],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ed5ba167f998d9ef23",
+    "external_id": "LK251",
+    "coordinates": [106.7974654, -6.2187432],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5edde831575cffffe36",
+    "external_id": "LK252",
+    "coordinates": [106.6533206, -6.1313458],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5edcf7642f4db512a4e",
+    "external_id": "LK253",
+    "coordinates": [106.8188579, -6.2059586],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ed798398e392665b28",
+    "external_id": "LK254",
+    "coordinates": [106.7983631, -6.2478317],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5edecd2cdb6f114597a",
+    "external_id": "LK255",
+    "coordinates": [107.701279, -6.9683389],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ed816746eb603c8e01",
+    "external_id": "LK256",
+    "coordinates": [108.084642, -7.0611028],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5edf699498b87fa29e5",
+    "external_id": "LK257",
+    "coordinates": [107.6232345, -6.9394898],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ed422891378f229e66",
+    "external_id": "LK258",
+    "coordinates": [115.4475148, -8.6690671],
+    "province": "Bali"
+  },
+  {
+    "radar_id": "67a9e5ef3831a4f9d311382b",
+    "external_id": "LK259",
+    "coordinates": [106.7738293, -6.2770437],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ef34b3b3d589786586",
+    "external_id": "LK260",
+    "coordinates": [106.9789351, -6.1743397],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ef292ae50f34ce2722",
+    "external_id": "LK261",
+    "coordinates": [106.874999, -6.270125],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ef5eeddee4f0dc8cc4",
+    "external_id": "LK262",
+    "coordinates": [106.8656093, -6.2156781],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5efcf44db2502ea73db",
+    "external_id": "LK263",
+    "coordinates": [106.9716239, -6.1687877],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ef9ec0f1e6dac4c23d",
+    "external_id": "LK264",
+    "coordinates": [106.9872494, -6.2548741],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ef0c8c42e6bbbf516d",
+    "external_id": "LK265",
+    "coordinates": [106.8981987, -6.309641],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5ef5291e657af682dc9",
+    "external_id": "LK266",
+    "coordinates": [107.5824077, -6.8933257],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5efcd6745344734cce7",
+    "external_id": "LK267",
+    "coordinates": [107.63432, -6.9147238],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5ef93c5be350b4e6b3f",
+    "external_id": "LK268",
+    "coordinates": [108.3354739, -6.3392374],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5f021c5453c878ab7d2",
+    "external_id": "LK269",
+    "coordinates": [106.9662874, -6.2451882],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5f093c5be350b4e6b60",
+    "external_id": "LK270",
+    "coordinates": [107.5903739, -6.9161184],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5f0ef260e210edbcabd",
+    "external_id": "LK271",
+    "coordinates": [106.7627039, -6.2947288],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67a9e5f05eeddee4f0dc8e43",
+    "external_id": "LK272",
+    "coordinates": [106.588063, -6.2269467],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f0627ef571c0a1ef43",
+    "external_id": "LK273",
+    "coordinates": [115.2517294, -8.5053246],
+    "province": "Bali"
+  },
+  {
+    "radar_id": "67a9e5f06e739366cf09ebb5",
+    "external_id": "LK274",
+    "coordinates": [115.1670041, -8.7164209],
+    "province": "Bali"
+  },
+  {
+    "radar_id": "67a9e5f0816746eb603c900f",
+    "external_id": "LK275",
+    "coordinates": [115.1594468, -8.6815774],
+    "province": "Bali"
+  },
+  {
+    "radar_id": "67a9e5f0c91092b8097f85bd",
+    "external_id": "LK276",
+    "coordinates": [109.1212327, -6.9781344],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9e5f0475915ee22c777a2",
+    "external_id": "LK277",
+    "coordinates": [106.0438318, -6.0227679],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f1292ae50f34ce27ad",
+    "external_id": "LK278",
+    "coordinates": [106.0994169, -5.9351733],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f3282d406caa301173",
+    "external_id": "LK279",
+    "coordinates": [106.1009754, -5.927685],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f344158c4830a2e88a",
+    "external_id": "LK280",
+    "coordinates": [106.0994169, -5.9351733],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f364b35fbc333f8b2a",
+    "external_id": "LK281",
+    "coordinates": [106.328105, -6.3327617],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67a9e5f3665aa77704043d4a",
+    "external_id": "LK282",
+    "coordinates": [110.2138362, -7.4829866],
+    "province": "Jawa Tengah"
+  },
+  {
+    "radar_id": "67a9e5f3ef260e210edbcbbe",
+    "external_id": "LK283",
+    "coordinates": [108.3511881, -7.325],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67a9e5f3e79b6f225c4d5800",
+    "external_id": "LK284",
+    "coordinates": [106.7834049, -6.7785734],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67aabe1a4e9998a44b8c0a8a",
+    "external_id": "LK285",
+    "coordinates": [107.1300395, -6.31846],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67aac06f5218ceedf00f2970",
+    "external_id": "LK286",
+    "coordinates": [106.8387346, -6.1769322],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac14037a9dc93bb874b09",
+    "external_id": "LK287",
+    "coordinates": [106.8893248, -6.3695998],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67aac1872133c724917ce087",
+    "external_id": "LK288",
+    "coordinates": [106.8136292, -6.1942036],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac189341a480b047d69ca",
+    "external_id": "LK289",
+    "coordinates": [106.8136292, -6.1942036],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac1d8c510150f72bb2c8e",
+    "external_id": "LK290",
+    "coordinates": [106.8619698, -6.2164577],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac22c47320d1057d18183",
+    "external_id": "LK291",
+    "coordinates": [106.9404288, -6.1836295],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac22e7b1261520eed8ec5",
+    "external_id": "LK292",
+    "coordinates": [106.9404288, -6.1836295],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac3d42de8455d283dde50",
+    "external_id": "LK293",
+    "coordinates": [106.6280997, -6.1732593],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac4d466ce6200df7759a9",
+    "external_id": "LK294",
+    "coordinates": [106.8119691, -6.177357],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aac5cc5664cebee76e71df",
+    "external_id": "LK295",
+    "coordinates": [106.7617249, -6.151927],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aad01cb2e9650a653783c6",
+    "external_id": "LK296",
+    "coordinates": [106.8140101, -6.3245114],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aad05e47320d1057d546b1",
+    "external_id": "LK297",
+    "coordinates": [106.8159728, -6.2862827],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aad0e62f8d36930a34fc05",
+    "external_id": "LK299",
+    "coordinates": [106.4728322, -6.3568729],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67aad12dcd7f3bbfb1c6e46c",
+    "external_id": "LK300",
+    "coordinates": [106.4993769, -6.3593628],
+    "province": "Jawa Barat"
+  },
+  {
+    "radar_id": "67aad19037a9dc93bb8b8ea5",
+    "external_id": "LK301",
+    "coordinates": [106.8242399, -6.2240223],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aad28d0692a455d9b1b62a",
+    "external_id": "LK302",
+    "coordinates": [106.8020299, -6.2909745],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aadc492133c7249183489d",
+    "external_id": "LK303",
+    "coordinates": [106.6120312, -6.1302204],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aadcb445dce2393dd35343",
+    "external_id": "LK304",
+    "coordinates": [106.693023, -6.3558075],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67aadd0412ce466d8cd8053a",
+    "external_id": "LK306",
+    "coordinates": [106.6607347, -6.1196362],
+    "province": "Jawa"
+  },
+  {
+    "radar_id": "67aadf4f3cff24529a394212",
+    "external_id": "LK307",
+    "coordinates": [106.7638478, -6.3443751],
+    "province": "Banten"
+  },
+  {
+    "radar_id": "67aae09d7e9e9db10d995154",
+    "external_id": "LK308",
+    "coordinates": [106.7638478, -6.3443751],
+    "province": "Banten"
+  }
+]
