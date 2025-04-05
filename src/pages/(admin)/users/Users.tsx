@@ -280,7 +280,7 @@ export default function Users() {
   };
 
   return (
-    <div className="w-[85%] max-w-screen-xxl p-6">
+    <div className="w-[88%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
       <Helmet>
         <title>Pengguna</title>

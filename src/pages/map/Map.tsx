@@ -117,7 +117,7 @@ const Map = () => {
       </Helmet>
 
       {/* Tile layer themes dropdown */}
-      < div className="z-50 flex justify-between w-[85%] p-4 bg-white rounded-md shadow-lg" >
+      < div className="z-50 flex justify-between w-[88%] p-4 bg-white rounded-md shadow-lg" >
         <h1 className="text-2xl font-semibold">Peta Lokasi</h1>
 
         {/* Map Legends */}

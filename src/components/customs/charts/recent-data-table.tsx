@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
+import { BadgeInfo } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useQuery } from "@tanstack/react-query"
-import { Skeleton } from "@/components/ui/skeleton"
 import { getRecentTickets } from "@/lib/dashboard"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BadgeInfo } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export function RecentDataTable() {
   const { data, isLoading, error } = useQuery({
@@ -35,77 +36,79 @@ export function RecentDataTable() {
         <CardDescription>Menampilkan {isLoading ? '...' : data?.length} data terbaru</CardDescription>
       </CardHeader>
       <CardContent className="px-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No.</TableHead>
-              <TableHead>ID Tiket</TableHead>
-              <TableHead>ID Perjalanan</TableHead>
-              <TableHead>Tempat Tujuan</TableHead>
-              <TableHead>Nama Pengguna</TableHead>
-              <TableHead>Deskripsi</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Update Terakhir</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array(5).fill(0).map((_, i) => (
-                <TableRow key={i}>
-                  {Array(7).fill(0).map((_, j) => (
-                    <TableCell key={j}>
-                      <Skeleton className="h-4 w-[100px]" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              data?.slice(0, 5).map((item, index) => (
-                <TableRow key={item.ticket_id}>
-                  <TableCell className="font-mono">{index + 1}</TableCell>
-                  <TableCell className="font-mono">{item.ticket_id}</TableCell>
-                  <TableCell className="font-mono">{item.trip_id}</TableCell>
-                  <TableCell className="font-mono">{(item as any).geofences?.description || '-'}</TableCell>
-                  <TableCell className="font-mono">{(item as any).users?.username || '-'}</TableCell>
-                  <TableCell>{item.description || '-'}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.status === "arrived" || item.status === "completed"
-                          ? "success"
-                          : item.status === "pending" || item.status === "started" || item.status === "approaching" || item.status === "on_progress"
-                            ? "warning"
-                            : item.status === "expired"
-                              ? "secondary"
-                              : item.status === "assigned" ? "assigned" : "destructive"
-                      }
-                    >
-                      {item.status === "assigned" && "Ditugaskan"}
-                      {item.status === "started" && "Dimulai"}
-                      {item.status === "on_progress" && "Berjalan"}
-                      {item.status === "pending" && "Menunggu"}
-                      {item.status === "approaching" && "Mendekati"}
-                      {item.status === "arrived" && "Tiba"}
-                      {item.status === "completed" && "Selesai"}
-                      {item.status === "expired" && "Kadaluarsa"}
-                      {item.status === "canceled" && "Dibatalkan"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(item.updated_at), "dd MMM yyyy HH:mm", { locale: id })}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-            {!isLoading && data?.length === 0 && (
+        <ScrollArea className="h-[500px]">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  Tidak ada data
-                </TableCell>
+                <TableHead>No.</TableHead>
+                <TableHead>ID Tiket</TableHead>
+                <TableHead>ID Perjalanan</TableHead>
+                <TableHead>Tempat Tujuan</TableHead>
+                <TableHead>Nama Pengguna</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Update Terakhir</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array(7).fill(0).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                data?.slice(0, 10).map((item, index) => (
+                  <TableRow key={item.ticket_id}>
+                    <TableCell className="font-mono">{index + 1}</TableCell>
+                    <TableCell className="font-mono">{item.ticket_id}</TableCell>
+                    <TableCell className="font-mono">{item.trip_id}</TableCell>
+                    <TableCell className="font-mono">{(item as any).geofences?.description || '-'}</TableCell>
+                    <TableCell className="font-mono">{(item as any).users?.username || '-'}</TableCell>
+                    <TableCell>{item.description || '-'}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          item.status === "arrived" || item.status === "completed"
+                            ? "success"
+                            : item.status === "pending" || item.status === "started" || item.status === "approaching" || item.status === "on_progress"
+                              ? "warning"
+                              : item.status === "expired"
+                                ? "secondary"
+                                : item.status === "assigned" ? "assigned" : "destructive"
+                        }
+                      >
+                        {item.status === "assigned" && "Ditugaskan"}
+                        {item.status === "started" && "Dimulai"}
+                        {item.status === "on_progress" && "Berjalan"}
+                        {item.status === "pending" && "Menunggu"}
+                        {item.status === "approaching" && "Mendekati"}
+                        {item.status === "arrived" && "Tiba"}
+                        {item.status === "completed" && "Selesai"}
+                        {item.status === "expired" && "Kadaluarsa"}
+                        {item.status === "canceled" && "Dibatalkan"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(item.updated_at), "dd MMM yyyy HH:mm", { locale: id })}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+              {!isLoading && data?.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    Tidak ada data
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </CardContent>
       {/* <CardFooter className="px-6 pb-6">
         <div className="flex items-start w-full gap-2 text-sm">

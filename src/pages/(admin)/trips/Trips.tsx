@@ -136,7 +136,7 @@ export default function Trips() {
     };
 
     if (!devMode) {
-      filtered = filtered.filter((trip) => trip?.geofenceTag !== "testing");
+      filtered = filtered.filter((trip) => trip?.geofenceTag !== "testing" && trip?.username !== "[DevUser]" && trip?.username !== "[DevClient]");
     }
 
     // Filter berdasarkan status
@@ -169,7 +169,7 @@ export default function Trips() {
           hour: '2-digit',
           minute: '2-digit',
         }).replace('.', ':').toLowerCase().includes(searchQuery) ||
-        statusMapping[trip.status].toLowerCase().includes
+        statusMapping[trip.status].toLowerCase().includes(searchQuery)
       );
     };
 
@@ -264,7 +264,7 @@ export default function Trips() {
   if (error) return <div>Error loading trips: {error.message}</div>;
 
   return (
-    <div className="w-[85%] max-w-screen-xxl p-6">
+    <div className="w-[88%] max-w-screen-xxl p-6">
       {/* Set Page Title */}
       <Helmet>
         <title>Perjalanan</title>

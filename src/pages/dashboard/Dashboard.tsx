@@ -22,6 +22,14 @@ export default function Dashboard() {
   const [loadingMessage, setLoadingMessage] = useState("Memuat...");
   const [isDataLoading, setIsDataLoading] = useState(true);
 
+  // Prevent scrolling on the body
+  useEffect(() => {
+    document.body.style.overflowX = "hidden"; // Prevent horizontal scrolling only
+    return () => {
+      document.body.style.overflowX = "auto"; // Restore horizontal scrolling when component unmounts
+    };
+  }, []);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -79,7 +87,7 @@ export default function Dashboard() {
   }, [isDataLoading]);
 
   return (
-    <div className="w-[85%] max-w-screen-xxl p-6">
+    <div className="w-[88%] max-w-screen-xxl p-6">
       <Helmet>
         <title>Dashboard</title>
       </Helmet>

@@ -120,7 +120,7 @@ export async function getRecentTickets() {
     .not("user_id", "in", `(${excludedTicketsFromUser})`)
     .not("geofences.description", "in", `(${excludedGeofenceNames})`)
     .not("geofences.tag", "in", `(${excludedGeofenceTags})`)
-    .limit(5);
+    .limit(10);
   if (error) throw error;
   return data;
 }
