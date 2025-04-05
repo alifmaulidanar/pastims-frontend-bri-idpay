@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Label, Pie, PieChart } from "recharts";
 import { MapPinCheck, User2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface TotalPieProps {
   parameter: string;

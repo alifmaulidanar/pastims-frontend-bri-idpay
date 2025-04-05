@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
@@ -64,8 +65,8 @@ export function RecentDataTable() {
                   <TableCell className="font-mono">{index + 1}</TableCell>
                   <TableCell className="font-mono">{item.ticket_id}</TableCell>
                   <TableCell className="font-mono">{item.trip_id}</TableCell>
-                  <TableCell className="font-mono">{item.geofences?.description || '-'}</TableCell>
-                  <TableCell className="font-mono">{item.users?.username || '-'}</TableCell>
+                  <TableCell className="font-mono">{(item as any).geofences?.description || '-'}</TableCell>
+                  <TableCell className="font-mono">{(item as any).users?.username || '-'}</TableCell>
                   <TableCell>{item.description || '-'}</TableCell>
                   <TableCell>
                     <Badge
