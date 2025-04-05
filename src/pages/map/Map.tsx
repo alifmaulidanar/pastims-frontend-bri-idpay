@@ -131,8 +131,8 @@ const Map = () => {
             <p className="text-sm">Pengguna</p>
           </div>
           <div className="flex flex-col items-center">
-            <img src={geofenceIconUrl} alt="Tempat" className="w-6 h-6" />
-            <p className="text-sm">Tempat</p>
+            <img src={geofenceIconUrl} alt="Merchant" className="w-6 h-6" />
+            <p className="text-sm">Merchant</p>
           </div>
         </div>
 

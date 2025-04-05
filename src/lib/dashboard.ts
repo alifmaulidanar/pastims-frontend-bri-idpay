@@ -14,6 +14,32 @@ export async function getUsersCounts() {
   return { userCount, clientCount };
 }
 
+// export async function getGeofencesCounts() {
+//   const excludedGeofenceNames = ['Tes Lokasi'];
+//   const excludedGeofenceTags = ['testing'];
+//   const { data, error } = await supabase
+//     .from("geofences")
+//     .select("province, description", { count: "exact" })
+//     .not("description", "in", `(${excludedGeofenceNames})`)
+//     .not("tag", "in", `(${excludedGeofenceTags})`);
+
+//   if (error) {
+//     throw new Error(`Error fetching geofences counts: ${error.message}`);
+//   }
+
+//   const provinceCounts = data.reduce((acc, geofence) => {
+//     if (geofence.province) {
+//       acc[geofence.province] = (acc[geofence.province] || 0) + 1;
+//     }
+//     return acc;
+//   }, {} as Record<string, number>);
+
+//   const provinceData = Object.keys(provinceCounts).map((province) => ({
+//     province,
+//     count: provinceCounts[province],
+//   }));
+//   return provinceData;
+// }
 export async function getGeofencesCounts() {
   const excludedGeofenceNames = ['Tes Lokasi'];
   const excludedGeofenceTags = ['testing'];
@@ -68,7 +94,11 @@ export async function getTripsCounts(timeRange: string) {
     .not("geofence_id", "in", `(${excludedGeofenceTrips})`)
     .gte("updated_at", startDate.toISOString());
   if (error) throw new Error(`Error fetching trip counts: ${error.message}`);
-  return data;
+  const modifiedData = data.map(trip => ({
+    ...trip,
+    status: trip.status === 'started' ? 'on_progress' : trip.status
+  }));
+  return modifiedData;
 }
 
 export async function getRecentTickets() {

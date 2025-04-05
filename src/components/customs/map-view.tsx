@@ -163,7 +163,7 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                           <td>{ticket.description}</td>
                         </tr>
                         <tr>
-                          <td><strong>Tempat</strong></td>
+                          <td><strong>Merchant</strong></td>
                           <td>:</td>
                           <td>{geofences.find((geofence) => geofence.externalId === ticket.geofence_id)?.description || "Unknown location"}</td>
                         </tr>
@@ -237,7 +237,7 @@ const MapView = ({ location, tileLayer, userLocations, geofences, tickets, onMap
                 <table className="mt-4 geofence-info-table">
                   <tbody>
                     <tr>
-                      <td><strong>Tempat</strong></td>
+                      <td><strong>Merchant</strong></td>
                       <td>:</td>
                       <td>{geofence.description || "Unknown location"}</td>
                     </tr>

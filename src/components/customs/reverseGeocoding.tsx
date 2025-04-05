@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import geofences from './geofences.json';
+import geofences from './jsonDataOutput/geofences.json';
 
 interface GeofenceData {
   radar_id: string;
   external_id: string;
   coordinates: number[];
   city: string;
+  province: string;
 }
 
 const GeocodingButton = () => {
@@ -16,7 +17,10 @@ const GeocodingButton = () => {
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const getCityFromAddress = (address: any): string => {
-    return address.city || address.county || address.town || address.village || '';
+    return address.city || address.county || address.town || address.regency || address.village || '';
+  };
+  const getProvinceFromAddress = (address: any): string => {
+    return address.state || address.region || '';
   };
 
   const saveToFile = (data: GeofenceData[]) => {
@@ -51,7 +55,7 @@ const GeocodingButton = () => {
         const { radar_id, external_id, coordinates } = geofences[i];
 
         if (!coordinates || coordinates.length < 2) {
-          processedData.push({ radar_id, external_id, coordinates: coordinates || [], city: '' });
+          processedData.push({ radar_id, external_id, coordinates: coordinates || [], city: '', province: '' });
           continue;
         }
 
@@ -69,10 +73,11 @@ const GeocodingButton = () => {
 
           const data = await response.json();
           const city = getCityFromAddress(data.address || {});
-          processedData.push({ radar_id, external_id, coordinates, city });
+          const province = getProvinceFromAddress(data.address || {});
+          processedData.push({ radar_id, external_id, coordinates, city, province });
         } catch (error) {
           console.error(`Error processing ${external_id}:`, error);
-          processedData.push({ radar_id, external_id, coordinates, city: '' });
+          processedData.push({ radar_id, external_id, coordinates, city: '', province: '' });
         }
 
         if (i < geofences.length - 1) await sleep(1000);
