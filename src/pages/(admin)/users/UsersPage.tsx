@@ -1,10 +1,10 @@
 import Users from "@/pages/(admin)/users/Users";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function UsersPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Users />
-    </Layout>
+    </PageLayout>
   );
 }

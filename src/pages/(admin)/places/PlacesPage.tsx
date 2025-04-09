@@ -1,10 +1,10 @@
 import Places from "./Places";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function PlacesPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Places />
-    </Layout>
+    </PageLayout>
   );
 }

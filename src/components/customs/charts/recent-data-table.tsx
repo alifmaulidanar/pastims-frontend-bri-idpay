@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
-import { BadgeInfo } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useQuery } from "@tanstack/react-query"
 import { getRecentTickets } from "@/lib/dashboard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { BadgeInfo, Ban, CheckCheck, Loader, X } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export function RecentDataTable() {
@@ -36,13 +37,13 @@ export function RecentDataTable() {
         <CardDescription>Menampilkan {isLoading ? '...' : data?.length} data terbaru</CardDescription>
       </CardHeader>
       <CardContent className="px-4">
-        <ScrollArea className="h-[500px]">
+        <ScrollArea className="h-[400px] md:h-[500px]">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>No.</TableHead>
                 <TableHead>ID Tiket</TableHead>
-                <TableHead>ID Perjalanan</TableHead>
+                {/* <TableHead>ID Perjalanan</TableHead> */}
                 <TableHead>Tempat Tujuan</TableHead>
                 <TableHead>Nama Pengguna</TableHead>
                 <TableHead>Deskripsi</TableHead>
@@ -55,8 +56,8 @@ export function RecentDataTable() {
                 Array(5).fill(0).map((_, i) => (
                   <TableRow key={i}>
                     {Array(7).fill(0).map((_, j) => (
-                      <TableCell key={j}>
-                        <Skeleton className="h-4 w-[100px]" />
+                      <TableCell key={j} className="font-mono truncate max-w-[120px] md:max-w-none">
+                        <Skeleton className="h-4 w-[80px]" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -64,37 +65,66 @@ export function RecentDataTable() {
               ) : (
                 data?.slice(0, 10).map((item, index) => (
                   <TableRow key={item.ticket_id}>
-                    <TableCell className="font-mono">{index + 1}</TableCell>
-                    <TableCell className="font-mono">{item.ticket_id}</TableCell>
-                    <TableCell className="font-mono">{item.trip_id}</TableCell>
-                    <TableCell className="font-mono">{(item as any).geofences?.description || '-'}</TableCell>
-                    <TableCell className="font-mono">{(item as any).users?.username || '-'}</TableCell>
-                    <TableCell>{item.description || '-'}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          item.status === "arrived" || item.status === "completed"
-                            ? "success"
-                            : item.status === "pending" || item.status === "started" || item.status === "approaching" || item.status === "on_progress"
-                              ? "warning"
-                              : item.status === "expired"
-                                ? "secondary"
-                                : item.status === "assigned" ? "assigned" : "destructive"
-                        }
-                      >
-                        {item.status === "assigned" && "Ditugaskan"}
-                        {item.status === "started" && "Dimulai"}
-                        {item.status === "on_progress" && "Berjalan"}
-                        {item.status === "pending" && "Menunggu"}
-                        {item.status === "approaching" && "Mendekati"}
-                        {item.status === "arrived" && "Tiba"}
-                        {item.status === "completed" && "Selesai"}
-                        {item.status === "expired" && "Kadaluarsa"}
-                        {item.status === "canceled" && "Dibatalkan"}
-                      </Badge>
+                    <TableCell className="font-mono truncate max-w-[120px] md:max-w-none">{index + 1}</TableCell>
+                    <TableCell className="font-mono truncate max-w-[120px] md:max-w-none">{item.ticket_id}</TableCell>
+                    {/* <TableCell className="font-mono truncate max-w-[120px] md:max-w-none">{item.trip_id}</TableCell> */}
+                    <TableCell className="font-mono max-w-[120px] md:max-w-none">
+                      {((item as any).geofences?.description || '-').length > 15
+                        ? `${((item as any).geofences?.description || '-').substring(0, 15)}...`
+                        : ((item as any).geofences?.description || '-')}
+                    </TableCell>                    <TableCell className="font-mono max-w-[120px] md:max-w-none">{(item as any).users?.username || '-'}</TableCell>
+                    <TableCell className="font-mono max-w-[120px] md:max-w-none">{item.description || '-'}</TableCell>
+                    <TableCell className="font-mono truncate max-w-[120px] md:max-w-none">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Badge
+                              variant={
+                                item.status === "arrived" || item.status === "completed"
+                                  ? "success"
+                                  : item.status === "pending" || item.status === "started" || item.status === "approaching" || item.status === "on_progress"
+                                    ? "warning"
+                                    : item.status === "expired"
+                                      ? "secondary"
+                                      : item.status === "assigned" ? "assigned" : "destructive"
+                              }
+                            >
+                              {item.status === "assigned" && <Loader className="w-4 h-4 animate-spin" />}
+                              {item.status === "started" && <Loader className="w-4 h-4 animate-spin" />}
+                              {item.status === "on_progress" && <Loader className="w-4 h-4 animate-spin" />}
+                              {item.status === "pending" && <Loader className="w-4 h-4 animate-spin" />}
+                              {item.status === "approaching" && <Loader className="w-4 h-4 animate-spin" />}
+                              {item.status === "arrived" && <CheckCheck className="w-4 h-4" />}
+                              {item.status === "completed" && <CheckCheck className="w-4 h-4" />}
+                              {item.status === "canceled" && <X className="w-4 h-4 animate-pulse" />}
+                              {item.status === "expired" && <Ban className="w-4 h-4" />}
+                              {/* {item.status === "assigned" && "Tugas"}
+                              {item.status === "started" && "Berjalan"}
+                              {item.status === "on_progress" && "Berjalan"}
+                              {item.status === "pending" && "Berjalan"}
+                              {item.status === "approaching" && "Berjalan"}
+                              {item.status === "arrived" && "Berjalan"}
+                              {item.status === "completed" && "Selesai"}
+                              {item.status === "expired" && "Kadaluarsa"}
+                              {item.status === "canceled" && "Batal"} */}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {item.status === "assigned" && "Ditugaskan"}
+                            {item.status === "started" && "Berjalan"}
+                            {item.status === "on_progress" && "Berjalan"}
+                            {item.status === "pending" && "Berjalan"}
+                            {item.status === "approaching" && "Berjalan"}
+                            {item.status === "arrived" && "Berjalan"}
+                            {item.status === "completed" && "Selesai"}
+                            {item.status === "expired" && "Kadaluarsa"}
+                            {item.status === "canceled" && "Dibatalkan"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(item.updated_at), "dd MMM yyyy HH:mm", { locale: id })}
+                    <TableCell className="font-mono max-w-[120px] md:max-w-none">
+                      {format(new Date(item.updated_at), "dd/MM/yyyy HH:mm", { locale: id })}
                     </TableCell>
                   </TableRow>
                 ))
@@ -108,6 +138,7 @@ export function RecentDataTable() {
               )}
             </TableBody>
           </Table>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </CardContent>
       {/* <CardFooter className="px-6 pb-6">

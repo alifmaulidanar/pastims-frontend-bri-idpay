@@ -1,15 +1,13 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/customs/app-sidebar"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen">
         <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="p-4 mx-auto md:p-6 max-w-screen-3xl">
-            {children}
-          </div>
+        <main className="w-screen">
+          {children}
         </main>
       </div>
     </SidebarProvider>

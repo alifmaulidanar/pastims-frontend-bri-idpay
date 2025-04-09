@@ -26,7 +26,9 @@ export default function TotalCard({ parameter, value }: TotalCardProps) {
         </CardDescription> */}
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-center my-auto text-5xl font-bold">{value.toLocaleString()}</div>
+        <div className="flex items-center justify-center my-auto text-3xl font-bold md:text-5xl">
+          {value.toLocaleString()}
+        </div>
       </CardContent>
       {/* <CardFooter>
         <div className="flex items-start w-full gap-2 text-sm">

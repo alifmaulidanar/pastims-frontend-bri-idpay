@@ -53,8 +53,9 @@ export default function TotalPie({ parameter, data, valueKey, nameKey }: TotalPi
         </div>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <ChartContainer config={dynamicChartConfig}
-          className="mx-auto aspect-square max-h-[300px]"
+        <ChartContainer
+          config={dynamicChartConfig}
+          className="mx-auto aspect-square max-h-[200px] md:max-h-[300px]"
         >
           <PieChart>
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
@@ -82,7 +83,9 @@ export default function TotalPie({ parameter, data, valueKey, nameKey }: TotalPi
                 }}
               />
             </Pie>
-            {/* <ChartLegend content={<ChartLegendContent nameKey={nameKey} />} className="flex flex-wrap gap-2 [&>*]:basis-1/8 [&>*]:justify-center text-sm" /> */}
+            {/* {parameter === "Pengguna" && (
+              <ChartLegend content={<ChartLegendContent nameKey={nameKey} />} className="flex flex-wrap gap-2 [&>*]:basis-1/8 [&>*]:justify-center text-sm" />
+            )} */}
           </PieChart>
         </ChartContainer>
       </CardContent>

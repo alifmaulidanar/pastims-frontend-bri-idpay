@@ -1,10 +1,10 @@
 import Trips from "./Trips";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function TripsPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Trips />
-    </Layout>
+    </PageLayout>
   );
 }

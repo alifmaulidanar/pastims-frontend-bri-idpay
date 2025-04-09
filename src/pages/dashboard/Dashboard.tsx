@@ -87,32 +87,35 @@ export default function Dashboard() {
   }, [isDataLoading]);
 
   return (
-    <div className="w-[88%] max-w-screen-xxl p-6">
+    <div className="w-full">
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
 
-      <h1 className="mb-4 text-2xl font-semibold">Dashboard</h1>
+      <h1 className="mb-4 text-xl font-semibold md:text-2xl">Dashboard</h1>
 
-      {/* <GeocodingButton /> */}
-      {/* <GeofenceUploader /> */}
-      {/* <CityProvinceUploader /> */}
+      {/* Grid Utama */}
+      <div className="grid grid-cols-1 gap-4 mb-6 lg:grid-cols-2 xl:grid-cols-4">
+        {/* Kolom Kiri */}
+        <div className="space-y-4 xl:col-span-2">
+          <div className="grid grid-cols-2 gap-4">
+            <TotalPie parameter="Pengguna" data={userData} valueKey="pengguna" nameKey="browser" />
+            <TotalPie parameter="Lokasi Merchant" data={geofenceData} valueKey="merchant" nameKey="browser" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TotalCard parameter="Tiket" value={ticketData.length} />
+            <TotalCard parameter="Perjalanan" value={tripData.length} />
+          </div>
+        </div>
 
-      <div className="grid grid-cols-4 mb-8 gap-x-8">
-        <div className="grid col-span-1 gap-y-8">
-          <TotalPie parameter="Pengguna" data={userData} valueKey="pengguna" nameKey="browser" />
-          <TotalCard parameter="Tiket" value={ticketData.length} />
-        </div>
-        <div className="grid col-span-1 gap-y-8">
-          <TotalPie parameter="Lokasi Merchant" data={geofenceData} valueKey="merchant" nameKey="browser" />
-          <TotalCard parameter="Perjalanan" value={tripData.length} />
-        </div>
-        <div className="col-span-2">
+        {/* Kolom Kanan */}
+        <div className="xl:col-span-2">
           <RecentDataTable />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 mb-8 gap-x-8">
+      {/* Line Charts */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <LineInteractiveChart
           data={ticketData}
           title="Distribusi Status Tiket"
@@ -126,6 +129,7 @@ export default function Dashboard() {
           onTimeRangeChange={setTimeRangeTrip}
         />
       </div>
+
       <LoadingOverlay isLoading={isLoading} message={loadingMessage} />
     </div>
   );

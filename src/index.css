@@ -78,3 +78,12 @@
 /* * {
   outline: 1px solid red;
 } */
+
+@media (max-width: 768px) {
+  .responsive-table {
+    th,
+    td {
+      min-width: 120px;
+    }
+  }
+}

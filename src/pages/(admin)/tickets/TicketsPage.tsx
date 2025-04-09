@@ -1,10 +1,10 @@
 import Tickets from "./Tickets";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function TicketsPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Tickets />
-    </Layout>
+    </PageLayout>
   );
 }

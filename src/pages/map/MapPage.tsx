@@ -1,10 +1,10 @@
 import Map from "@/pages/map/Map";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function MapPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Map />
-    </Layout>
+    </PageLayout>
   );
 }

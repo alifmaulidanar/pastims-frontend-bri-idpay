@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react"
+import { Badge } from "@/components/ui/badge"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -115,7 +116,7 @@ export function LineInteractiveChart({
         <div className="flex flex-col justify-center flex-1 gap-1 px-6 py-5 sm:py-6">
           <CardTitle>{title}</CardTitle>
           <CardDescription>
-            Menampilkan data dari {timeRange == "30d" ? "1 bulan" : timeRange == "60d" ? "2 bulan" : timeRange == "90d" ? "3 bulan" : "1 bulan"} terakhir
+            Data {timeRange == "30d" ? "1 bulan" : timeRange == "60d" ? "2 bulan" : timeRange == "90d" ? "3 bulan" : "1 bulan"} terakhir
           </CardDescription>
           <div className="flex items-center gap-4">
             <Select value={timeRange} onValueChange={onTimeRangeChange}>
@@ -135,7 +136,7 @@ export function LineInteractiveChart({
             </Select>
           </div>
         </div>
-        <div className="flex">
+        <div className="flex flex-wrap sm:flex-nowrap">
           {Object.keys(chartConfig).map((key) => {
             const chartKey = key as keyof typeof chartConfig
             return (
@@ -145,9 +146,23 @@ export function LineInteractiveChart({
                 className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chartKey)}
               >
-                <span className="text-xs text-muted-foreground">
+                <Badge
+                  className="text-xs"
+                  variant={
+                    chartConfig[chartKey].label === "Ditugaskan"
+                      ? "assigned"
+                      : chartConfig[chartKey].label === "Berjalan"
+                        ? "warning"
+                        : chartConfig[chartKey].label === "Selesai"
+                          ? "success"
+                          : "destructive"
+                  }
+                >
                   {chartConfig[chartKey].label}
-                </span>
+                </Badge>
+                {/* <span className="text-xs">
+                  Klik untuk melihat grafik
+                </span> */}
                 <span className="text-lg font-bold leading-none sm:text-3xl">
                   {totals[chartKey].toLocaleString()}
                 </span>
@@ -159,7 +174,7 @@ export function LineInteractiveChart({
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[200px] sm:h-[250px]"
         >
           <LineChart
             data={processedData}

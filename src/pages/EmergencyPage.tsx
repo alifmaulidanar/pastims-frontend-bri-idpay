@@ -1,10 +1,10 @@
 import Emergency from "./Emergency";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function EmergencyPage() {
   return (
-    <Layout>
+    <PageLayout>
       <Emergency />
-    </Layout>
+    </PageLayout>
   );
 }

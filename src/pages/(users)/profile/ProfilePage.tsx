@@ -1,10 +1,10 @@
 import Profile from "./Profile";
-import Layout from "@/components/layouts/dashboard-layout";
+import PageLayout from "@/components/layouts/page-layout";
 
 export default function ProfilePage() {
   return (
-    <Layout>
+    <PageLayout>
       <Profile />
-    </Layout>
+    </PageLayout>
   );
 }
