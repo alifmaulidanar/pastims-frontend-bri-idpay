@@ -42,8 +42,11 @@ export default function Trips() {
 
   // Fetch Tickets
   const { data: tripsData, isLoading: isDataLoading, error } = useQuery({
-    queryKey: ['allTrips', pageSize, currentPage],
-    queryFn: ({ queryKey }) => fetchDBTrips({ queryKey: queryKey as [string, number, number] }),
+    queryKey: ['allTrips', pageSize, currentPage, devMode],
+    queryFn: ({ queryKey }) => fetchDBTrips({
+      queryKey: queryKey as [string, number, number],
+      devMode: devMode,
+    }),
     initialData: { trips: [], count: 0 },
     refetchInterval: 600000, // Refetch every 10 minutes
   });

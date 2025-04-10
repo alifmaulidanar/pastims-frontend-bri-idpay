@@ -42,7 +42,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={checkUser() ? <Navigate to="/maps" /> : <LandingPage />}
+            element={checkUser() ? <Navigate to="/dashboard" /> : <LandingPage />}
           />
           <Route
             path="/emergency-only"
@@ -50,7 +50,7 @@ function App() {
           />
           <Route
             path="/login"
-            element={checkUser() ? <Navigate to="/maps" /> : <LoginForm />}
+            element={checkUser() ? <Navigate to="/dashboard" /> : <LoginForm />}
           />
           <Route
             path="/dashboard"

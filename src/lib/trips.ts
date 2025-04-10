@@ -4,12 +4,12 @@
 const BASE_URL = import.meta.env.VITE_abu_V2;
 const SLSS = import.meta.env.VITE_slss;
 
-// Fetch tickets from the backend API
-export const fetchDBTrips = async ({ queryKey }: { queryKey: [string, number, number] }) => {
+// Fetch trips from the backend API
+export const fetchDBTrips = async ({ queryKey, devMode }: { queryKey: [string, number, number], devMode: boolean }) => {
   try {
     const token = localStorage.getItem(`${SLSS}`);
     const [, limit, page] = queryKey;
-    const response = await fetch(`${BASE_URL}/admin/trips?limit=${limit}&page=${page}`, {
+    const response = await fetch(`${BASE_URL}/admin/trips?limit=${limit}&page=${page}&ondevmodeprod=${devMode}`, {
       headers: {
         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
       },
