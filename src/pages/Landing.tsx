@@ -47,7 +47,7 @@ export default function Landing() {
           </div>
           <div className="space-y-4 text-center">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              PastiMS EDC
+              {import.meta.env.VITE_PT}
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
               Pantau dan kelola tenaga kerja Anda dengan mudah dengan solusi pelacakan lokasi yang canggih. Tetap terhubung, memastikan keamanan, dan mengoptimalkan kinerja.
