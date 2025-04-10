@@ -1,19 +1,18 @@
-import { useRef } from 'react';
 import { Link } from "react-router-dom";
+import { Navigation } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Badge } from '@/components/ui/badge';
 import { Button } from "@/components/ui/button"
-import landingImage from "@/assets/landing-map-preview.png";
+import landingImage from "@/assets/landing-edc.jpg";
 import { Card, CardContent } from "@/components/ui/card"
-import { MapPin, Navigation, History, Users, ArrowRight, Building2 } from 'lucide-react'
+import teamManagement from "@/assets/team-management.png";
+import adminDashboard from "@/assets/admin-dashboard.png";
+import locationHistory from "@/assets/location-history.jpg";
+import realTimeTracking from "@/assets/real-time-tracking.jpg";
 
 export default function Landing() {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollToBottom = () => { if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: 'smooth' }) };
-
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Set Page Title */}
       <Helmet>
         <title>{import.meta.env.VITE_PT}</title>
       </Helmet>
@@ -26,7 +25,7 @@ export default function Landing() {
           </Link>
           <nav className="flex gap-4 ml-auto">
             <Link to="/login">
-              <Button variant="ghost" className="text-sm font-medium hover:text-emerald-600">
+              <Button variant="ghost" className="text-lg font-bold hover:text-emerald-600">
                 Masuk
               </Button>
             </Link>
@@ -48,20 +47,13 @@ export default function Landing() {
           </div>
           <div className="space-y-4 text-center">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Lacak Lokasi Tim Anda <br /> secara <span className='italic'>Real-Time</span>
+              PastiMS EDC
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
               Pantau dan kelola tenaga kerja Anda dengan mudah dengan solusi pelacakan lokasi yang canggih. Tetap terhubung, memastikan keamanan, dan mengoptimalkan kinerja.
             </p>
           </div>
-          <div className="flex gap-4">
-            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" onClick={scrollToBottom}>
-              Mulai sekarang <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            {/* <Button size="lg" variant="outline">
-              Learn More
-            </Button> */}
-          </div>
+          <div className="flex gap-4"></div>
 
           <div className="relative w-full max-w-4xl mx-auto mt-8">
             <div className="relative border rounded-lg shadow-2xl bg-background">
@@ -78,7 +70,7 @@ export default function Landing() {
         </section>
 
         <section className="container max-w-screen-lg py-12 mx-auto border-t md:py-24 lg:py-32">
-          <div className="grid items-center max-w-5xl gap-8 mx-auto lg:grid-cols-2">
+          <div className="grid items-center max-w-5xl gap-8 mx-auto">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Fitur-fitur yang Kuat untuk Bisnis Anda
@@ -90,7 +82,13 @@ export default function Landing() {
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardContent className="p-6 space-y-2">
-                  <MapPin className="w-10 h-10 text-emerald-500" />
+                  <img
+                    src={realTimeTracking}
+                    width={300}
+                    height={200}
+                    alt="Dashboard Preview"
+                    className="rounded-lg"
+                  />
                   <h3 className="font-bold">Pelacakan <span className='italic'>Real-Time</span></h3>
                   <p className="text-sm text-muted-foreground">
                     Pantau lokasi tim secara <span className='italic'>real-time</span> dengan akurasi tinggi
@@ -99,7 +97,13 @@ export default function Landing() {
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
-                  <History className="w-10 h-10 text-emerald-500" />
+                  <img
+                    src={locationHistory}
+                    width={300}
+                    height={200}
+                    alt="Dashboard Preview"
+                    className="rounded-lg"
+                  />
                   <h3 className="font-bold">Riwayat Lokasi</h3>
                   <p className="text-sm text-muted-foreground">
                     Laporan riwayat pergerakan dan aktivitas secara terperinci
@@ -108,7 +112,13 @@ export default function Landing() {
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
-                  <Users className="w-10 h-10 text-emerald-500" />
+                  <img
+                    src={teamManagement}
+                    width={300}
+                    height={200}
+                    alt="Dashboard Preview"
+                    className="rounded-lg"
+                  />
                   <h3 className="font-bold">Manajemen Tim</h3>
                   <p className="text-sm text-muted-foreground">
                     Pengelolaan tenaga kerja secara efisien
@@ -117,7 +127,13 @@ export default function Landing() {
               </Card>
               <Card>
                 <CardContent className="p-6 space-y-2">
-                  <Building2 className="w-10 h-10 text-emerald-500" />
+                  <img
+                    src={adminDashboard}
+                    width={300}
+                    height={200}
+                    alt="Dashboard Preview"
+                    className="rounded-lg"
+                  />
                   <h3 className="font-bold">Dasbor Admin</h3>
                   <p className="text-sm text-muted-foreground">
                     Tinjauan menyeluruh atas seluruh aktivitas pemantauan
@@ -129,7 +145,7 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer ref={bottomRef} className="py-6 border-t md:py-0">
+      <footer className="py-6 border-t md:py-0">
         <div className="container flex flex-col items-center justify-between max-w-screen-lg gap-4 mx-auto md:h-24 md:flex-row">
           <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
             <Navigation className="w-6 h-6 text-emerald-500" />
@@ -142,4 +158,3 @@ export default function Landing() {
     </div>
   )
 }
-
