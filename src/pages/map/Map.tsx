@@ -128,11 +128,11 @@ const Map = () => {
           </div>
           <div className="flex flex-col items-center">
             <img src={motorIconUrl} alt="Pengguna" className="w-6 h-6" />
-            <p className="text-sm">Pengguna</p>
+            <p className="text-sm">Pengguna = <span className="font-semibold">{userLocations.length}</span></p>
           </div>
           <div className="flex flex-col items-center">
             <img src={geofenceIconUrl} alt="Merchant" className="w-6 h-6" />
-            <p className="text-sm">Merchant</p>
+            <p className="text-sm">Merchant = <span className="font-semibold">{geofences.length}</span></p>
           </div>
         </div>
 

@@ -75,10 +75,6 @@
   }
 }
 
-/* * {
-  outline: 1px solid red;
-} */
-
 @media (max-width: 768px) {
   .responsive-table {
     th,
@@ -87,3 +83,12 @@
     }
   }
 }
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* * {
+  outline: 1px solid red;
+} */

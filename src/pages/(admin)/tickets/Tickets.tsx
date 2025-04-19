@@ -51,6 +51,10 @@ export default function Tickets() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+  // const [isPhotoEditing, setIsPhotoEditing] = useState(false);
+  // const [openPhotoEditDialog, setOpenPhotoEditDialog] = useState(false);
+  // const [editedPhotos, setEditedPhotos] = useState<any[]>([]);
+  // const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
   const [alertAction, setAlertAction] = useState<any>("cancel");
   const [apiResponse, setApiResponse] = useState<{
     status: 'idle' | 'success' | 'error' | 'warning'
@@ -660,6 +664,84 @@ export default function Tickets() {
   //   geofence.external_id.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
+  // const handleReplacePhoto = async (position: number) => {
+  //   const input = document.createElement('input');
+  //   input.type = 'file';
+  //   input.accept = 'image/*';
+  //   input.onchange = (e) => {
+  //     const file = (e.target as HTMLInputElement).files?.[0];
+  //     if (file) {
+  //       const newPhotos = [...editedPhotos];
+  //       newPhotos[position] = file;
+  //       setEditedPhotos(newPhotos);
+  //     }
+  //   };
+  //   input.click();
+  // };
+
+  // const handleUploadToPosition = (e: React.ChangeEvent<HTMLInputElement>, position: number) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const newPhotos = [...editedPhotos];
+  //     newPhotos[position] = file;
+  //     setEditedPhotos(newPhotos);
+  //   }
+  // };
+
+  // const handleDeleteSinglePhoto = (position: number) => {
+  //   const newPhotos = [...editedPhotos];
+  //   newPhotos[position] = null;
+  //   setEditedPhotos(newPhotos);
+  // };
+
+  // const handleDeleteAllPhotos = () => {
+  //   setEditedPhotos(Array(8).fill(null));
+  // };
+
+  // const handleSavePhotoChanges = async () => {
+  //   setIsLoading(true);
+  //   setLoadingMessage("Menyimpan perubahan foto...");
+
+  //   try {
+  //     const formData = new FormData();
+  //     editedPhotos.forEach((photo, index) => {
+  //       if (photo instanceof File) {
+  //         formData.append(`photo_${index + 1}`, photo);
+  //       } else if (photo === null) {
+  //         formData.append(`photo_${index + 1}`, 'delete');
+  //       }
+  //     });
+
+  //     const token = localStorage.getItem(SLSS);
+  //     const response = await fetch(`${BASE_URL2}/admin/tickets/photos/${selectedTicket?.ticket_id}`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         Authorization: `Bearer ${token ? JSON.parse(token).access_token : ''}`,
+  //       },
+  //       body: formData,
+  //     });
+
+  //     if (!response.ok) throw new Error('Gagal menyimpan foto');
+
+  //     const newPhotos = await fetchTicketPhotos(selectedTicket?.ticket_id || "");
+  //     setTicketPhotos(newPhotos.photos);
+  //     setOpenPhotoEditDialog(false);
+  //     setApiResponse({
+  //       status: 'success',
+  //       title: 'Foto berhasil diperbarui',
+  //       description: 'Perubahan foto tiket telah disimpan'
+  //     });
+  //   } catch (error) {
+  //     setApiResponse({
+  //       status: 'error',
+  //       title: 'Gagal menyimpan foto',
+  //       description: String(error)
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   return (
     <>
       <div className="w-[88%] max-w-screen-xxl p-6">
@@ -922,7 +1004,8 @@ export default function Tickets() {
                   {(ticket.status !== "completed" && ticket.status !== "canceled" && ticket.status !== "on_progress") &&
                     <>
                       <Button
-                        onClick={() => handleAddOrUpdate(ticket)}
+                        onClick={() => handleInfo(ticket)}
+                        // onClick={() => handleAddOrUpdate(ticket)}
                         variant="outline" className="mr-2">
                         <Pencil className="inline" />
                       </Button>
@@ -1026,7 +1109,7 @@ export default function Tickets() {
             <DialogTitle>Detail Tiket</DialogTitle>
             {/* <div className="grid grid-cols-3 gap-x-8"> */}
             <div className="grid grid-cols-4 gap-x-6">
-              {tripInfo ? (
+              {selectedTicket ? (
                 <>
                   {/* Tiket */}
                   <div>
@@ -1221,70 +1304,93 @@ export default function Tickets() {
                       <div>
                         <label className="block text-sm">ID Perjalanan</label>
                         <p className="px-4 py-2 bg-gray-100 border rounded">
-                          {tripInfo.trip.externalId || "-"}
+                          {tripInfo?.trip.externalId || selectedTicket?.status === "assigned" && (
+                            <Badge variant="assigned">
+                              Ditugaskan
+                            </Badge>
+                          )}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm">Dimulai pada (WIB)</label>
                         <p className="px-4 py-2 bg-gray-100 border rounded">
-                          {new Date(tripInfo.trip.startedAt).toLocaleString('id-ID', {
-                            timeZone: 'Asia/Jakarta',
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }).replace('.', ':')}
+                          {tripInfo?.trip.startedAt && !isNaN(new Date(tripInfo.trip.startedAt).getTime()) ?
+                            new Date(tripInfo?.trip.startedAt).toLocaleString('id-ID', {
+                              timeZone: 'Asia/Jakarta',
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }).replace('.', ':')
+                            : ""}
+                          {selectedTicket?.status === "assigned" && (
+                            <Badge variant="assigned">
+                              Ditugaskan
+                            </Badge>
+                          )}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm">Diselesaikan pada (WIB)</label>
                         <p className="px-4 py-2 bg-gray-100 border rounded">
-                          {new Date(tripInfo.trip.endedAt).toLocaleString('id-ID', {
-                            timeZone: 'Asia/Jakarta',
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }).replace('.', ':')}
+                          {tripInfo?.trip.endedAt && !isNaN(new Date(tripInfo.trip.endedAt).getTime()) ?
+                            new Date(tripInfo.trip.endedAt).toLocaleString('id-ID', {
+                              timeZone: 'Asia/Jakarta',
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }).replace('.', ':')
+                            : ""}
+                          {selectedTicket?.status === "assigned" && (
+                            <Badge variant="assigned">
+                              Ditugaskan
+                            </Badge>
+                          )}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm">Durasi</label>
                         <p className="px-4 py-2 bg-gray-100 border rounded">
                           {(() => {
-                            // const trip = tripInfo.trip.externalId === selectedTicket?.trip_id;
-                            if (!tripInfo || !tripInfo.trip.startedAt || !tripInfo.trip.endedAt) return "-";
-
+                            if (!tripInfo || !tripInfo?.trip.startedAt || !tripInfo?.trip.endedAt) return "";
                             const startedAt = new Date(tripInfo.trip.startedAt);
                             const endedAt = new Date(tripInfo.trip.endedAt);
                             const diffMs = endedAt.getTime() - startedAt.getTime();
-
                             const hours = Math.floor(diffMs / (1000 * 60 * 60));
                             const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                             const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
                             const duration = [];
                             if (hours > 0) duration.push(`${hours} jam`);
                             if (minutes > 0) duration.push(`${minutes} menit`);
                             if (seconds > 0) duration.push(`${seconds} detik`);
-
                             return duration.length > 0 ? duration.join(" ") : "-";
                           })()}
+                          {selectedTicket?.status === "assigned" && (
+                            <Badge variant="assigned">
+                              Ditugaskan
+                            </Badge>
+                          )}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm">Status Perjalanan</label>
                         <p className="px-4 py-2 bg-gray-100 border rounded">
-                          {tripInfo.trip.status === "assigned" && "Ditugaskan"}
-                          {tripInfo.trip.status === "started" && "Dimulai"}
-                          {tripInfo.trip.status === "pending" && "Menunggu"}
-                          {tripInfo.trip.status === "approaching" && "Mendekati"}
-                          {tripInfo.trip.status === "arrived" && "Tiba"}
-                          {tripInfo.trip.status === "completed" && "Selesai"}
-                          {tripInfo.trip.status === "expired" && "Kadaluarsa"}
-                          {tripInfo.trip.status === "canceled" && "Dibatalkan"}
+                          {tripInfo?.trip.status === "assigned" && "Ditugaskan"}
+                          {tripInfo?.trip.status === "started" && "Dimulai"}
+                          {tripInfo?.trip.status === "pending" && "Menunggu"}
+                          {tripInfo?.trip.status === "approaching" && "Mendekati"}
+                          {tripInfo?.trip.status === "arrived" && "Tiba"}
+                          {tripInfo?.trip.status === "completed" && "Selesai"}
+                          {tripInfo?.trip.status === "expired" && "Kadaluarsa"}
+                          {tripInfo?.trip.status === "canceled" && "Dibatalkan"}
+                          {selectedTicket?.status === "assigned" && (
+                            <Badge variant="assigned">
+                              Ditugaskan
+                            </Badge>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -1332,7 +1438,7 @@ export default function Tickets() {
                   </div>
                 </>
               ) : (
-                <p className="text-gray-500">Tidak ada informasi perjalanan yang tersedia.</p>
+                <p className="text-gray-500">Tidak ada informasi tiket yang tersedia.</p>
               )}
             </div>
             {selectedImage ? (
@@ -1364,12 +1470,28 @@ export default function Tickets() {
                         Unduh PDF
                       </a>
                       {/* <Button
-                      onClick={() => setIsEditing(true)}
-                      variant="outline"
-                    >
-                      <Pencil className="inline" />
-                      Edit Tiket
-                    </Button> */}
+                        onClick={() => {
+                          setEditedPhotos([...ticketPhotos]);
+                          setOpenPhotoEditDialog(true);
+                        }}
+                        variant="outline"
+                      >
+                        <ImagesIcon /> Edit Foto
+                      </Button> */}
+                      {/* <Button
+                        onClick={() => setIsEditing(true)}
+                        variant="outline"
+                      >
+                        <File className="inline" />
+                        Edit Berita Acara
+                      </Button> */}
+                      {/* <Button
+                        onClick={() => setIsEditing(true)}
+                        variant="outline"
+                      >
+                        <Pencil className="inline" />
+                        Edit Tiket
+                      </Button> */}
                       {selectedTicket.status !== "canceled" && (
                         <Button
                           onClick={() => handleAlertDialog(selectedTicket, "cancel")}
@@ -1465,6 +1587,90 @@ export default function Tickets() {
           onDismiss={() => setApiResponse({ status: 'idle' })}
         />
       )}
+
+      {/* Modal Edit Foto */}
+      {/* <Dialog open={openPhotoEditDialog} onOpenChange={setOpenPhotoEditDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Edit Foto Tiket</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, index) => {
+              const photo = editedPhotos[index];
+              return (
+                <div key={index} className="relative h-40 border-2 rounded-lg group">
+                  {photo ? (
+                    <>
+                      <img
+                        src={photo.url}
+                        alt={`Foto ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 bg-black/50 group-hover:opacity-100">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleReplacePhoto(index)}
+                        >
+                          <Pencil size={16} />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteSinglePhoto(index)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                      <span className="absolute bottom-0 left-0 p-1 text-xs text-white bg-black/50">
+                        Foto {index + 1}
+                      </span>
+                    </>
+                  ) : (
+                    <div
+                      {...getRootProps()}
+                      className="flex flex-col items-center justify-center h-full cursor-pointer"
+                    >
+                      <input
+                        {...getInputProps({
+                          onChange: (e) => handleUploadToPosition(e, index)
+                        })}
+                      />
+                      <Upload size={24} className="mb-2" />
+                      <p className="text-sm">Unggah Foto</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-between mt-4">
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAllPhotos}
+            >
+              <Trash2 className="mr-2" /> Hapus Semua Foto
+            </Button>
+
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpenPhotoEditDialog(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleSavePhotoChanges}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog> */}
     </>
   );
 }
