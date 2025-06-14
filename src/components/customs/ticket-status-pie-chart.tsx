@@ -9,13 +9,13 @@ const STATUS_LABELS: Record<string, string> = {
   assigned: "Ditugaskan",
   on_progress: "Berjalan",
   completed: "Selesai",
-  cancelled: "Dibatalkan",
+  canceled: "Dibatalkan",
 };
 const STATUS_COLORS: Record<string, string> = {
   assigned: "#0074D9",      // Biru terang
   on_progress: "#FF851B",   // Oranye terang
   completed: "#2ECC40",     // Hijau terang
-  cancelled: "#FF4136",     // Merah terang
+  canceled: "#FF4136",      // Merah terang
 };
 
 export default function TicketStatusPieChart({ month, setMonth, year, months }: { month: number; setMonth: (m: number) => void; year: number; months: string[] }) {
@@ -61,9 +61,9 @@ export default function TicketStatusPieChart({ month, setMonth, year, months }: 
       label: STATUS_LABELS.completed,
       color: STATUS_COLORS.completed,
     },
-    cancelled: {
-      label: STATUS_LABELS.cancelled,
-      color: STATUS_COLORS.cancelled,
+    canceled: {
+      label: STATUS_LABELS.canceled,
+      color: STATUS_COLORS.canceled,
     },
   };
 

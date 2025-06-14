@@ -10,13 +10,13 @@ const STATUS_LABELS: Record<string, string> = {
   assigned: "Ditugaskan",
   on_progress: "Berjalan",
   completed: "Selesai",
-  cancelled: "Dibatalkan",
+  canceled: "Dibatalkan",
 };
 const STATUS_COLORS: Record<string, string> = {
   assigned: "#0074D9",
   on_progress: "#FF851B",
   completed: "#2ECC40",
-  cancelled: "#FF4136",
+  canceled: "#FF4136",
 };
 
 type Ticket = {
