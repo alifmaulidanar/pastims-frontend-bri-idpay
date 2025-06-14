@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Helmet } from "react-helmet-async";
+import { useState, useEffect, useRef } from "react";
 import TotalPie from "@/components/customs/charts/totalPie";
 import TotalCard from "@/components/customs/charts/totalCard";
-import { getGeofencesCounts, getTicketsCounts, getTripsCounts, getUsersCounts } from "@/lib/dashboard";
-import { useState, useEffect, useRef } from "react";
-import { LineInteractiveChart } from "@/components/customs/charts/line-interactive";
-import { RecentDataTable } from "@/components/customs/charts/recent-data-table";
 import { LoadingOverlay } from "@/components/customs/loading-state";
+import { RecentDataTable } from "@/components/customs/charts/recent-data-table";
+import TicketStatusPieChart from "@/components/customs/ticket-status-pie-chart";
+import TicketStatusSummaryCard from "@/components/customs/TicketStatusSummaryCard";
+import { LineInteractiveChart } from "@/components/customs/charts/line-interactive";
+import { getGeofencesCounts, getTicketsCounts, getTripsCounts, getUsersCounts } from "@/lib/dashboard";
 // import GeocodingButton from "@/components/customs/reverseGeocoding";
 // import GeofenceUploader from "@/components/customs/cityGeofenceUploader";
 // import CityProvinceUploader from "@/components/customs/cityProvinceGeofenceUploader";
@@ -21,6 +23,26 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Memuat...");
   const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // Default bulan harus bulan ini
+  const now = new Date();
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+  // Default: bulan sekarang
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const year = now.getFullYear();
 
   // Prevent scrolling on the body
   useEffect(() => {
@@ -67,6 +89,23 @@ export default function Dashboard() {
     fetchData()
   }, [timeRangeTicket, timeRangeTrip]);
 
+  // Perubahan: query ulang tiket jika bulan berubah
+  useEffect(() => {
+    async function fetchTicketsByMonth() {
+      setIsDataLoading(true);
+      // Ambil tiket untuk tahun dan bulan yang dipilih, filter by created_at
+      const allTickets = await getTicketsCounts(timeRangeTicket);
+      setTicketData(
+        allTickets.filter((t: any) => {
+          const d = new Date(t.created_at);
+          return d.getMonth() + 1 === month && d.getFullYear() === year;
+        })
+      );
+      setIsDataLoading(false);
+    }
+    fetchTicketsByMonth();
+  }, [month, year, timeRangeTicket]);
+
   const isMounted = useRef(true);
   useEffect(() => {
     isMounted.current = true;
@@ -95,6 +134,18 @@ export default function Dashboard() {
       <h1 className="mb-4 text-xl font-semibold md:text-2xl">Dashboard</h1>
 
       {/* Grid Utama */}
+      <div className="grid grid-cols-1 gap-4 mb-6 lg:grid-cols-2 xl:grid-cols-4">
+        {/* Kolom Kiri */}
+        <div className="space-y-4 xl:col-span-1">
+          <TicketStatusPieChart month={month} setMonth={setMonth} year={year} months={months} />
+        </div>
+
+        {/* Kolom Kanan */}
+        <div className="xl:col-span-3">
+          <TicketStatusSummaryCard tickets={ticketData} month={month} setMonth={setMonth} year={year} months={months} />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 mb-6 lg:grid-cols-2 xl:grid-cols-4">
         {/* Kolom Kiri */}
         <div className="space-y-4 xl:col-span-2">

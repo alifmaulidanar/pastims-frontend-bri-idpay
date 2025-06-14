@@ -33,6 +33,7 @@ import { ResponseStatus } from "@/components/customs/response-alert";
 const csvGeofencesTemplate = new URL("@/assets/csv-templates/new-geofences-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
 const BASE_URL_V2 = import.meta.env.VITE_abu_V2;
+const PROJECT_MODE = import.meta.env.VITE_PROJECT_MODE;
 const SLSS = import.meta.env.VITE_slss;
 
 export default function Places() {
@@ -834,16 +835,18 @@ export default function Places() {
           </Button>
 
           {/* Development Mode Toggle */}
-          <div className="flex items-center mb-6 space-x-4">
-            <Switch
-              id="dev-mode-toggle"
-              checked={devMode}
-              onCheckedChange={(checked) => setDevMode(checked)}
-            />
-            <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
-              Development Mode
-            </label>
-          </div>
+          {PROJECT_MODE === "development" && (
+            <div className="flex items-center mb-6 space-x-4">
+              <Switch
+                id="dev-mode-toggle"
+                checked={devMode}
+                onCheckedChange={(checked) => setDevMode(checked)}
+              />
+              <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+                Development Mode
+              </label>
+            </div>
+          )}
         </div>
 
         <div className='flex mb-2 gap-x-4'>

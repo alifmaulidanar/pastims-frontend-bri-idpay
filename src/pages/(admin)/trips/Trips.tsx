@@ -14,6 +14,7 @@ import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { LoadingOverlay } from "@/components/customs/loading-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+const PROJECT_MODE = import.meta.env.VITE_PROJECT_MODE;
 
 export default function Trips() {
   const [filteredTrips, setFilteredTrips] = useState<any[]>([]);
@@ -308,16 +309,18 @@ export default function Trips() {
         </Button>
 
         {/* Development Mode Toggle */}
-        <div className="flex items-center mb-6 space-x-4">
-          <Switch
-            id="dev-mode-toggle"
-            checked={devMode}
-            onCheckedChange={(checked) => setDevMode(checked)}
-          />
-          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
-            Development Mode
-          </label>
-        </div>
+        {PROJECT_MODE === "development" && (
+          <div className="flex items-center mb-6 space-x-4">
+            <Switch
+              id="dev-mode-toggle"
+              checked={devMode}
+              onCheckedChange={(checked) => setDevMode(checked)}
+            />
+            <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+              Development Mode
+            </label>
+          </div>
+        )}
       </div>
 
       <div className='flex items-end mb-2 gap-x-4'>

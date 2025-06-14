@@ -28,6 +28,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 const csvTicketsTemplate = new URL("@/assets/csv-templates/new-tickets-template.csv", import.meta.url).href;
 const BASE_URL = import.meta.env.VITE_abu;
 const BASE_URL2 = import.meta.env.VITE_abu_V2;
+const PROJECT_MODE = import.meta.env.VITE_PROJECT_MODE;
 const SLSS = import.meta.env.VITE_slss;
 const queryClient = new QueryClient();
 
@@ -222,6 +223,43 @@ export default function Tickets() {
     });
 
     setFilteredTickets(filtered);
+  };
+
+  const handleQuickSearch = async () => {
+    setIsLoading(true);
+    setLoadingMessage("Mencari tiket...");
+    try {
+      const { quickSearch } = await import('@/lib/emergencies');
+      const results = await quickSearch(searchQuery);
+      const safeResults = Array.isArray(results) ? results : [];
+      const mappedResults = safeResults.map((item: any) => {
+        return {
+          id: item.ticket?.id || "",
+          ticket_id: item.ticket?.ticket_id || "",
+          user_id: item.ticket?.user_id || "",
+          geofence_id: item.ticket?.geofence_id || "",
+          description: item.ticket?.description || "",
+          status: item.ticket?.status || "",
+          created_at: item.ticket?.created_at || "",
+          updated_at: item.ticket?.updated_at || "",
+          merchant_name: item.ticket?.merchant_name || item.geofence?.description || "",
+          merchant_address: item.ticket?.merchant_address || item.geofence?.address || "",
+          city: item.ticket?.city || item.geofence?.city || "",
+          user_name: item.user?.username || "",
+          trip_id: item.ticket?.trip_id || "",
+        };
+      });
+      setFilteredTickets(mappedResults);
+    } catch (error) {
+      console.error("Error during quick search:", error);
+      setApiResponse({
+        status: 'error',
+        title: 'Gagal mencari tiket',
+        description: 'Terjadi kesalahan saat mencari tiket. Silakan coba lagi.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -829,6 +867,9 @@ export default function Tickets() {
             onChange={handleSearch}
             className="w-1/3"
           />
+          <Button onClick={handleQuickSearch} variant="default">
+            Cari Cepat
+          </Button>
           <Select
             onValueChange={handleFilter}
             value={statusFilter}
@@ -875,16 +916,18 @@ export default function Tickets() {
           </Button>
 
           {/* Development Mode Toggle */}
-          <div className="flex items-center mb-6 space-x-4">
-            <Switch
-              id="dev-mode-toggle"
-              checked={devMode}
-              onCheckedChange={(checked) => setDevMode(checked)}
-            />
-            <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
-              Development Mode
-            </label>
-          </div>
+          {PROJECT_MODE === "development" && (
+            <div className="flex items-center mb-6 space-x-4">
+              <Switch
+                id="dev-mode-toggle"
+                checked={devMode}
+                onCheckedChange={(checked) => setDevMode(checked)}
+              />
+              <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+                Development Mode
+              </label>
+            </div>
+          )}
         </div>
 
         <div className='mb-2'>

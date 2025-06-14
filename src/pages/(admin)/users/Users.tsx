@@ -15,6 +15,7 @@ import { ChevronDown, ChevronUp, Download, Pencil, Save, Trash2, UserPlus, X } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
+const PROJECT_MODE = import.meta.env.VITE_PROJECT_MODE;
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -327,16 +328,18 @@ export default function Users() {
         </Button>
 
         {/* Development Mode Toggle */}
-        <div className="flex items-center mb-6 space-x-4">
-          <Switch
-            id="dev-mode-toggle"
-            checked={devMode}
-            onCheckedChange={(checked) => setDevMode(checked)}
-          />
-          <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
-            Development Mode
-          </label>
-        </div>
+        {PROJECT_MODE === "development" && (
+          <div className="flex items-center mb-6 space-x-4">
+            <Switch
+              id="dev-mode-toggle"
+              checked={devMode}
+              onCheckedChange={(checked) => setDevMode(checked)}
+            />
+            <label htmlFor="dev-mode-toggle" className="text-sm font-medium">
+              Development Mode
+            </label>
+          </div>
+        )}
       </div>
 
       {/* <div className='mb-2'>

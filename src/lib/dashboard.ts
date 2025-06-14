@@ -74,7 +74,7 @@ export async function getTicketsCounts(timeRange: string) {
   startDate.setDate(startDate.getDate() - days);
   const { data, error } = await supabase
     .from("tickets")
-    .select("ticket_id, status, updated_at")
+    .select("ticket_id, user_id, geofence_id, description, status, created_at, updated_at, users:user_id(username), geofences:geofence_id(description)")
     .not("user_id", "in", `(${excludedTicketsFromUser})`)
     .gte("updated_at", startDate.toISOString());
   if (error) throw new Error(`Error fetching ticket counts: ${error.message}`);
