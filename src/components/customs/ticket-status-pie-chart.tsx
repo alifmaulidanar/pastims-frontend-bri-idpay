@@ -19,16 +19,18 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TicketStatusPieChart({ month, setMonth, year, months }: { month: number; setMonth: (m: number) => void; year: number; months: string[] }) {
-  type Ticket = { status: string; updated_at: string };
+  type Ticket = { status: string; updated_at: string; created_at?: string };
   const [data, setData] = React.useState<Ticket[]>([]);
 
   React.useEffect(() => {
     async function fetchData() {
-      const result = await getTicketsCounts("31d");
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999); // hari terakhir bulan tsb
+      const result = await getTicketsCounts("365d");
       setData(
-        result.filter((t: Ticket & { created_at?: string }) => {
-          const d = new Date(t.created_at ?? t.updated_at);
-          return d.getMonth() + 1 === month && d.getFullYear() === year;
+        result.filter((t: Ticket) => {
+          const d = new Date(t.updated_at);
+          return d >= startDate && d <= endDate;
         })
       );
     }
