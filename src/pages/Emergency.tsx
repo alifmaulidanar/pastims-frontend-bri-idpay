@@ -23,9 +23,9 @@ const Emergency = () => {
     user_id: "",
     ticket_id: "",
     trip_id: "",
-    tid: "",
-    sn_edc: "",
-    keterangan: "",
+    // tid: "",
+    // sn_edc: "",
+    // keterangan: "",
     photos: [] as File[], // Multiple files
   });
 
@@ -36,9 +36,9 @@ const Emergency = () => {
     description: "",
     geofence_id: "",
     geofence_tag: "",
-    tid: "",
-    sn_edc: "",
-    keterangan: "",
+    // tid: "",
+    // sn_edc: "",
+    // keterangan: "",
     photos: [] as File[], // Multiple files
   });
 
@@ -91,9 +91,9 @@ const Emergency = () => {
       formData.append("user_id", fixFormData.user_id);
       formData.append("ticket_id", fixFormData.ticket_id);
       formData.append("trip_id", fixFormData.trip_id);
-      formData.append("tid", fixFormData.tid);
-      formData.append("sn_edc", fixFormData.sn_edc);
-      formData.append("keterangan", fixFormData.keterangan);
+      // formData.append("tid", fixFormData.tid);
+      // formData.append("sn_edc", fixFormData.sn_edc);
+      // formData.append("keterangan", fixFormData.keterangan);
       fixFormData.photos.forEach((file) => {
         formData.append(`photos[]`, file);
       });
@@ -114,11 +114,14 @@ const Emergency = () => {
         user_id: "",
         ticket_id: "",
         trip_id: "",
-        tid: "",
-        sn_edc: "",
-        keterangan: "",
+        // tid: "",
+        // sn_edc: "",
+        // keterangan: "",
         photos: [],
       });
+      if (window.confirm(`Tiket ${startFormData.ticket_id} berhasil diselesaikan! Klik OK untuk memuat ulang halaman.`)) {
+        window.location.reload();
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Terjadi kesalahan.");
       console.error("Error:", error);
@@ -146,9 +149,9 @@ const Emergency = () => {
       formData.append("description", startFormData.description);
       formData.append("geofence_id", startFormData.geofence_id);
       formData.append("geofence_tag", startFormData.geofence_tag);
-      formData.append("tid", startFormData.tid);
-      formData.append("sn_edc", startFormData.sn_edc);
-      formData.append("keterangan", startFormData.keterangan);
+      // formData.append("tid", startFormData.tid);
+      // formData.append("sn_edc", startFormData.sn_edc);
+      // formData.append("keterangan", startFormData.keterangan);
       startFormData.photos.forEach((file) => {
         formData.append(`photos[]`, file);
       });
@@ -164,7 +167,7 @@ const Emergency = () => {
         throw new Error(result.message || "Gagal memperbaiki tiket.");
       }
 
-      setMessage("Ticket uploaded and trip started successfully!");
+      setMessage("Ticket uploaded and trip finished successfully!");
       setStartFormData({
         user_id: "",
         username: "",
@@ -172,11 +175,14 @@ const Emergency = () => {
         description: "",
         geofence_id: "",
         geofence_tag: "",
-        tid: "",
-        sn_edc: "",
-        keterangan: "",
+        // tid: "",
+        // sn_edc: "",
+        // keterangan: "",
         photos: [],
       });
+      if (window.confirm(`Tiket ${startFormData.ticket_id} berhasil diselesaikan! Klik OK untuk memuat ulang halaman.`)) {
+        window.location.reload();
+      }
     } catch (error) {
       if (error instanceof Error) {
         setMessage(error.message || "An unexpected error occurred");
@@ -191,8 +197,7 @@ const Emergency = () => {
 
   return (
     <div className="justify-center mt-4 w-[65%] mx-auto ml-60">
-
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-8 mt-20">
         {/* Fix Ticket Only */}
         <div className="max-w-2xl px-4 py-2 bg-white rounded-lg shadow-md">
           <h2 className="mb-4 text-xl font-bold text-center">Perbaikan Tiket Tersangkut</h2>
@@ -292,7 +297,7 @@ const Emergency = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <p>TID - Berita Acara</p>
               <input
                 type="text"
@@ -328,7 +333,7 @@ const Emergency = () => {
                 className="w-full p-2 border rounded"
                 required
               />
-            </div>
+            </div> */}
 
             <div>
               <p>Unggah {REQUIRED_PHOTO_COUNT} Foto Bukti Tiket (Opsional):</p>
@@ -449,7 +454,7 @@ const Emergency = () => {
                 required
               />
             </div>
-            <div>
+            {/* <div>
               <p>TID - Berita Acara</p>
               <input
                 type="text"
@@ -472,10 +477,10 @@ const Emergency = () => {
                 className="w-full p-2 border rounded"
                 required
               />
-            </div>
+            </div> */}
 
             <div className="col-span-2">
-              <p>Keterangan - Berita Acara</p>
+              {/* <p>Keterangan - Berita Acara</p>
               <textarea
                 name="keterangan"
                 placeholder="Keterangan"
@@ -483,7 +488,7 @@ const Emergency = () => {
                 onChange={handleStartChange}
                 className="w-full p-2 border rounded"
                 required
-              />
+              /> */}
 
               <p className="mt-4">Unggah {REQUIRED_PHOTO_COUNT} Foto Bukti Tiket <Badge variant="destructive">(WAJIB)</Badge>:</p>
               <input
